@@ -1,4 +1,5 @@
 import win32api, os
+import ed_user_interaction
 
 
 def get_drive_letters():
@@ -26,3 +27,14 @@ def find_all_storage():
             dict_[path_marker] = drive_letter
 
     return dict_
+
+
+def keep_getting_storage_path(name):
+    while True:
+        path = find_all_storage().get(name)
+
+        if path is not None:
+            return path
+
+        if not ed_user_interaction.yes_no_prompt('Try to find ' + name + ' again'):
+            return None
