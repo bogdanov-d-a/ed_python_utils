@@ -10,9 +10,10 @@ import ed_storage_path_data
 
 
 class Data:
-    def __init__(self, path, remotes):
+    def __init__(self, path, remotes, branches):
         self.path = path
         self.remotes = remotes
+        self.branches = branches
 
 
 def get_host_repos():
@@ -33,7 +34,8 @@ def get_host_repos():
                         storage_remotes[storage_alias] = storage_path
 
             result[repo_alias] = Data(path,
-                ed_git_repo_data.Remotes(repo.remotes.native, storage_remotes))
+                ed_git_repo_data.Remotes(repo.remotes.native, storage_remotes),
+                repo.branches)
 
     return result
 
@@ -58,14 +60,30 @@ def host_repos_fetch():
 def host_repos_all_refs():
     host_repos_run_with_path_and_print(ed_git_tools.all_refs)
 
-def fetch_storage_if_available(alias, repo):
+def handle_storage_if_available(alias, repo, handler):
     storage_path = repo.remotes.storage.get(alias)
     if storage_path is None:
         return 'No repo at ' + alias + '\n'
-    return ed_git_tools.fetch_storage(repo.path, storage_path)
+    return handler(storage_path)
+
+def fetch_storage_if_available(alias, repo):
+    return handle_storage_if_available(alias, repo,
+        lambda path: ed_git_tools.fetch_storage(repo.path, path))
 
 def host_repos_fetch_storage(alias):
     host_repos_run_and_print(lambda repo: fetch_storage_if_available(alias, repo))
+
+def pull_storage_if_available(alias, repo):
+    return handle_storage_if_available(alias, repo,
+        lambda path: ed_git_tools.pull_storage_multi(repo.path, path, repo.branches))
+
+def host_repos_pull_storage(alias):
+    host_repos_run_and_print(lambda repo: pull_storage_if_available(alias, repo))
+
+def pick_storage_and_handle(handler):
+        storage = ed_storage_finder.pick_storage()
+        if storage is not None:
+            handler(storage)
 
 
 def main():
@@ -74,6 +92,7 @@ def main():
         'Fetch all',
         'Ref status all',
         'Fetch storage all',
+        'Pull storage all',
     ])
 
     if action == 0:
@@ -83,9 +102,9 @@ def main():
     elif action == 2:
         host_repos_all_refs()
     elif action == 3:
-        storage = ed_storage_finder.pick_storage()
-        if storage is not None:
-            host_repos_fetch_storage(storage)
+        pick_storage_and_handle(host_repos_fetch_storage)
+    elif action == 4:
+        pick_storage_and_handle(host_repos_pull_storage)
     else:
         raise Exception('unexpected action')
 
