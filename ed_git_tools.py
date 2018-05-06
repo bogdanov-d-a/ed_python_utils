@@ -16,7 +16,7 @@ def all_refs(path):
     result += '\n' + run_command(path, ['git', 'stash', 'list'])
     return result
 
-def fetch_storage(path, remote_path):
+def fetch_remote(path, remote_path):
     return run_command(path, ['git', 'fetch', remote_path])
 
 def checkout(path, branch):
@@ -39,3 +39,18 @@ def pull_with_checkout_multi(path, remote_path, branches):
 
 def push_all(path, remote_path):
     return run_command(path, ['git', 'push', '--all', remote_path])
+
+def merge_with_checkout(path, remote_path, local_branch, remote_branch=None):
+    if remote_branch is None:
+        remote_branch = local_branch
+
+    result = checkout(path, local_branch)
+    result += '\n' + run_command(path, ['git', 'merge', remote_path + '/' + remote_branch])
+    return result
+
+def fetch_merge_with_checkout_multi(path, remote_path, branches):
+    result = fetch_remote(path, remote_path)
+    for branch in branches:
+        result += merge_with_checkout(path, remote_path, branch)
+    result += checkout(path, branches[0])
+    return result

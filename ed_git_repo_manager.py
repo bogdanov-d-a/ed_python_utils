@@ -68,7 +68,7 @@ def handle_storage_if_available(alias, repo, handler):
 
 def fetch_storage_if_available(alias, repo):
     return handle_storage_if_available(alias, repo,
-        lambda path: ed_git_tools.fetch_storage(repo.path, path))
+        lambda path: ed_git_tools.fetch_remote(repo.path, path))
 
 def host_repos_fetch_storage(alias):
     host_repos_run_and_print(lambda repo: fetch_storage_if_available(alias, repo))
@@ -95,7 +95,7 @@ def pick_storage_and_handle(handler):
 def pull_repo_native(repo):
     result = ''
     for remote in repo.remotes.native:
-        result += ed_git_tools.pull_with_checkout_multi(repo.path, remote, repo.branches)
+        result += ed_git_tools.fetch_merge_with_checkout_multi(repo.path, remote, repo.branches)
     return result
 
 def host_repos_pull_native():
