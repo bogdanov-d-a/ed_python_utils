@@ -17,9 +17,6 @@ class Data:
 
 def get_host_repos():
     host = ed_host_alias.get()
-    storage = ed_storage_finder.find_all_storage()
-    storage_path_data = ed_storage_path_data.get()
-
     result = {}
 
     for repo_alias, repo in ed_git_repo_userdata.get().items():
@@ -29,10 +26,11 @@ def get_host_repos():
 
             storage_remotes = {}
             for storage_alias, storage_path_alias in repo.remotes.storage.items():
-                storage_path_root = storage.get(storage_alias)
-                if storage_path_root is not None:
-                    storage_path = storage_path_data.get(storage_alias).get(storage_path_alias)
-                    storage_remotes[storage_alias] = storage_path_root + storage_path
+                storage_data = ed_path_manager.get_storage_data_auto(storage_alias)
+                if storage_data is not None:
+                    storage_path = storage_data.get(storage_path_alias)
+                    if storage_path is not None:
+                        storage_remotes[storage_alias] = storage_path
 
             result[repo_alias] = Data(path,
                 ed_git_repo_data.Remotes(repo.remotes.native, storage_remotes))
