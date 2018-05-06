@@ -22,7 +22,7 @@ def fetch_storage(path, remote_path):
 def checkout(path, branch):
     return run_command(path, ['git', 'checkout', branch])
 
-def pull_storage(path, remote_path, local_branch, remote_branch=None):
+def pull_with_checkout(path, remote_path, local_branch, remote_branch=None):
     if remote_branch is None:
         remote_branch = local_branch
 
@@ -30,10 +30,10 @@ def pull_storage(path, remote_path, local_branch, remote_branch=None):
     result += '\n' + run_command(path, ['git', 'pull', remote_path, remote_branch])
     return result
 
-def pull_storage_multi(path, remote_path, branches):
+def pull_with_checkout_multi(path, remote_path, branches):
     result = ''
     for branch in branches:
-        result += pull_storage(path, remote_path, branch)
+        result += pull_with_checkout(path, remote_path, branch)
     result += checkout(path, branches[0])
     return result
 

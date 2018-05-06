@@ -75,7 +75,7 @@ def host_repos_fetch_storage(alias):
 
 def pull_storage_if_available(alias, repo):
     return handle_storage_if_available(alias, repo,
-        lambda path: ed_git_tools.pull_storage_multi(repo.path, path, repo.branches))
+        lambda path: ed_git_tools.pull_with_checkout_multi(repo.path, path, repo.branches))
 
 def host_repos_pull_storage(alias):
     host_repos_run_and_print(lambda repo: pull_storage_if_available(alias, repo))
@@ -88,9 +88,18 @@ def host_repos_push_storage(alias):
     host_repos_run_and_print(lambda repo: push_storage_if_available(alias, repo))
 
 def pick_storage_and_handle(handler):
-        storage = ed_storage_finder.pick_storage()
-        if storage is not None:
-            handler(storage)
+    storage = ed_storage_finder.pick_storage()
+    if storage is not None:
+        handler(storage)
+
+def pull_repo_native(repo):
+    result = ''
+    for remote in repo.remotes.native:
+        result += ed_git_tools.pull_with_checkout_multi(repo.path, remote, repo.branches)
+    return result
+
+def host_repos_pull_native():
+    host_repos_run_and_print(pull_repo_native)
 
 
 def main():
@@ -101,6 +110,7 @@ def main():
         'Fetch storage all',
         'Pull storage all',
         'Push storage all',
+        'Pull native all',
     ])
 
     if action == 0:
@@ -115,6 +125,8 @@ def main():
         pick_storage_and_handle(host_repos_pull_storage)
     elif action == 5:
         pick_storage_and_handle(host_repos_push_storage)
+    elif action == 6:
+        host_repos_pull_native()
     else:
         raise Exception('unexpected action')
 
