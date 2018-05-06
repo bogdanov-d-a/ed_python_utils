@@ -38,3 +38,9 @@ def keep_getting_storage_path(name):
 
         if not ed_user_interaction.yes_no_prompt('Try to find ' + name + ' again'):
             return None
+
+
+def pick_storage():
+    storage = find_all_storage()
+    keys = list(storage.keys())
+    return keys[ed_user_interaction.pick_option('Pick storage', keys)]
