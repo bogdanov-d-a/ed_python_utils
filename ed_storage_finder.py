@@ -42,5 +42,8 @@ def keep_getting_storage_path(name):
 
 def pick_storage():
     storage = find_all_storage()
+    if len(storage) == 0:
+        print('No storage available')
+        return None
     keys = list(storage.keys())
     return keys[ed_user_interaction.pick_option('Pick storage', keys)]

@@ -83,7 +83,9 @@ def main():
     elif action == 2:
         host_repos_all_refs()
     elif action == 3:
-        host_repos_fetch_storage(ed_storage_finder.pick_storage())
+        storage = ed_storage_finder.pick_storage()
+        if storage is not None:
+            host_repos_fetch_storage(storage)
     else:
         raise Exception('unexpected action')
 
