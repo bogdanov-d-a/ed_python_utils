@@ -36,17 +36,23 @@ def host_repos_status():
 def host_repos_fetch():
     host_repos_run_and_print(ed_git_tools.fetch)
 
+def host_repos_all_refs():
+    host_repos_run_and_print(ed_git_tools.all_refs)
+
 
 def main():
     action = ed_user_interaction.pick_option('Pick action', [
         'Status all',
         'Fetch all',
+        'Ref status all',
     ])
 
-    if (action == 0):
+    if action == 0:
         host_repos_status()
-    elif (action == 1):
+    elif action == 1:
         host_repos_fetch()
+    elif action == 2:
+        host_repos_all_refs()
     else:
         raise Exception('unexpected action')
 

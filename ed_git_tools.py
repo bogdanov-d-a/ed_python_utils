@@ -9,3 +9,9 @@ def status(path):
 
 def fetch(path):
     return run_command(path, ['git', 'fetch', '--all'])
+
+def all_refs(path):
+    result = run_command(path, ['git', 'branch', '-av'])
+    result += '\n' + run_command(path, ['git', 'tag', '--format=%(refname:strip=2) %(objectname:short)'])
+    result += '\n' + run_command(path, ['git', 'stash', 'list'])
+    return result
