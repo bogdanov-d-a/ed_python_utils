@@ -36,3 +36,6 @@ def pull_storage_multi(path, remote_path, branches):
         result += pull_storage(path, remote_path, branch)
     result += checkout(path, branches[0])
     return result
+
+def push_all(path, remote_path):
+    return run_command(path, ['git', 'push', '--all', remote_path])

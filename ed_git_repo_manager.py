@@ -80,6 +80,13 @@ def pull_storage_if_available(alias, repo):
 def host_repos_pull_storage(alias):
     host_repos_run_and_print(lambda repo: pull_storage_if_available(alias, repo))
 
+def push_storage_if_available(alias, repo):
+    return handle_storage_if_available(alias, repo,
+        lambda path: ed_git_tools.push_all(repo.path, path))
+
+def host_repos_push_storage(alias):
+    host_repos_run_and_print(lambda repo: push_storage_if_available(alias, repo))
+
 def pick_storage_and_handle(handler):
         storage = ed_storage_finder.pick_storage()
         if storage is not None:
@@ -93,6 +100,7 @@ def main():
         'Ref status all',
         'Fetch storage all',
         'Pull storage all',
+        'Push storage all',
     ])
 
     if action == 0:
@@ -105,6 +113,8 @@ def main():
         pick_storage_and_handle(host_repos_fetch_storage)
     elif action == 4:
         pick_storage_and_handle(host_repos_pull_storage)
+    elif action == 5:
+        pick_storage_and_handle(host_repos_push_storage)
     else:
         raise Exception('unexpected action')
 
