@@ -16,11 +16,16 @@ class Data:
         self.branches = branches
 
 
-def get_host_repos():
+def get_host_repos(bootstrap_mode):
     host = ed_host_alias.get()
     result = {}
 
-    for repo_alias, repo in ed_git_repo_userdata.get().items():
+    repos = ed_git_repo_userdata.get().items()
+    if bootstrap_mode:
+        bootstrap_repos = ed_git_repo_userdata.bootstrap_repos()
+        repos = filter(lambda elem: elem[0] in bootstrap_repos, repos)
+
+    for repo_alias, repo in repos:
         path_alias = repo.host_to_path.get(host)
         if path_alias is not None:
             path = ed_path_manager.get_host_data().get(path_alias)
@@ -40,25 +45,25 @@ def get_host_repos():
     return result
 
 
-def host_repos_run_and_print(command):
-    for repo_alias, repo in get_host_repos().items():
+def host_repos_run_and_print(command, bootstrap_mode):
+    for repo_alias, repo in get_host_repos(bootstrap_mode).items():
         print(repo_alias)
         print(command(repo))
         print()
 
 
-def host_repos_run_with_path_and_print(command):
-    host_repos_run_and_print(lambda repo: command(repo.path))
+def host_repos_run_with_path_and_print(command, bootstrap_mode):
+    host_repos_run_and_print(lambda repo: command(repo.path), bootstrap_mode)
 
 
-def host_repos_status():
-    host_repos_run_with_path_and_print(ed_git_tools.status)
+def host_repos_status(bootstrap_mode):
+    host_repos_run_with_path_and_print(ed_git_tools.status, bootstrap_mode)
 
-def host_repos_fetch():
-    host_repos_run_with_path_and_print(ed_git_tools.fetch)
+def host_repos_fetch(bootstrap_mode):
+    host_repos_run_with_path_and_print(ed_git_tools.fetch, bootstrap_mode)
 
-def host_repos_all_refs():
-    host_repos_run_with_path_and_print(ed_git_tools.all_refs)
+def host_repos_all_refs(bootstrap_mode):
+    host_repos_run_with_path_and_print(ed_git_tools.all_refs, bootstrap_mode)
 
 def handle_storage_if_available(alias, repo, handler):
     storage_path = repo.remotes.storage.get(alias)
@@ -70,27 +75,27 @@ def fetch_storage_if_available(alias, repo):
     return handle_storage_if_available(alias, repo,
         lambda path: ed_git_tools.fetch_remote(repo.path, path))
 
-def host_repos_fetch_storage(alias):
-    host_repos_run_and_print(lambda repo: fetch_storage_if_available(alias, repo))
+def host_repos_fetch_storage(alias, bootstrap_mode):
+    host_repos_run_and_print(lambda repo: fetch_storage_if_available(alias, repo), bootstrap_mode)
 
 def pull_storage_if_available(alias, repo):
     return handle_storage_if_available(alias, repo,
         lambda path: ed_git_tools.pull_with_checkout_multi(repo.path, path, repo.branches))
 
-def host_repos_pull_storage(alias):
-    host_repos_run_and_print(lambda repo: pull_storage_if_available(alias, repo))
+def host_repos_pull_storage(alias, bootstrap_mode):
+    host_repos_run_and_print(lambda repo: pull_storage_if_available(alias, repo), bootstrap_mode)
 
 def push_storage_if_available(alias, repo):
     return handle_storage_if_available(alias, repo,
         lambda path: ed_git_tools.push_all(repo.path, path))
 
-def host_repos_push_storage(alias):
-    host_repos_run_and_print(lambda repo: push_storage_if_available(alias, repo))
+def host_repos_push_storage(alias, bootstrap_mode):
+    host_repos_run_and_print(lambda repo: push_storage_if_available(alias, repo), bootstrap_mode)
 
-def pick_storage_and_handle(handler):
+def pick_storage_and_handle(handler, bootstrap_mode):
     storage = ed_storage_finder.pick_storage()
     if storage is not None:
-        handler(storage)
+        handler(storage, bootstrap_mode)
 
 def pull_repo_native(repo):
     result = ''
@@ -98,37 +103,47 @@ def pull_repo_native(repo):
         result += ed_git_tools.fetch_merge_with_checkout_multi(repo.path, remote, repo.branches)
     return result
 
-def host_repos_pull_native():
-    host_repos_run_and_print(pull_repo_native)
+def host_repos_pull_native(bootstrap_mode):
+    host_repos_run_and_print(pull_repo_native, bootstrap_mode)
 
 
 def main():
-    action = ed_user_interaction.pick_option('Pick action', [
-        'Status all',
-        'Fetch all',
-        'Ref status all',
-        'Fetch storage all',
-        'Pull storage all',
-        'Push storage all',
-        'Pull native all',
-    ])
+    bootstrap_mode = False
 
-    if action == 0:
-        host_repos_status()
-    elif action == 1:
-        host_repos_fetch()
-    elif action == 2:
-        host_repos_all_refs()
-    elif action == 3:
-        pick_storage_and_handle(host_repos_fetch_storage)
-    elif action == 4:
-        pick_storage_and_handle(host_repos_pull_storage)
-    elif action == 5:
-        pick_storage_and_handle(host_repos_push_storage)
-    elif action == 6:
-        host_repos_pull_native()
-    else:
-        raise Exception('unexpected action')
+    while True:
+        action = ed_user_interaction.pick_option('Pick action', [
+            'Status all',
+            'Fetch all',
+            'Ref status all',
+            'Fetch storage all',
+            'Pull storage all',
+            'Push storage all',
+            'Pull native all',
+            'Flip bootstrap_mode',
+        ])
+
+        if action == 0:
+            host_repos_status(bootstrap_mode)
+        elif action == 1:
+            host_repos_fetch(bootstrap_mode)
+        elif action == 2:
+            host_repos_all_refs(bootstrap_mode)
+        elif action == 3:
+            pick_storage_and_handle(host_repos_fetch_storage, bootstrap_mode)
+        elif action == 4:
+            pick_storage_and_handle(host_repos_pull_storage, bootstrap_mode)
+        elif action == 5:
+            pick_storage_and_handle(host_repos_push_storage, bootstrap_mode)
+        elif action == 6:
+            host_repos_pull_native(bootstrap_mode)
+        elif action == 7:
+            bootstrap_mode = not bootstrap_mode
+            print('bootstrap_mode == ' + str(bootstrap_mode))
+        else:
+            raise Exception('unexpected action')
+
+        if action != 7:
+            break
 
 
 if __name__ == '__main__':
