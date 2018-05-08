@@ -105,6 +105,15 @@ def pull_repo_native(repo):
 def host_repos_pull_native(filter_repos):
     host_repos_run_and_print(pull_repo_native, filter_repos)
 
+def push_repo_native(repo):
+    result = ''
+    for remote in repo.remotes.native:
+        result += ed_git_tools.push_multi(repo.path, remote, repo.branches)
+    return result
+
+def host_repos_push_native(filter_repos):
+    host_repos_run_and_print(push_repo_native, filter_repos)
+
 
 def main():
     bootstrap_mode = False
@@ -113,21 +122,22 @@ def main():
     while True:
         action = ed_user_interaction.pick_option('Pick action', [
             'Status all',
-            'Fetch all',
             'Ref status all',
+            'Fetch all',
             'Fetch storage all',
             'Pull storage all',
             'Push storage all',
             'Pull native all',
+            'Push native all',
             'Flip bootstrap_mode',
         ])
 
         if action == 0:
             host_repos_status(bootstrap_mode_filter())
         elif action == 1:
-            host_repos_fetch(bootstrap_mode_filter())
-        elif action == 2:
             host_repos_all_refs(bootstrap_mode_filter())
+        elif action == 2:
+            host_repos_fetch(bootstrap_mode_filter())
         elif action == 3:
             pick_storage_and_handle(host_repos_fetch_storage, bootstrap_mode_filter())
         elif action == 4:
@@ -137,12 +147,17 @@ def main():
         elif action == 6:
             host_repos_pull_native(bootstrap_mode_filter())
         elif action == 7:
+            filter_ = ed_git_repo_userdata.autopush_repos()
+            if bootstrap_mode:
+                filter_ &= bootstrap_mode_filter()
+            host_repos_push_native(filter_)
+        elif action == 8:
             bootstrap_mode = not bootstrap_mode
             print('bootstrap_mode == ' + str(bootstrap_mode))
         else:
             raise Exception('unexpected action')
 
-        if action != 7:
+        if action != 8:
             break
 
 

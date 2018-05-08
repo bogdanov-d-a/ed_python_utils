@@ -37,6 +37,15 @@ def pull_with_checkout_multi(path, remote_path, branches):
     result += checkout(path, branches[0])
     return result
 
+def push(path, remote_path, branch):
+    return run_command(path, ['git', 'push', remote_path, branch])
+
+def push_multi(path, remote_path, branches):
+    result = ''
+    for branch in branches:
+        result += push(path, remote_path, branch)
+    return result
+
 def push_all(path, remote_path):
     return run_command(path, ['git', 'push', '--all', remote_path])
 
