@@ -44,52 +44,53 @@ def get_host_repos(filter_repos):
     return result
 
 
-def host_repos_run_and_print(command, filter_repos):
+def host_repos_run(command, filter_repos):
     for repo_alias, repo in get_host_repos(filter_repos).items():
         print(repo_alias)
-        print(command(repo))
+        command(repo)
+        print()
         print()
 
 
-def host_repos_run_with_path_and_print(command, filter_repos):
-    host_repos_run_and_print(lambda repo: command(repo.path), filter_repos)
+def host_repos_run_with_path(command, filter_repos):
+    host_repos_run(lambda repo: command(repo.path), filter_repos)
 
 
 def host_repos_status(filter_repos):
-    host_repos_run_with_path_and_print(ed_git_tools.status, filter_repos)
+    host_repos_run_with_path(ed_git_tools.status, filter_repos)
 
 def host_repos_fetch(filter_repos):
-    host_repos_run_with_path_and_print(ed_git_tools.fetch, filter_repos)
+    host_repos_run_with_path(ed_git_tools.fetch, filter_repos)
 
 def host_repos_all_refs(filter_repos):
-    host_repos_run_with_path_and_print(ed_git_tools.all_refs, filter_repos)
+    host_repos_run_with_path(ed_git_tools.all_refs, filter_repos)
 
 def handle_storage_if_available(alias, repo, handler):
     storage_path = repo.remotes.storage.get(alias)
     if storage_path is None:
-        return 'No repo at ' + alias + '\n'
-    return handler(storage_path)
+        print('No repo at ' + alias + '\n')
+    handler(storage_path)
 
 def fetch_storage_if_available(alias, repo):
-    return handle_storage_if_available(alias, repo,
+    handle_storage_if_available(alias, repo,
         lambda path: ed_git_tools.fetch_remote(repo.path, path))
 
 def host_repos_fetch_storage(alias, filter_repos):
-    host_repos_run_and_print(lambda repo: fetch_storage_if_available(alias, repo), filter_repos)
+    host_repos_run(lambda repo: fetch_storage_if_available(alias, repo), filter_repos)
 
 def pull_storage_if_available(alias, repo):
-    return handle_storage_if_available(alias, repo,
+    handle_storage_if_available(alias, repo,
         lambda path: ed_git_tools.pull_with_checkout_multi(repo.path, path, repo.branches))
 
 def host_repos_pull_storage(alias, filter_repos):
-    host_repos_run_and_print(lambda repo: pull_storage_if_available(alias, repo), filter_repos)
+    host_repos_run(lambda repo: pull_storage_if_available(alias, repo), filter_repos)
 
 def push_storage_if_available(alias, repo):
-    return handle_storage_if_available(alias, repo,
+    handle_storage_if_available(alias, repo,
         lambda path: ed_git_tools.push_all(repo.path, path))
 
 def host_repos_push_storage(alias, filter_repos):
-    host_repos_run_and_print(lambda repo: push_storage_if_available(alias, repo), filter_repos)
+    host_repos_run(lambda repo: push_storage_if_available(alias, repo), filter_repos)
 
 def pick_storage_and_handle(handler, filter_repos):
     storage = ed_storage_finder.pick_storage()
@@ -97,22 +98,18 @@ def pick_storage_and_handle(handler, filter_repos):
         handler(storage, filter_repos)
 
 def pull_repo_native(repo):
-    result = ''
     for remote in repo.remotes.native:
-        result += ed_git_tools.fetch_merge_with_checkout_multi(repo.path, remote, repo.branches)
-    return result
+        ed_git_tools.fetch_merge_with_checkout_multi(repo.path, remote, repo.branches)
 
 def host_repos_pull_native(filter_repos):
-    host_repos_run_and_print(pull_repo_native, filter_repos)
+    host_repos_run(pull_repo_native, filter_repos)
 
 def push_repo_native(repo):
-    result = ''
     for remote in repo.remotes.native:
-        result += ed_git_tools.push_multi(repo.path, remote, repo.branches)
-    return result
+        ed_git_tools.push_multi(repo.path, remote, repo.branches)
 
 def host_repos_push_native(filter_repos):
-    host_repos_run_and_print(push_repo_native, filter_repos)
+    host_repos_run(push_repo_native, filter_repos)
 
 
 def main():

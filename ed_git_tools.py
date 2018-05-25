@@ -1,65 +1,64 @@
 import subprocess
 
 def run_command(path, command):
-    with subprocess.Popen(command, stdout=subprocess.PIPE, cwd=path) as process:
-        return process.communicate()[0].decode('utf-8')
+    with subprocess.Popen(command, cwd=path) as process:
+        process.communicate()
+
+def run_git_command(path, args):
+    run_command(path, ['git', '--no-pager'] + args)
 
 def status(path):
-    return run_command(path, ['git', 'status'])
+    run_git_command(path, ['status'])
 
 def fetch(path):
-    return run_command(path, ['git', 'fetch', '--all'])
+    run_git_command(path, ['fetch', '--all'])
 
 def all_refs(path):
-    result = run_command(path, ['git', 'branch', '-av'])
-    result += '\n' + run_command(path, ['git', 'tag', '--format=%(refname:strip=2) %(objectname:short)'])
-    result += '\n' + run_command(path, ['git', 'stash', 'list'])
-    return result
+    run_git_command(path, ['branch', '-av'])
+    print()
+    run_git_command(path, ['tag', '--format=%(refname:strip=2) %(objectname:short)'])
+    print()
+    run_git_command(path, ['stash', 'list'])
 
 def fetch_remote(path, remote_path):
-    return run_command(path, ['git', 'fetch', remote_path])
+    run_git_command(path, ['fetch', remote_path])
 
 def checkout(path, branch):
-    return run_command(path, ['git', 'checkout', branch])
+    run_git_command(path, ['checkout', branch])
 
 def pull_with_checkout(path, remote_path, local_branch, remote_branch=None):
     if remote_branch is None:
         remote_branch = local_branch
 
-    result = checkout(path, local_branch)
-    result += '\n' + run_command(path, ['git', 'pull', remote_path, remote_branch])
-    return result
+    checkout(path, local_branch)
+    print()
+    run_git_command(path, ['pull', remote_path, remote_branch])
 
 def pull_with_checkout_multi(path, remote_path, branches):
-    result = ''
     for branch in branches:
-        result += pull_with_checkout(path, remote_path, branch)
-    result += checkout(path, branches[0])
-    return result
+        pull_with_checkout(path, remote_path, branch)
+    checkout(path, branches[0])
 
 def push(path, remote_path, branch):
-    return run_command(path, ['git', 'push', remote_path, branch])
+    run_git_command(path, ['push', remote_path, branch])
 
 def push_multi(path, remote_path, branches):
-    result = ''
     for branch in branches:
-        result += push(path, remote_path, branch)
-    return result
+        push(path, remote_path, branch)
 
 def push_all(path, remote_path):
-    return run_command(path, ['git', 'push', '--all', remote_path])
+    run_git_command(path, ['push', '--all', remote_path])
 
 def merge_with_checkout(path, remote_path, local_branch, remote_branch=None):
     if remote_branch is None:
         remote_branch = local_branch
 
-    result = checkout(path, local_branch)
-    result += '\n' + run_command(path, ['git', 'merge', remote_path + '/' + remote_branch])
-    return result
+    checkout(path, local_branch)
+    print()
+    run_git_command(path, ['merge', remote_path + '/' + remote_branch])
 
 def fetch_merge_with_checkout_multi(path, remote_path, branches):
-    result = fetch_remote(path, remote_path)
+    fetch_remote(path, remote_path)
     for branch in branches:
-        result += merge_with_checkout(path, remote_path, branch)
-    result += checkout(path, branches[0])
-    return result
+        merge_with_checkout(path, remote_path, branch)
+    checkout(path, branches[0])
