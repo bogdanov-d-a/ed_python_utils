@@ -1,8 +1,21 @@
 import subprocess
 
+mock = False
+
 def run_command(path, command):
+    if mock:
+        print('run_command ' + path + ' ' + str(command))
+        return
+
     with subprocess.Popen(command, cwd=path) as process:
         process.communicate()
+
+def put_blank_line():
+    if mock:
+        print('put_blank_line')
+        return
+
+    print()
 
 def run_git_command(path, args):
     run_command(path, ['git', '--no-pager'] + args)
@@ -15,9 +28,9 @@ def fetch(path):
 
 def all_refs(path):
     run_git_command(path, ['branch', '-av'])
-    print()
+    put_blank_line()
     run_git_command(path, ['tag', '--format=%(refname:strip=2) %(objectname:short)'])
-    print()
+    put_blank_line()
     run_git_command(path, ['stash', 'list'])
 
 def fetch_remote(path, remote_path):
@@ -31,7 +44,7 @@ def pull_with_checkout(path, remote_path, local_branch, remote_branch=None):
         remote_branch = local_branch
 
     checkout(path, local_branch)
-    print()
+    put_blank_line()
     run_git_command(path, ['pull', remote_path, remote_branch])
 
 def pull_with_checkout_multi(path, remote_path, branches):
@@ -54,7 +67,7 @@ def merge_with_checkout(path, remote_path, local_branch, remote_branch=None):
         remote_branch = local_branch
 
     checkout(path, local_branch)
-    print()
+    put_blank_line()
     run_git_command(path, ['merge', remote_path + '/' + remote_branch])
 
 def fetch_merge_with_checkout_multi(path, remote_path, branches):

@@ -69,6 +69,7 @@ def handle_storage_if_available(alias, repo, handler):
     storage_path = repo.remotes.storage.get(alias)
     if storage_path is None:
         print('No repo at ' + alias + '\n')
+        return
     handler(storage_path)
 
 def fetch_storage_if_available(alias, repo):
