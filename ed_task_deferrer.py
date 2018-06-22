@@ -23,7 +23,7 @@ def info_2d(columns, state, now_date=None):
         now_date = (now_date_.year, now_date_.month, now_date_.day)
 
     with codecs.open(out_filename, 'w') as out_file:
-        for name, dates in sorted(state, key=operator.itemgetter(1)):
+        for name, dates in state:
             if len(columns) != len(dates):
                 raise Exception("Incorrect dates count for " + name)
             for date_index in range(len(columns)):
