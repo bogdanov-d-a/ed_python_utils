@@ -44,7 +44,7 @@ def info_2d(columns, state, now_date=None):
                 for date_index in range(len(columns)):
                     if dates[date_index] is not None:
                         if dates[date_index] <= now_date:
-                            out_file.write(name + ' - ' + columns[date_index] + '\n')
+                            out_file.write(name + ' - ' + columns[date_index] + ' (' + str(date_index + 1) + ')\n')
                         else:
                             earliest_date = none_min(earliest_date, dates[date_index])
 
