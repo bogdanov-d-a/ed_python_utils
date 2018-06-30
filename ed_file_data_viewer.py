@@ -14,8 +14,7 @@ def show_and_delete_file(filename):
 def show_data_using_file(writer):
     fd, path = tempfile.mkstemp('.txt')
     try:
-        with open(path, 'w') as f:
-            writer(f)
+        writer(path)
     finally:
         os.close(fd)
         show_and_delete_file(path)
