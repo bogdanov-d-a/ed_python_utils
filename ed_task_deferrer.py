@@ -16,7 +16,7 @@ def info(state, now_date=None):
 
         earliest_date = None
 
-        with codecs.open(path, 'w') as out_file:
+        with codecs.open(path, 'w', 'utf-8') as out_file:
             for name, date_ in sorted(state, key=operator.itemgetter(1)):
                 if date_ <= now_date:
                     out_file.write(name + '\n')
@@ -37,7 +37,7 @@ def info_2d(columns, state, now_date=None):
 
         earliest_date = None
 
-        with codecs.open(path, 'w') as out_file:
+        with codecs.open(path, 'w', 'utf-8') as out_file:
             for name, dates in state:
                 if len(columns) != len(dates):
                     raise Exception("Incorrect dates count for " + name)
