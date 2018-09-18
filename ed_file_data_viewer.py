@@ -1,6 +1,7 @@
 import os
 import webbrowser
 import tempfile
+import codecs
 
 def show_and_delete_file(filename):
     try:
@@ -18,3 +19,9 @@ def show_data_using_file(writer):
     finally:
         os.close(fd)
         show_and_delete_file(path)
+
+def show_data_using_file_simple(writer):
+    def cb(path):
+        with codecs.open(path, 'w', 'utf-8') as out_file:
+            writer(out_file)
+    show_data_using_file(cb)
