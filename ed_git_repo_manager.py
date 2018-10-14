@@ -4,7 +4,6 @@ import ed_path_manager
 import ed_git_tools
 import ed_user_interaction
 import ed_pause_at_end
-import ed_storage_finder
 import ed_git_repo_data
 import ed_storage_path_data
 
@@ -65,38 +64,31 @@ def host_repos_fetch(filter_repos):
 def host_repos_all_refs(filter_repos):
     host_repos_run_with_path(ed_git_tools.all_refs, filter_repos)
 
-def handle_storage_if_available(alias, repo, handler):
-    storage_path = repo.remotes.storage.get(alias)
-    if storage_path is None:
-        print('No repo at ' + alias + '\n')
-        return
-    handler(storage_path)
+def handle_all_storage(repo, handler):
+    for alias, storage_path in repo.remotes.storage.items():
+        print('Processing ' + alias)
+        handler(storage_path)
 
-def fetch_storage_if_available(alias, repo):
-    handle_storage_if_available(alias, repo,
+def fetch_all_storage(repo):
+    handle_all_storage(repo,
         lambda path: ed_git_tools.fetch_remote(repo.path, path))
 
-def host_repos_fetch_storage(alias, filter_repos):
-    host_repos_run(lambda repo: fetch_storage_if_available(alias, repo), filter_repos)
+def host_repos_fetch_storage(filter_repos):
+    host_repos_run(lambda repo: fetch_all_storage(repo), filter_repos)
 
-def pull_storage_if_available(alias, repo):
-    handle_storage_if_available(alias, repo,
+def pull_all_storage(repo):
+    handle_all_storage(repo,
         lambda path: ed_git_tools.pull_with_checkout_multi(repo.path, path, repo.branches))
 
-def host_repos_pull_storage(alias, filter_repos):
-    host_repos_run(lambda repo: pull_storage_if_available(alias, repo), filter_repos)
+def host_repos_pull_storage(filter_repos):
+    host_repos_run(lambda repo: pull_all_storage(repo), filter_repos)
 
-def push_storage_if_available(alias, repo):
-    handle_storage_if_available(alias, repo,
+def push_all_storage(repo):
+    handle_all_storage(repo,
         lambda path: ed_git_tools.push_all(repo.path, path))
 
-def host_repos_push_storage(alias, filter_repos):
-    host_repos_run(lambda repo: push_storage_if_available(alias, repo), filter_repos)
-
-def pick_storage_and_handle(handler, filter_repos):
-    storage = ed_storage_finder.pick_storage()
-    if storage is not None:
-        handler(storage, filter_repos)
+def host_repos_push_storage(filter_repos):
+    host_repos_run(lambda repo: push_all_storage(repo), filter_repos)
 
 def pull_repo_native(repo):
     for remote in repo.remotes.native:
@@ -137,11 +129,11 @@ def main():
         elif action == 2:
             host_repos_fetch(bootstrap_mode_filter())
         elif action == 3:
-            pick_storage_and_handle(host_repos_fetch_storage, bootstrap_mode_filter())
+            host_repos_fetch_storage(bootstrap_mode_filter())
         elif action == 4:
-            pick_storage_and_handle(host_repos_pull_storage, bootstrap_mode_filter())
+            host_repos_pull_storage(bootstrap_mode_filter())
         elif action == 5:
-            pick_storage_and_handle(host_repos_push_storage, bootstrap_mode_filter())
+            host_repos_push_storage(bootstrap_mode_filter())
         elif action == 6:
             host_repos_pull_native(bootstrap_mode_filter())
         elif action == 7:
