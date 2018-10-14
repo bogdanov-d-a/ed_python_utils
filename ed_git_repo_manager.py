@@ -69,39 +69,31 @@ def handle_all_storage(repo, handler):
         print('Processing ' + alias)
         handler(storage_path)
 
-def fetch_all_storage(repo):
-    handle_all_storage(repo,
-        lambda path: ed_git_tools.fetch_remote(repo.path, path))
-
 def host_repos_fetch_storage(filter_repos):
-    host_repos_run(lambda repo: fetch_all_storage(repo), filter_repos)
-
-def pull_all_storage(repo):
-    handle_all_storage(repo,
-        lambda path: ed_git_tools.pull_with_checkout_multi(repo.path, path, repo.branches))
+    def fetch_all_storage(repo):
+        handle_all_storage(repo, lambda path: ed_git_tools.fetch_remote(repo.path, path))
+    host_repos_run(fetch_all_storage, filter_repos)
 
 def host_repos_pull_storage(filter_repos):
-    host_repos_run(lambda repo: pull_all_storage(repo), filter_repos)
-
-def push_all_storage(repo):
-    handle_all_storage(repo,
-        lambda path: ed_git_tools.push_all(repo.path, path))
+    def pull_all_storage(repo):
+        handle_all_storage(repo, lambda path: ed_git_tools.pull_with_checkout_multi(repo.path, path, repo.branches))
+    host_repos_run(pull_all_storage, filter_repos)
 
 def host_repos_push_storage(filter_repos):
-    host_repos_run(lambda repo: push_all_storage(repo), filter_repos)
-
-def pull_repo_native(repo):
-    for remote in repo.remotes.native:
-        ed_git_tools.fetch_merge_with_checkout_multi(repo.path, remote, repo.branches)
+    def push_all_storage(repo):
+        handle_all_storage(repo, lambda path: ed_git_tools.push_all(repo.path, path))
+    host_repos_run(push_all_storage, filter_repos)
 
 def host_repos_pull_native(filter_repos):
+    def pull_repo_native(repo):
+        for remote in repo.remotes.native:
+            ed_git_tools.fetch_merge_with_checkout_multi(repo.path, remote, repo.branches)
     host_repos_run(pull_repo_native, filter_repos)
 
-def push_repo_native(repo):
-    for remote in repo.remotes.native:
-        ed_git_tools.push_multi(repo.path, remote, repo.branches)
-
 def host_repos_push_native(filter_repos):
+    def push_repo_native(repo):
+        for remote in repo.remotes.native:
+            ed_git_tools.push_multi(repo.path, remote, repo.branches)
     host_repos_run(push_repo_native, filter_repos)
 
 
