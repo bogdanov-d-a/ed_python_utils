@@ -7,7 +7,7 @@ def none_min(a, b):
     return b if a is None else min(a, b)
 
 
-def info_writer(out_file, state, now_date=None):
+def info_writer(out_file, state, now_date=None, hide_hint=False):
     if now_date is None:
         now_date_ = datetime.datetime.now().date()
         now_date = (now_date_.year, now_date_.month, now_date_.day)
@@ -20,7 +20,8 @@ def info_writer(out_file, state, now_date=None):
         else:
             earliest_date = none_min(earliest_date, date_)
 
-    out_file.write('Earliest date: ' + str(earliest_date) + '\n')
+    if not hide_hint:
+        out_file.write('Earliest date: ' + str(earliest_date) + '\n')
 
 
 def info(state, now_date=None):
