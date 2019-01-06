@@ -84,6 +84,11 @@ def host_repos_push_storage(filter_repos):
         handle_all_storage(repo, lambda path: ed_git_tools.push_all(repo.path, path))
     host_repos_run(push_all_storage, filter_repos)
 
+def host_repos_fsck_storage(filter_repos):
+    def fsck_all_storage(repo):
+        handle_all_storage(repo, lambda path: ed_git_tools.fsck(path))
+    host_repos_run(fsck_all_storage, filter_repos)
+
 def host_repos_pull_native(filter_repos):
     def pull_repo_native(repo):
         for remote in repo.remotes.native:
@@ -109,6 +114,7 @@ def main():
             'Fetch storage all',
             'Pull storage all',
             'Push storage all',
+            'Run fsck storage all',
             'Pull native all',
             'Push native all',
             'Flip bootstrap_mode',
@@ -127,19 +133,21 @@ def main():
         elif action == 5:
             host_repos_push_storage(bootstrap_mode_filter())
         elif action == 6:
-            host_repos_pull_native(bootstrap_mode_filter())
+            host_repos_fsck_storage(bootstrap_mode_filter())
         elif action == 7:
+            host_repos_pull_native(bootstrap_mode_filter())
+        elif action == 8:
             filter_ = ed_git_repo_userdata.autopush_repos()
             if bootstrap_mode:
                 filter_ &= bootstrap_mode_filter()
             host_repos_push_native(filter_)
-        elif action == 8:
+        elif action == 9:
             bootstrap_mode = not bootstrap_mode
             print('bootstrap_mode == ' + str(bootstrap_mode))
         else:
             raise Exception('unexpected action')
 
-        if action != 8:
+        if action != 9:
             break
 
 

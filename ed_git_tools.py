@@ -26,6 +26,9 @@ def status(path):
 def fetch(path):
     run_git_command(path, ['fetch', '--all'])
 
+def fsck(path):
+    run_git_command(path, ['fsck'])
+
 def all_refs(path):
     run_git_command(path, ['branch', '-av'])
     put_blank_line()
