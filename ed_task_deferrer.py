@@ -30,15 +30,19 @@ def get_info(state, now_date=None, hide_hint=False):
     return result
 
 
+def get_info_from_file(state_filename, now_date=None):
+    with codecs.open(state_filename, 'r', 'utf-8') as state_file:
+        state_data = state_file.read()
+        state = eval(state_data)
+        return get_info(state, now_date)
+
+
 def info_viewer(state_filename, now_date=None, window_title='info_viewer'):
     def data_provider():
-        with codecs.open(state_filename, 'r', 'utf-8') as state_file:
-            try:
-                state_data = state_file.read()
-                state = eval(state_data)
-                return get_info(state, now_date)
-            except:
-                return traceback.format_exc()
+        try:
+            return get_info_from_file(state_filename, now_date)
+        except:
+            return traceback.format_exc()
     ed_query_window.run(data_provider, window_title)
 
 
@@ -66,13 +70,17 @@ def get_info_2d(columns, state, now_date=None):
     return result
 
 
+def get_info_2d_from_file(data_filename, now_date=None):
+    with codecs.open(data_filename, 'r', 'utf-8') as data_file:
+        data_data = data_file.read()
+        data = eval(data_data)
+        return get_info_2d(data[0], data[1], now_date)
+
+
 def info_2d_viewer(data_filename, now_date=None, window_title='info_2d_viewer'):
     def data_provider():
-        with codecs.open(data_filename, 'r', 'utf-8') as data_file:
-            try:
-                data_data = data_file.read()
-                data = eval(data_data)
-                return get_info_2d(data[0], data[1], now_date)
-            except:
-                return traceback.format_exc()
+        try:
+            return get_info_2d_from_file(data_filename, now_date)
+        except:
+            return traceback.format_exc()
     ed_query_window.run(data_provider, window_title)
