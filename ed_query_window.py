@@ -10,8 +10,9 @@ def center_window(win):
     win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
 
 
-def run(data_provider):
+def run(data_provider, title='Default title'):
     root = tkinter.Tk()
+    root.title(title)
 
     def calc():
         out_text.delete(1.0, tkinter.END)
