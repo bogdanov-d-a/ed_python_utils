@@ -8,6 +8,7 @@ import ed_user_interaction
 import ed_pause_at_end
 import ed_git_repo_data
 import ed_storage_path_data
+import ed_host_python_path
 
 
 class Data:
@@ -154,7 +155,10 @@ def main():
             ])
 
             def run_action(action_str):
-                os.system("start cmd /c ed_git_repo_manager.py --action " + action_str + (' --bootstrap' if bootstrap_mode else ''))
+                python_dir = ed_host_python_path.get_python_3_path()
+                if python_dir is None:
+                    raise Exception('python3 not found')
+                os.system("start " + python_dir + "python.exe ed_git_repo_manager.py --action " + action_str + (' --bootstrap' if bootstrap_mode else ''))
 
             if action == 0:
                 run_action('status_all')
