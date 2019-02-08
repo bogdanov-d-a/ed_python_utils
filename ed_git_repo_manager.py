@@ -1,3 +1,5 @@
+import argparse
+import os
 import ed_git_repo_userdata
 import ed_host_alias
 import ed_path_manager
@@ -103,52 +105,82 @@ def host_repos_push_native(filter_repos):
 
 
 def main():
-    bootstrap_mode = False
-    bootstrap_mode_filter = lambda: ed_git_repo_userdata.bootstrap_repos() if bootstrap_mode else None
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--action')
+    parser.add_argument('--bootstrap', action='store_true')
+    args = parser.parse_args()
 
-    while True:
-        action = ed_user_interaction.pick_option('Pick action', [
-            'Status all',
-            'Ref status all',
-            'Fetch all',
-            'Fetch storage all',
-            'Pull storage all',
-            'Push storage all',
-            'Run fsck storage all',
-            'Pull native all',
-            'Push native all',
-            'Flip bootstrap_mode',
-        ])
-
-        if action == 0:
+    if args.action is not None:
+        bootstrap_mode_filter = lambda: ed_git_repo_userdata.bootstrap_repos() if args.bootstrap else None
+        if args.action == 'status_all':
             host_repos_status(bootstrap_mode_filter())
-        elif action == 1:
+        elif args.action == 'ref_status_all':
             host_repos_all_refs(bootstrap_mode_filter())
-        elif action == 2:
+        elif args.action == 'fetch_all':
             host_repos_fetch(bootstrap_mode_filter())
-        elif action == 3:
+        elif args.action == 'fetch_storage_all':
             host_repos_fetch_storage(bootstrap_mode_filter())
-        elif action == 4:
+        elif args.action == 'pull_storage_all':
             host_repos_pull_storage(bootstrap_mode_filter())
-        elif action == 5:
+        elif args.action == 'push_storage_all':
             host_repos_push_storage(bootstrap_mode_filter())
-        elif action == 6:
+        elif args.action == 'run_fsck_storage_all':
             host_repos_fsck_storage(bootstrap_mode_filter())
-        elif action == 7:
+        elif args.action == 'pull_native_all':
             host_repos_pull_native(bootstrap_mode_filter())
-        elif action == 8:
+        elif args.action == 'push_native_all':
             filter_ = ed_git_repo_userdata.autopush_repos()
-            if bootstrap_mode:
+            if args.bootstrap:
                 filter_ &= bootstrap_mode_filter()
             host_repos_push_native(filter_)
-        elif action == 9:
-            bootstrap_mode = not bootstrap_mode
-            print('bootstrap_mode == ' + str(bootstrap_mode))
         else:
-            raise Exception('unexpected action')
+            raise Exception('unexpected action ' + args.action)
+    else:
+        bootstrap_mode = False
 
-        if action != 9:
-            break
+        while True:
+            action = ed_user_interaction.pick_option('Pick action', [
+                'Status all',
+                'Ref status all',
+                'Fetch all',
+                'Fetch storage all',
+                'Pull storage all',
+                'Push storage all',
+                'Run fsck storage all',
+                'Pull native all',
+                'Push native all',
+                'Flip bootstrap_mode',
+                'Exit',
+            ])
+
+            def run_action(action_str):
+                os.system("start cmd /c ed_git_repo_manager.py --action " + action_str + (' --bootstrap' if bootstrap_mode else ''))
+
+            if action == 0:
+                run_action('status_all')
+            elif action == 1:
+                run_action('ref_status_all')
+            elif action == 2:
+                run_action('fetch_all')
+            elif action == 3:
+                run_action('fetch_storage_all')
+            elif action == 4:
+                run_action('pull_storage_all')
+            elif action == 5:
+                run_action('push_storage_all')
+            elif action == 6:
+                run_action('run_fsck_storage_all')
+            elif action == 7:
+                run_action('pull_native_all')
+            elif action == 8:
+                run_action('push_native_all')
+            elif action == 9:
+                bootstrap_mode = not bootstrap_mode
+                print('bootstrap_mode == ' + str(bootstrap_mode))
+            elif action == 10:
+                break
+            else:
+                raise Exception('unexpected action')
 
 
 if __name__ == '__main__':
