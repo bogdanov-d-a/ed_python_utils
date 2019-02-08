@@ -30,11 +30,11 @@ def get_info(state, now_date=None, hide_hint=False):
     return result
 
 
-def get_info_from_file(state_filename, now_date=None):
+def get_info_from_file(state_filename, now_date=None, hide_hint=False):
     with codecs.open(state_filename, 'r', 'utf-8') as state_file:
         state_data = state_file.read()
         state = eval(state_data)
-        return get_info(state, now_date)
+        return get_info(state, now_date, hide_hint)
 
 
 def info_viewer(state_filename, now_date=None, window_title='info_viewer'):
