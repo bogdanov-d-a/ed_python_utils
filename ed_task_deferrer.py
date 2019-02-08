@@ -30,7 +30,7 @@ def get_info(state, now_date=None, hide_hint=False):
     return result
 
 
-def info_viewer(state_filename, now_date=None):
+def info_viewer(state_filename, now_date=None, window_title='info_viewer'):
     def data_provider():
         with codecs.open(state_filename, 'r', 'utf-8') as state_file:
             try:
@@ -39,7 +39,7 @@ def info_viewer(state_filename, now_date=None):
                 return get_info(state, now_date)
             except:
                 return traceback.format_exc()
-    ed_query_window.run(data_provider)
+    ed_query_window.run(data_provider, window_title)
 
 
 def get_info_2d(columns, state, now_date=None):
@@ -66,7 +66,7 @@ def get_info_2d(columns, state, now_date=None):
     return result
 
 
-def info_2d_viewer(data_filename, now_date=None):
+def info_2d_viewer(data_filename, now_date=None, window_title='info_2d_viewer'):
     def data_provider():
         with codecs.open(data_filename, 'r', 'utf-8') as data_file:
             try:
@@ -75,4 +75,4 @@ def info_2d_viewer(data_filename, now_date=None):
                 return get_info_2d(data[0], data[1], now_date)
             except:
                 return traceback.format_exc()
-    ed_query_window.run(data_provider)
+    ed_query_window.run(data_provider, window_title)
