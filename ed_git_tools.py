@@ -33,7 +33,8 @@ def all_refs(path):
     run_git_command(path, ['branch', '-av'])
     put_blank_line()
     run_git_command(path, ['tag', '--format=%(refname:strip=2) %(objectname:short)'])
-    put_blank_line()
+
+def all_stash(path):
     run_git_command(path, ['stash', 'list'])
 
 def fetch_remote(path, remote_path):
