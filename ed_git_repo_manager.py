@@ -112,6 +112,10 @@ def main():
     args = parser.parse_args()
 
     if args.action is not None:
+        print('action == ' + args.action)
+        print('bootstrap == ' + str(args.bootstrap))
+        print()
+
         bootstrap_mode_filter = lambda: ed_git_repo_userdata.bootstrap_repos() if args.bootstrap else None
         if args.action == 'status_all':
             host_repos_status(bootstrap_mode_filter())
