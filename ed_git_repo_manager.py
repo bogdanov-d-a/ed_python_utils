@@ -67,6 +67,9 @@ def host_repos_fetch(filter_repos):
 def host_repos_all_refs(filter_repos):
     host_repos_run_with_path(ed_git_tools.all_refs, filter_repos)
 
+def host_repos_fsck(filter_repos):
+    host_repos_run_with_path(ed_git_tools.fsck, filter_repos)
+
 def handle_all_storage(repo, handler):
     for alias, storage_path in repo.remotes.storage.items():
         print('Processing ' + alias)
@@ -131,6 +134,8 @@ def main():
             host_repos_push_storage(bootstrap_mode_filter())
         elif args.action == 'run_fsck_storage_all':
             host_repos_fsck_storage(bootstrap_mode_filter())
+        elif args.action == 'run_fsck_all':
+            host_repos_fsck(bootstrap_mode_filter())
         elif args.action == 'pull_native_all':
             host_repos_pull_native(bootstrap_mode_filter())
         elif args.action == 'push_native_all':
@@ -152,6 +157,7 @@ def main():
                 'Pull storage all',
                 'Push storage all',
                 'Run fsck storage all',
+                'Run fsck all',
                 'Pull native all',
                 'Push native all',
                 'Flip bootstrap_mode',
@@ -179,13 +185,15 @@ def main():
             elif action == 6:
                 run_action('run_fsck_storage_all')
             elif action == 7:
-                run_action('pull_native_all')
+                run_action('run_fsck_all')
             elif action == 8:
-                run_action('push_native_all')
+                run_action('pull_native_all')
             elif action == 9:
+                run_action('push_native_all')
+            elif action == 10:
                 bootstrap_mode = not bootstrap_mode
                 print('bootstrap_mode == ' + str(bootstrap_mode))
-            elif action == 10:
+            elif action == 11:
                 break
             else:
                 raise Exception('unexpected action')
