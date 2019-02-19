@@ -16,8 +16,9 @@ class CbPack:
         c.grid(row=row, sticky=W)
 
 
-def show_checklist(items):
+def show_checklist(items, title):
     master = Tk()
+    master.title(title)
 
     info_text = StringVar(master)
     info = Label(master, textvariable=info_text)
@@ -27,8 +28,8 @@ def show_checklist(items):
     checked_count = 0
 
     def update_info_text():
-        info_text.set('Stats: {0} / {1} ({2})'.format(
-            checked_count, total_count - checked_count, total_count))
+        info_text.set('{0} stats: {1} / {2} ({3})'.format(
+            title, checked_count, total_count - checked_count, total_count))
 
     update_info_text()
 
@@ -53,7 +54,7 @@ def show_picker(checklists):
     master = Tk()
 
     def get_command(index):
-        return lambda: show_checklist(checklists[index][1])
+        return lambda: show_checklist(checklists[index][1], checklists[index][0])
 
     index = 0
     for text, _ in checklists:
