@@ -26,14 +26,19 @@ def show_checklist(items):
     total_count = len(items)
     checked_count = 0
 
+    def update_info_text():
+        info_text.set('Stats: {0} / {1} ({2})'.format(
+            checked_count, total_count - checked_count, total_count))
+
+    update_info_text()
+
     def cb_command_handler(cb_pack):
         nonlocal checked_count
         if cb_pack.var.get() == 0:
             checked_count -= 1
         else:
             checked_count += 1
-        info_text.set('Stats: {0} / {1} ({2})'.format(
-            checked_count, total_count - checked_count, total_count))
+        update_info_text()
 
     row = 1
     for item in items:
