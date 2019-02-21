@@ -1,5 +1,6 @@
 from tkinter import *
 import ed_tkinter_utils
+import ed_button_window
 
 
 class CbPack:
@@ -51,16 +52,14 @@ def show_checklist(items, title):
 
 
 def show_picker(checklists):
-    master = Tk()
+    buttons = []
 
     def get_command(index):
         return lambda: show_checklist(checklists[index][1], checklists[index][0])
 
     index = 0
     for text, _ in checklists:
-        b = Button(master, text=text, command=get_command(index))
-        b.pack(side=TOP, fill=X)
+        buttons.append((text, get_command(index)))
         index += 1
 
-    ed_tkinter_utils.center_window(master)
-    mainloop()
+    ed_button_window.run(buttons)
