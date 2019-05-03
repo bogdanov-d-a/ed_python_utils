@@ -6,7 +6,10 @@ def run(buttons):
     master = Tk()
 
     def get_command(index):
-        return lambda: buttons[index][1]()
+        def impl():
+            master.destroy()
+            return buttons[index][1]()
+        return impl
 
     index = 0
     for text, _ in buttons:
