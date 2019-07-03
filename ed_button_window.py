@@ -2,7 +2,13 @@ from tkinter import *
 import ed_tkinter_utils
 
 
-def run(buttons):
+def run(buttons, auto_pick=None):
+    if auto_pick is not None:
+        for text, command in buttons:
+            if text == auto_pick:
+                command()
+        return
+
     master = Tk()
 
     def get_command(index):
