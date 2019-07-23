@@ -10,6 +10,8 @@ import ed_pause_at_end
 import ed_git_repo_data
 import ed_storage_path_data
 import ed_host_python_path
+import ed_user_password_provider
+import ed_file_encryptor
 
 
 class Data:
@@ -86,6 +88,8 @@ def host_repos_all_create_bundle(filter_repos):
         raise Exception(bundle_path + ' exists')
     os.mkdir(bundle_path)
 
+    password = ed_user_password_provider.get()
+
     def create_bundle(repo_alias, repo):
         last_hash = repo.bundle_versions.get(target_alias)
         if last_hash is not None:
@@ -99,10 +103,12 @@ def host_repos_all_create_bundle(filter_repos):
                     refs = 'HEAD'
                 else:
                     refs = last_hash + '..' + 'HEAD'
+                bundle_file_path = bundle_path + '\\' + target_alias + '-' + repo_alias + '-' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + '.bundle'
                 ed_git_tools.create_bundle(
                     repo.path,
-                    bundle_path + '\\' + target_alias + '-' + repo_alias + '-' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'),
+                    bundle_file_path,
                     refs)
+                ed_file_encryptor.encrypt(bundle_file_path, password, bundle_file_path + '.7z')
         else:
             print('No {0} bundle provided'.format(target_alias))
     host_repos_run(create_bundle, filter_repos)
