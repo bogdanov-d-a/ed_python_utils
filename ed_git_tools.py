@@ -10,6 +10,13 @@ def run_command(path, command):
     with subprocess.Popen(command, cwd=path) as process:
         process.communicate()
 
+def run_command_for_result(path, command):
+    result = b''
+    with subprocess.Popen(command, cwd=path, stdout=subprocess.PIPE) as process:
+        for line in process.stdout.readlines():
+            result += line
+    return result
+
 def put_blank_line():
     if mock:
         print('put_blank_line')
@@ -19,6 +26,9 @@ def put_blank_line():
 
 def run_git_command(path, args):
     run_command(path, ['git', '--no-pager'] + args)
+
+def run_git_command_for_result(path, args):
+    return run_command_for_result(path, ['git', '--no-pager'] + args).decode('utf-8').rstrip('\n')
 
 def status(path):
     run_git_command(path, ['status'])
@@ -45,6 +55,12 @@ def fetch_remote(path, remote_path):
 
 def checkout(path, branch):
     run_git_command(path, ['checkout', branch])
+
+def create_bundle(path, file_name, refs):
+    run_git_command(path, ['bundle', 'create', file_name, refs])
+
+def rev_parse(path, ref):
+    return run_git_command_for_result(path, ['rev-parse', ref])
 
 def pull_with_checkout(path, remote_path, local_branch, remote_branch=None):
     if remote_branch is None:

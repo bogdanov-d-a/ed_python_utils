@@ -12,10 +12,11 @@ import ed_host_python_path
 
 
 class Data:
-    def __init__(self, path, remotes, branches):
+    def __init__(self, path, remotes, branches, bundle_versions):
         self.path = path
         self.remotes = remotes
         self.branches = branches
+        self.bundle_versions = bundle_versions
 
 
 def get_host_repos(filter_repos):
@@ -41,7 +42,7 @@ def get_host_repos(filter_repos):
 
             result[repo_alias] = Data(path,
                 ed_git_repo_data.Remotes(repo.remotes.native, storage_remotes),
-                repo.branches)
+                repo.branches, repo.bundle_versions)
 
     return result
 
@@ -49,13 +50,13 @@ def get_host_repos(filter_repos):
 def host_repos_run(command, filter_repos):
     for repo_alias, repo in get_host_repos(filter_repos).items():
         print(repo_alias)
-        command(repo)
+        command(repo_alias, repo)
         print()
         print()
 
 
 def host_repos_run_with_path(command, filter_repos):
-    host_repos_run(lambda repo: command(repo.path), filter_repos)
+    host_repos_run(lambda _, repo: command(repo.path), filter_repos)
 
 
 def host_repos_status(filter_repos):
@@ -70,6 +71,33 @@ def host_repos_all_refs(filter_repos):
 def host_repos_all_stash(filter_repos):
     host_repos_run_with_path(ed_git_tools.all_stash, filter_repos)
 
+def host_repos_all_create_bundle(filter_repos):
+    target_aliases = set([])
+    for repo_alias, repo in get_host_repos(filter_repos).items():
+        for target_alias in repo.bundle_versions.keys():
+            target_aliases.add(target_alias)
+    target_aliases = sorted(target_aliases)
+
+    target_alias = target_aliases[ed_user_interaction.pick_option('Pick target', target_aliases)]
+
+    def create_bundle(repo_alias, repo):
+        last_hash = repo.bundle_versions.get(target_alias)
+        if last_hash is not None:
+            now_hash = ed_git_tools.rev_parse(repo.path, 'HEAD')
+            if last_hash == now_hash:
+                print('No changes found: HEAD is ' + last_hash)
+            else:
+                if last_hash == '':
+                    refs = 'HEAD'
+                else:
+                    refs = last_hash + '..' + 'HEAD'
+                print('Updating ' + refs)
+                ed_git_tools.create_bundle(
+                    repo.path,
+                    ed_git_repo_userdata.get_bundle_path(target_alias, repo_alias, 'root' if last_hash == '' else last_hash, now_hash),
+                    refs)
+    host_repos_run(create_bundle, filter_repos)
+
 def host_repos_fsck(filter_repos):
     host_repos_run_with_path(ed_git_tools.fsck, filter_repos)
 
@@ -82,33 +110,33 @@ def handle_all_storage(repo, handler):
         handler(storage_path)
 
 def host_repos_fetch_storage(filter_repos):
-    def fetch_all_storage(repo):
+    def fetch_all_storage(_, repo):
         handle_all_storage(repo, lambda path: ed_git_tools.fetch_remote(repo.path, path))
     host_repos_run(fetch_all_storage, filter_repos)
 
 def host_repos_pull_storage(filter_repos):
-    def pull_all_storage(repo):
+    def pull_all_storage(_, repo):
         handle_all_storage(repo, lambda path: ed_git_tools.pull_with_checkout_multi(repo.path, path, repo.branches))
     host_repos_run(pull_all_storage, filter_repos)
 
 def host_repos_push_storage(filter_repos):
-    def push_all_storage(repo):
+    def push_all_storage(_, repo):
         handle_all_storage(repo, lambda path: ed_git_tools.push_all(repo.path, path))
     host_repos_run(push_all_storage, filter_repos)
 
 def host_repos_fsck_storage(filter_repos):
-    def fsck_all_storage(repo):
+    def fsck_all_storage(_, repo):
         handle_all_storage(repo, lambda path: ed_git_tools.fsck(path))
     host_repos_run(fsck_all_storage, filter_repos)
 
 def host_repos_pull_native(filter_repos):
-    def pull_repo_native(repo):
+    def pull_repo_native(_, repo):
         for remote in repo.remotes.native:
             ed_git_tools.fetch_merge_with_checkout_multi(repo.path, remote, repo.branches)
     host_repos_run(pull_repo_native, filter_repos)
 
 def host_repos_push_native(filter_repos):
-    def push_repo_native(repo):
+    def push_repo_native(_, repo):
         for remote in repo.remotes.native:
             ed_git_tools.push_multi(repo.path, remote, repo.branches)
     host_repos_run(push_repo_native, filter_repos)
@@ -146,6 +174,8 @@ def main():
             host_repos_gc(bootstrap_mode_filter())
         elif args.action == 'stash_all':
             host_repos_all_stash(bootstrap_mode_filter())
+        elif args.action == 'create_bundle_all':
+            host_repos_all_create_bundle(bootstrap_mode_filter())
         elif args.action == 'pull_native_all':
             host_repos_pull_native(bootstrap_mode_filter())
         elif args.action == 'push_native_all':
@@ -170,6 +200,7 @@ def main():
                 'Run fsck all',
                 'Run gc all',
                 'Stash all',
+                'Create bundle all',
                 'Pull native all',
                 'Push native all',
                 'Flip bootstrap_mode',
@@ -202,10 +233,12 @@ def main():
             elif action == 9:
                 run_action('stash_all')
             elif action == 10:
-                run_action('pull_native_all')
+                run_action('create_bundle_all')
             elif action == 11:
-                run_action('push_native_all')
+                run_action('pull_native_all')
             elif action == 12:
+                run_action('push_native_all')
+            elif action == 13:
                 bootstrap_mode = not bootstrap_mode
                 print('bootstrap_mode == ' + str(bootstrap_mode))
             else:
