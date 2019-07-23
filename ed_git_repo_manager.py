@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import os
 import ed_git_repo_userdata
 import ed_host_alias
@@ -80,22 +81,30 @@ def host_repos_all_create_bundle(filter_repos):
 
     target_alias = target_aliases[ed_user_interaction.pick_option('Pick target', target_aliases)]
 
+    bundle_path = ed_git_repo_userdata.get_bundle_path()
+    if os.path.exists(bundle_path):
+        raise Exception(bundle_path + ' exists')
+    os.mkdir(bundle_path)
+
     def create_bundle(repo_alias, repo):
         last_hash = repo.bundle_versions.get(target_alias)
         if last_hash is not None:
+            last_hash_or_root = 'root' if last_hash == '' else last_hash
             now_hash = ed_git_tools.rev_parse(repo.path, 'HEAD')
             if last_hash == now_hash:
                 print('No changes found: HEAD is ' + last_hash)
             else:
+                print('Updating {0}..{1}'.format(last_hash_or_root, now_hash))
                 if last_hash == '':
                     refs = 'HEAD'
                 else:
                     refs = last_hash + '..' + 'HEAD'
-                print('Updating ' + refs)
                 ed_git_tools.create_bundle(
                     repo.path,
-                    ed_git_repo_userdata.get_bundle_path(target_alias, repo_alias, 'root' if last_hash == '' else last_hash, now_hash),
+                    bundle_path + '\\' + target_alias + '-' + repo_alias + '-' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'),
                     refs)
+        else:
+            print('No {0} bundle provided'.format(target_alias))
     host_repos_run(create_bundle, filter_repos)
 
 def host_repos_fsck(filter_repos):
