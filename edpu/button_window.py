@@ -1,5 +1,5 @@
 from tkinter import *
-import ed_tkinter_utils
+import edpu.tkinter_utils
 
 
 def run(buttons, auto_pick=None):
@@ -23,5 +23,5 @@ def run(buttons, auto_pick=None):
         b.pack(side=TOP, fill=X)
         index += 1
 
-    ed_tkinter_utils.center_window(master)
+    edpu.tkinter_utils.center_window(master)
     mainloop()

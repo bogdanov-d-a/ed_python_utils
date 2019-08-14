@@ -1,9 +1,9 @@
 import argparse
-import ed_file_encryptor
-import ed_user_password_provider
+import edpu.file_encryptor
+import edpu.user.password_provider
 
 def encrypt(file_name):
-    ed_file_encryptor.encrypt(file_name, ed_user_password_provider.get(), file_name + '.7z')
+    edpu.file_encryptor.encrypt(file_name, edpu.user.password_provider.get(), file_name + '.7z')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

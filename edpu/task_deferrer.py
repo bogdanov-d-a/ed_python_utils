@@ -2,7 +2,7 @@ import datetime
 import operator
 import codecs
 import traceback
-import ed_query_window
+import edpu.query_window
 
 
 def none_min(a, b):
@@ -43,7 +43,7 @@ def info_viewer(state_filename, now_date=None, window_title='info_viewer'):
             return get_info_from_file(state_filename, now_date)
         except:
             return traceback.format_exc()
-    ed_query_window.run(data_provider, window_title)
+    edpu.query_window.run(data_provider, window_title)
 
 
 def get_info_2d(columns, state, now_date=None):
@@ -83,4 +83,4 @@ def info_2d_viewer(data_filename, now_date=None, window_title='info_2d_viewer'):
             return get_info_2d_from_file(data_filename, now_date)
         except:
             return traceback.format_exc()
-    ed_query_window.run(data_provider, window_title)
+    edpu.query_window.run(data_provider, window_title)

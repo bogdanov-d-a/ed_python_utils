@@ -1,5 +1,5 @@
 import win32api, os
-import ed_user_interaction
+import edpu.user_interaction
 
 
 def get_drive_letters():
@@ -36,7 +36,7 @@ def keep_getting_storage_path(name):
         if path is not None:
             return path
 
-        if not ed_user_interaction.yes_no_prompt('Try to find ' + name + ' again'):
+        if not edpu.user_interaction.yes_no_prompt('Try to find ' + name + ' again'):
             return None
 
 
@@ -46,4 +46,4 @@ def pick_storage():
         print('No storage available')
         return None
     keys = list(storage.keys())
-    return keys[ed_user_interaction.pick_option('Pick storage', keys)]
+    return keys[edpu.user_interaction.pick_option('Pick storage', keys)]

@@ -1,11 +1,11 @@
-import ed_storage_path_data
-import ed_host_path_data
-import ed_host_alias
-from ed_storage_finder import find_all_storage
+import edpu.user.storage_path_data
+import edpu.user.host_path_data
+import edpu.host_alias
+from edpu.storage_finder import find_all_storage
 
 
 def get_storage_data_impl(stor_alias, root_path):
-    stor_alias_data = ed_storage_path_data.get().get(stor_alias)
+    stor_alias_data = edpu.user.storage_path_data.get().get(stor_alias)
     if stor_alias_data is None:
         return None
 
@@ -23,4 +23,4 @@ def get_storage_data_auto(alias):
 
 
 def get_host_data():
-    return ed_host_path_data.get().get(ed_host_alias.get())
+    return edpu.user.host_path_data.get().get(edpu.host_alias.get())

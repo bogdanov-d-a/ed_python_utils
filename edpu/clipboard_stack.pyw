@@ -1,5 +1,5 @@
 from tkinter import *
-import ed_tkinter_utils
+import edpu.tkinter_utils
 import pyperclip
 
 
@@ -39,7 +39,7 @@ def main():
     out_text.config(yscrollcommand=out_text_sb.set)
     out_text_sb.config(command=out_text.yview)
 
-    ed_tkinter_utils.center_window(root)
+    edpu.tkinter_utils.center_window(root)
     mainloop()
 
 

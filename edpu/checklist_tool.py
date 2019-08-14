@@ -1,6 +1,6 @@
 from tkinter import *
-import ed_tkinter_utils
-import ed_button_window
+import edpu.tkinter_utils
+import edpu.button_window
 
 
 class CbPack:
@@ -47,7 +47,7 @@ def show_checklist(items, title):
         CbPack(master, item, row, cb_command_handler)
         row += 1
 
-    ed_tkinter_utils.center_window(master)
+    edpu.tkinter_utils.center_window(master)
     mainloop()
 
 
@@ -62,4 +62,4 @@ def show_picker(checklists):
         buttons.append((text, get_command(index)))
         index += 1
 
-    ed_button_window.run(buttons)
+    edpu.button_window.run(buttons)

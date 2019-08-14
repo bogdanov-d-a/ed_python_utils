@@ -1,5 +1,5 @@
 import tkinter
-import ed_tkinter_utils
+import edpu.tkinter_utils
 
 
 def run(data_provider, title='Default title'):
@@ -24,5 +24,5 @@ def run(data_provider, title='Default title'):
     out_text_sb.config(command=out_text.yview)
 
     calc()
-    ed_tkinter_utils.center_window(root)
+    edpu.tkinter_utils.center_window(root)
     tkinter.mainloop()
