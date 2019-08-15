@@ -221,10 +221,7 @@ def main():
             ])
 
             def run_action(action_str):
-                python_dir = edpu.user.python_launcher.get_python_3_path()
-                if python_dir is None:
-                    raise Exception('python3 not found')
-                os.system("start " + python_dir + "python.exe git_repo_manager.py --action " + action_str + (' --bootstrap' if bootstrap_mode else ''))
+                edpu.user.python_launcher.start_with_python3('git_repo_manager.py --action ' + action_str + (' --bootstrap' if bootstrap_mode else ''), '.')
 
             if action == 0:
                 run_action('status_all')
