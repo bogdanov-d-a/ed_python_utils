@@ -1,9 +1,16 @@
-import win32api, os
+import os
 import edpu.user_interaction
+
+try:
+    import win32api
+    win32api_loaded = True
+except:
+    import edpu.user.storage_finder
+    win32api_loaded = False
 
 
 def get_drive_letters():
-    return win32api.GetLogicalDriveStrings().split('\000')[:-1]
+    return win32api.GetLogicalDriveStrings().split('\000')[:-1] if win32api_loaded else edpu.user.storage_finder.get_drive_letters()
 
 
 def get_path_marker(dir_path):
