@@ -112,6 +112,11 @@ def host_repos_all_create_bundle(filter_repos):
             print('No {0} bundle provided'.format(target_alias))
     host_repos_run(create_bundle, filter_repos)
 
+    try:
+        os.rmdir(bundle_path)
+    except:
+        pass
+
 def host_repos_fsck(filter_repos):
     host_repos_run_with_path(edpu.git_tools.fsck, filter_repos)
 
