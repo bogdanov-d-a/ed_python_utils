@@ -11,6 +11,7 @@ import edpu.git_repo_data
 import edpu.user.python_launcher
 import edpu.user.password_provider
 import edpu.file_encryptor
+import edpu.datetime_utils
 
 
 class Data:
@@ -102,7 +103,7 @@ def host_repos_all_create_bundle(filter_repos):
                     refs = 'HEAD'
                 else:
                     refs = last_hash + '..' + 'HEAD'
-                bundle_file_path = bundle_path + '\\' + target_alias + '-' + repo_alias + '-' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + '.bundle'
+                bundle_file_path = bundle_path + '\\' + target_alias + '-' + repo_alias + '-' + edpu.datetime_utils.get_now_datetime_str() + '.bundle'
                 edpu.git_tools.create_bundle(
                     repo.path,
                     bundle_file_path,
