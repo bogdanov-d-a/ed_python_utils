@@ -1,5 +1,15 @@
 import tkinter
+import traceback
 import edpu.tkinter_utils
+
+
+def make_exception_wrapper(callback):
+    def wrapper():
+        try:
+            return callback()
+        except:
+            return traceback.format_exc()
+    return wrapper
 
 
 def run(data_provider, title='Default title'):
@@ -26,3 +36,7 @@ def run(data_provider, title='Default title'):
     calc()
     edpu.tkinter_utils.center_window(root)
     tkinter.mainloop()
+
+
+def run_with_exception_wrapper(data_provider, title='Default title'):
+    run(make_exception_wrapper(data_provider), title)

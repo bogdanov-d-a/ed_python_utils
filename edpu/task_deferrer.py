@@ -1,7 +1,6 @@
 import datetime
 import operator
 import codecs
-import traceback
 import edpu.query_window
 
 
@@ -40,12 +39,7 @@ def get_info_from_file(state_filename, now_date=None, hide_hint=False):
 
 
 def info_viewer(state_filename, now_date=None, window_title='info_viewer'):
-    def data_provider():
-        try:
-            return get_info_from_file(state_filename, now_date)
-        except:
-            return traceback.format_exc()
-    edpu.query_window.run(data_provider, window_title)
+    edpu.query_window.run_with_exception_wrapper(lambda: get_info_from_file(state_filename, now_date), window_title)
 
 
 def get_info_2d(columns, state, now_date=None):
@@ -78,9 +72,4 @@ def get_info_2d_from_file(data_filename, now_date=None):
 
 
 def info_2d_viewer(data_filename, now_date=None, window_title='info_2d_viewer'):
-    def data_provider():
-        try:
-            return get_info_2d_from_file(data_filename, now_date)
-        except:
-            return traceback.format_exc()
-    edpu.query_window.run(data_provider, window_title)
+    edpu.query_window.run_with_exception_wrapper(lambda: get_info_2d_from_file(data_filename, now_date), window_title)
