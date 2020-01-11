@@ -3,7 +3,8 @@ from decimal import *
 def fail():
     raise Exception('fail')
 
-def trace(items):
+def get_info(items):
+    result = ''
     debt = Decimal(0)
 
     for item in items:
@@ -19,4 +20,9 @@ def trace(items):
         else:
             fail()
 
-        print(action + ' ' + sum_str + ', debt ' + str(debt) + ' (' + note + ')')
+        result += action + ' ' + sum_str + ', debt ' + str(debt) + ' (' + note + ')' + '\n'
+
+    return result
+
+def trace(items):
+    print(get_info(items))
