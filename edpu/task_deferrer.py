@@ -1,6 +1,6 @@
 import datetime
 import operator
-import codecs
+import edpu.file_utils
 import edpu.query_window
 
 
@@ -29,13 +29,8 @@ def get_info(state, now_date=None, hide_hint=False):
     return result
 
 
-def eval_file(filename):
-    with codecs.open(filename, 'r', 'utf-8') as file:
-        return eval(file.read())
-
-
 def get_info_from_file(state_filename, now_date=None, hide_hint=False):
-    return get_info(eval_file(state_filename), now_date, hide_hint)
+    return get_info(edpu.file_utils.eval_file(state_filename), now_date, hide_hint)
 
 
 def info_viewer(state_filename, now_date=None, window_title='info_viewer'):
@@ -67,7 +62,7 @@ def get_info_2d(columns, state, now_date=None):
 
 
 def get_info_2d_from_file(data_filename, now_date=None):
-    data = eval_file(data_filename)
+    data = edpu.file_utils.eval_file(data_filename)
     return get_info_2d(data[0], data[1], now_date)
 
 
