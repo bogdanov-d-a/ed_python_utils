@@ -29,6 +29,6 @@ def create_and_open_dir_with_datetime(root_dir):
     edpu.explorer_launcher.open_dir_in_explorer(dir_path)
 
 
-def eval_file(filename):
+def eval_file(filename, eval_fn=eval):
     with codecs.open(filename, 'r', 'utf-8') as file:
-        return eval(file.read())
+        return eval_fn(file.read())
