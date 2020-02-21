@@ -9,22 +9,26 @@ def get_info(items, value_def, subject_area):
     balance_name, income_name, expenses_name = subject_area
 
     result = ''
-    balance = zero_val
+    income_sum = zero_val
+    expenses_sum = zero_val
 
     for item in items:
         action = item[0]
-        sum_str = item[1]
-        sum_ = parse_cb(sum_str)
+        val_str = item[1]
+        val = parse_cb(val_str)
         note = item[2]
 
         if action == income_name:
-            balance = add_cb(balance, sum_)
+            income_sum = add_cb(income_sum, val)
         elif action == expenses_name:
-            balance = add_cb(balance, negate_cb(sum_))
+            expenses_sum = add_cb(expenses_sum, val)
         else:
             fail()
 
-        result += action + ' ' + sum_str + ', ' + balance_name + ' ' + to_str_cb(balance) + ' (' + note + ')' + '\n'
+        result += action + ' ' + val_str + ', ' + balance_name + ' = ' + \
+            to_str_cb(income_sum) + ' - ' + to_str_cb(expenses_sum) + ' = ' + \
+            to_str_cb(add_cb(income_sum, negate_cb(expenses_sum))) + \
+            ' (' + note + ')' + '\n'
 
     return result
 
