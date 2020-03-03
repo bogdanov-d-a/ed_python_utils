@@ -15,11 +15,11 @@ import edpu.datetime_utils
 
 
 class Data:
-    def __init__(self, path, remotes, branches, bundle_versions):
+    def __init__(self, path, remotes, branches, bundles):
         self.path = path
         self.remotes = remotes
         self.branches = branches
-        self.bundle_versions = bundle_versions
+        self.bundles = bundles
 
 
 def get_host_repos(filter_repos):
@@ -45,7 +45,7 @@ def get_host_repos(filter_repos):
 
             result[repo_alias] = Data(path,
                 edpu.git_repo_data.Remotes(repo.remotes.native, storage_remotes),
-                repo.branches, repo.bundle_versions)
+                repo.branches, repo.bundles)
 
     return result
 
@@ -77,7 +77,7 @@ def host_repos_all_stash(filter_repos):
 def host_repos_all_create_bundle(filter_repos):
     target_aliases = set([])
     for repo_alias, repo in get_host_repos(filter_repos).items():
-        for target_alias in repo.bundle_versions.keys():
+        for target_alias in repo.bundles:
             target_aliases.add(target_alias)
     target_aliases = sorted(target_aliases)
 
@@ -91,15 +91,26 @@ def host_repos_all_create_bundle(filter_repos):
     password = edpu.user.password_provider.get()
 
     def create_bundle(repo_alias, repo):
-        last_hash = repo.bundle_versions.get(target_alias)
-        if last_hash is not None:
-            last_hash_or_root = 'root' if last_hash == '' else last_hash
+        def load_line(path):
+            if not os.path.exists(path):
+                return None
+            with open(path) as f:
+                return f.readlines()[0].rstrip('\n')
+
+        def save_line(line, path):
+            with open(path, 'w') as f:
+                f.write(line)
+
+        if target_alias in repo.bundles:
+            hash_file_path = edpu.user.git_repo_data.get_bundle_hash_path(target_alias, repo_alias)
+            last_hash = load_line(hash_file_path)
+            last_hash_or_root = 'root' if last_hash is None else last_hash
             now_hash = edpu.git_tools.rev_parse(repo.path, 'HEAD')
             if last_hash == now_hash:
                 print('No changes found: HEAD is ' + last_hash)
             else:
                 print('Updating {0}..{1}'.format(last_hash_or_root, now_hash))
-                if last_hash == '':
+                if last_hash is None:
                     refs = 'HEAD'
                 else:
                     refs = last_hash + '..' + 'HEAD'
@@ -109,6 +120,7 @@ def host_repos_all_create_bundle(filter_repos):
                     bundle_file_path,
                     refs)
                 edpu.file_encryptor.encrypt(bundle_file_path, password, bundle_file_path + '.7z')
+                save_line(now_hash, hash_file_path)
         else:
             print('No {0} bundle provided'.format(target_alias))
     host_repos_run(create_bundle, filter_repos)
