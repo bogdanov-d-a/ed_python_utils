@@ -19,11 +19,12 @@ def get_info(state, now_date=None, hide_hint=False, show_future=False):
     future = ''
 
     for name, date_ in sorted(state, key=operator.itemgetter(1)):
+        output_str = name + ' ' + str(date_) + '\n'
         if date_ <= now_date:
-            result += name + '\n'
+            result += output_str
         else:
             if show_future:
-                future += name + '\n'
+                future += output_str
             earliest_date = none_min(earliest_date, date_)
 
     if not hide_hint:
