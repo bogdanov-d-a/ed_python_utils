@@ -8,7 +8,7 @@ def none_min(a, b):
     return b if a is None else min(a, b)
 
 
-def get_info(state, now_date=None, hide_hint=False):
+def get_info(state, now_date=None, hide_hint=False, show_future=False):
     result = ''
 
     if now_date is None:
@@ -16,16 +16,20 @@ def get_info(state, now_date=None, hide_hint=False):
         now_date = (now_date_.year, now_date_.month, now_date_.day)
 
     earliest_date = None
+    future = ''
 
     for name, date_ in sorted(state, key=operator.itemgetter(1)):
         if date_ <= now_date:
             result += name + '\n'
         else:
+            if show_future:
+                future += name + '\n'
             earliest_date = none_min(earliest_date, date_)
 
     if not hide_hint:
         result += 'Earliest date: ' + str(earliest_date) + '\n'
 
+    result += future
     return result
 
 
