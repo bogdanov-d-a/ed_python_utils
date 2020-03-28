@@ -76,7 +76,7 @@ def host_repos_all_stash(filter_repos):
 
 def host_repos_all_create_bundle(filter_repos):
     target_aliases = set([])
-    for repo_alias, repo in get_host_repos(filter_repos).items():
+    for _, repo in get_host_repos(filter_repos).items():
         for target_alias in repo.bundles:
             target_aliases.add(target_alias)
     target_aliases = sorted(target_aliases)

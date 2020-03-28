@@ -20,8 +20,8 @@ def get_progress_matrix(progress, capacity, columns):
     if blank < 0:
         fail()
 
-    for row in range(rows):
-        for column in range(columns):
+    for _ in range(rows):
+        for _ in range(columns):
             if progress > 0:
                 progress -= 1
                 result += 'X'
