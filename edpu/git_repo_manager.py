@@ -1,15 +1,15 @@
 import argparse
 import datetime
 import os
-import edpu.user.git_repo_data
+import edpu_user.git_repo_data
 import edpu.host_alias
 import edpu.path_manager
 import edpu.git_tools
 import edpu.user_interaction
 import edpu.pause_at_end
 import edpu.git_repo_data
-import edpu.user.python_launcher
-import edpu.user.password_provider
+import edpu_user.python_launcher
+import edpu_user.password_provider
 import edpu.file_encryptor
 import edpu.datetime_utils
 
@@ -26,7 +26,7 @@ def get_host_repos(filter_repos):
     host = edpu.host_alias.get()
     result = {}
 
-    repos = edpu.user.git_repo_data.get().items()
+    repos = edpu_user.git_repo_data.get().items()
     if filter_repos is not None:
         repos = filter(lambda elem: elem[0] in filter_repos, repos)
 
@@ -83,12 +83,12 @@ def host_repos_all_create_bundle(filter_repos):
 
     target_alias = target_aliases[edpu.user_interaction.pick_option('Pick target', target_aliases)]
 
-    bundle_path = edpu.user.git_repo_data.get_bundle_path()
+    bundle_path = edpu_user.git_repo_data.get_bundle_path()
     if os.path.exists(bundle_path):
         raise Exception(bundle_path + ' exists')
     os.mkdir(bundle_path)
 
-    password = edpu.user.password_provider.get()
+    password = edpu_user.password_provider.get()
 
     def create_bundle(repo_alias, repo):
         def load_line(path):
@@ -102,7 +102,7 @@ def host_repos_all_create_bundle(filter_repos):
                 f.write(line)
 
         if target_alias in repo.bundles:
-            hash_file_path = edpu.user.git_repo_data.get_bundle_hash_path(target_alias, repo_alias)
+            hash_file_path = edpu_user.git_repo_data.get_bundle_hash_path(target_alias, repo_alias)
             last_hash = load_line(hash_file_path)
             last_hash_or_root = 'root' if last_hash is None else last_hash
             now_hash = edpu.git_tools.rev_parse(repo.path, 'HEAD')
@@ -185,7 +185,7 @@ def main():
         print('bootstrap == ' + str(args.bootstrap))
         print()
 
-        bootstrap_mode_filter = lambda: edpu.user.git_repo_data.bootstrap_repos() if args.bootstrap else None
+        bootstrap_mode_filter = lambda: edpu_user.git_repo_data.bootstrap_repos() if args.bootstrap else None
         if args.action == 'status_all':
             host_repos_status(bootstrap_mode_filter())
         elif args.action == 'ref_status_all':
@@ -211,7 +211,7 @@ def main():
         elif args.action == 'pull_native_all':
             host_repos_pull_native(bootstrap_mode_filter())
         elif args.action == 'push_native_all':
-            filter_ = edpu.user.git_repo_data.autopush_repos()
+            filter_ = edpu_user.git_repo_data.autopush_repos()
             if args.bootstrap:
                 filter_ &= bootstrap_mode_filter()
             host_repos_push_native(filter_)
@@ -239,7 +239,7 @@ def main():
             ])
 
             def run_action(action_str):
-                edpu.user.python_launcher.start_with_python3('git_repo_manager.py --action ' + action_str + (' --bootstrap' if bootstrap_mode else ''), '.')
+                edpu_user.python_launcher.start_with_python3('git_repo_manager.py --action ' + action_str + (' --bootstrap' if bootstrap_mode else ''), '.')
 
             if action == 0:
                 run_action('status_all')
