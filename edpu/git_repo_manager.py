@@ -62,6 +62,21 @@ def host_repos_run_with_path(command, filter_repos):
     host_repos_run(lambda _, repo: command(repo.path), filter_repos)
 
 
+def run_with_bundle_path(f):
+    bundle_path = edpu_user.git_repo_data.get_bundle_path()
+    if os.path.exists(bundle_path):
+        raise Exception(bundle_path + ' exists')
+    os.mkdir(bundle_path)
+
+    try:
+        f(bundle_path)
+    finally:
+        try:
+            os.rmdir(bundle_path)
+        except:
+            pass
+
+
 def host_repos_status(filter_repos):
     host_repos_run_with_path(edpu.git_tools.status, filter_repos)
 
@@ -75,60 +90,66 @@ def host_repos_all_stash(filter_repos):
     host_repos_run_with_path(edpu.git_tools.all_stash, filter_repos)
 
 def host_repos_all_create_bundle(filter_repos):
-    target_aliases = set([])
-    for _, repo in get_host_repos(filter_repos).items():
-        for target_alias in repo.bundles:
-            target_aliases.add(target_alias)
-    target_aliases = sorted(target_aliases)
+    def bundle_path_callback(bundle_path):
+        target_aliases = set([])
+        for _, repo in get_host_repos(filter_repos).items():
+            for target_alias in repo.bundles:
+                target_aliases.add(target_alias)
+        target_aliases = sorted(target_aliases)
 
-    target_alias = target_aliases[edpu.user_interaction.pick_option('Pick target', target_aliases)]
+        target_alias = target_aliases[edpu.user_interaction.pick_option('Pick target', target_aliases)]
+        password = edpu_user.password_provider.get()
 
-    bundle_path = edpu_user.git_repo_data.get_bundle_path()
-    if os.path.exists(bundle_path):
-        raise Exception(bundle_path + ' exists')
-    os.mkdir(bundle_path)
+        def create_bundle(repo_alias, repo):
+            def load_line(path):
+                if not os.path.exists(path):
+                    return None
+                with open(path) as f:
+                    return f.readlines()[0].rstrip('\n')
 
-    password = edpu_user.password_provider.get()
+            def save_line(line, path):
+                with open(path, 'w') as f:
+                    f.write(line)
 
-    def create_bundle(repo_alias, repo):
-        def load_line(path):
-            if not os.path.exists(path):
-                return None
-            with open(path) as f:
-                return f.readlines()[0].rstrip('\n')
-
-        def save_line(line, path):
-            with open(path, 'w') as f:
-                f.write(line)
-
-        if target_alias in repo.bundles:
-            hash_file_path = edpu_user.git_repo_data.get_bundle_hash_path(target_alias, repo_alias)
-            last_hash = load_line(hash_file_path)
-            last_hash_or_root = 'root' if last_hash is None else last_hash
-            now_hash = edpu.git_tools.rev_parse(repo.path, 'HEAD')
-            if last_hash == now_hash:
-                print('No changes found: HEAD is ' + last_hash)
-            else:
-                print('Updating {0}..{1}'.format(last_hash_or_root, now_hash))
-                if last_hash is None:
-                    refs = 'HEAD'
+            if target_alias in repo.bundles:
+                hash_file_path = edpu_user.git_repo_data.get_bundle_hash_path(target_alias, repo_alias)
+                last_hash = load_line(hash_file_path)
+                last_hash_or_root = 'root' if last_hash is None else last_hash
+                now_hash = edpu.git_tools.rev_parse(repo.path, 'HEAD')
+                if last_hash == now_hash:
+                    print('No changes found: HEAD is ' + last_hash)
                 else:
-                    refs = last_hash + '..' + 'HEAD'
-                bundle_file_path = bundle_path + '\\' + target_alias + '-' + repo_alias + '-' + edpu.datetime_utils.get_now_datetime_str() + '.bundle'
-                edpu.git_tools.create_bundle(
-                    repo.path,
-                    bundle_file_path,
-                    refs)
-                edpu.file_encryptor.encrypt(bundle_file_path, password, bundle_file_path + '.7z')
-                save_line(now_hash, hash_file_path)
-        else:
-            print('No {0} bundle provided'.format(target_alias))
-    host_repos_run(create_bundle, filter_repos)
+                    print('Updating {0}..{1}'.format(last_hash_or_root, now_hash))
+                    if last_hash is None:
+                        refs = 'HEAD'
+                    else:
+                        refs = last_hash + '..' + 'HEAD'
+                    bundle_file_path = bundle_path + '\\' + target_alias + '-' + repo_alias + '-' + edpu.datetime_utils.get_now_datetime_str() + '.bundle'
+                    edpu.git_tools.create_bundle(
+                        repo.path,
+                        bundle_file_path,
+                        refs)
+                    edpu.file_encryptor.encrypt(bundle_file_path, password, bundle_file_path + '.7z')
+                    save_line(now_hash, hash_file_path)
+            else:
+                print('No {0} bundle provided'.format(target_alias))
 
-    try:
-        os.rmdir(bundle_path)
-    except:
-        pass
+        host_repos_run(create_bundle, filter_repos)
+
+    run_with_bundle_path(bundle_path_callback)
+
+def host_repos_all_get_user_bundle_info(filter_repos):
+    def get_user_bundle_info(repo_alias, repo):
+        now_hash = edpu.git_tools.rev_parse(repo.path, 'HEAD')
+        print(repo_alias + ' ' + now_hash)
+
+    host_repos_run(get_user_bundle_info, filter_repos)
+
+def host_repos_all_create_user_bundle(filter_repos):
+    pass
+
+def host_repos_all_apply_user_bundle(filter_repos):
+    pass
 
 def host_repos_fsck(filter_repos):
     host_repos_run_with_path(edpu.git_tools.fsck, filter_repos)
@@ -208,6 +229,12 @@ def main():
             host_repos_all_stash(bootstrap_mode_filter())
         elif args.action == 'create_bundle_all':
             host_repos_all_create_bundle(bootstrap_mode_filter())
+        elif args.action == 'get_user_bundle_info':
+            host_repos_all_get_user_bundle_info(bootstrap_mode_filter())
+        elif args.action == 'create_user_bundle':
+            host_repos_all_create_user_bundle(bootstrap_mode_filter())
+        elif args.action == 'apply_user_bundle':
+            host_repos_all_apply_user_bundle(bootstrap_mode_filter())
         elif args.action == 'pull_native_all':
             host_repos_pull_native(bootstrap_mode_filter())
         elif args.action == 'push_native_all':
@@ -233,6 +260,9 @@ def main():
                 'Run gc all',
                 'Stash all',
                 'Create bundle all',
+                'Get user bundle info',
+                'Create user bundle',
+                'Apply user bundle',
                 'Pull native all',
                 'Push native all',
                 'Flip bootstrap_mode',
@@ -264,10 +294,16 @@ def main():
             elif action == 10:
                 run_action('create_bundle_all')
             elif action == 11:
-                run_action('pull_native_all')
+                run_action('get_user_bundle_info')
             elif action == 12:
-                run_action('push_native_all')
+                run_action('create_user_bundle')
             elif action == 13:
+                run_action('apply_user_bundle')
+            elif action == 14:
+                run_action('pull_native_all')
+            elif action == 15:
+                run_action('push_native_all')
+            elif action == 16:
                 bootstrap_mode = not bootstrap_mode
                 print('bootstrap_mode == ' + str(bootstrap_mode))
             else:
