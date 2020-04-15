@@ -181,7 +181,21 @@ def host_repos_all_create_user_bundle(filter_repos):
     run_with_bundle_path(bundle_path_callback)
 
 def host_repos_all_apply_user_bundle(filter_repos):
-    pass
+    bundle_path = edpu_user.git_repo_data.get_bundle_path()
+    if not os.path.exists(bundle_path):
+        raise Exception(bundle_path + ' doesn\'t exist')
+
+    def apply_user_bundle(repo_alias, repo):
+        bundle_file_path = bundle_path + '\\' + repo_alias + '.bundle'
+        if os.path.exists(bundle_file_path):
+            print('Applying bundle')
+            edpu.git_tools.pull_remote(
+                repo.path,
+                bundle_file_path)
+        else:
+            print('No {0} bundle provided'.format(repo_alias))
+
+    host_repos_run(apply_user_bundle, filter_repos)
 
 def host_repos_fsck(filter_repos):
     host_repos_run_with_path(edpu.git_tools.fsck, filter_repos)

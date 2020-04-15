@@ -53,6 +53,9 @@ def all_stash(path):
 def fetch_remote(path, remote_path):
     run_git_command(path, ['fetch', remote_path])
 
+def pull_remote(path, remote_path):
+    run_git_command(path, ['pull', remote_path])
+
 def checkout(path, branch):
     run_git_command(path, ['checkout', branch])
 
