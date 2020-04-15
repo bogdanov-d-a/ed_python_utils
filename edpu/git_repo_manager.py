@@ -1,4 +1,5 @@
 import argparse
+import codecs
 import datetime
 import os
 import edpu_user.git_repo_data
@@ -141,15 +142,43 @@ def host_repos_all_create_bundle(filter_repos):
     run_with_bundle_path(bundle_path_callback)
 
 def host_repos_all_get_user_bundle_info(filter_repos):
+    result = []
+
     def get_user_bundle_info(repo_alias, repo):
+        nonlocal result
         now_hash = edpu.git_tools.rev_parse(repo.path, 'HEAD')
-        print(now_hash + ' ' + repo_alias)
+        result.append(now_hash + ' ' + repo_alias)
 
     host_repos_run(get_user_bundle_info, filter_repos, False)
-    print()
+
+    with codecs.open(edpu_user.git_repo_data.get_user_bundle_info_path(), 'w', 'utf-8') as f:
+        f.write('|'.join(result))
 
 def host_repos_all_create_user_bundle(filter_repos):
-    pass
+    def bundle_path_callback(bundle_path):
+        user_info = {}
+        for line in input().split('|'):
+            hash_, alias = line.split(' ', 1)
+            user_info[alias] = hash_
+
+        def create_user_bundle(repo_alias, repo):
+            user_hash = user_info.get(repo_alias)
+            if user_hash is not None:
+                now_hash = edpu.git_tools.rev_parse(repo.path, 'HEAD')
+                if user_hash == now_hash:
+                    print('No changes found: HEAD is ' + user_hash)
+                else:
+                    print('Packing {0}..{1}'.format(user_hash, now_hash))
+                    edpu.git_tools.create_bundle(
+                        repo.path,
+                        bundle_path + '\\' + repo_alias + '.bundle',
+                        user_hash + '..' + 'HEAD')
+            else:
+                print('No {0} bundle requested'.format(repo_alias))
+
+        host_repos_run(create_user_bundle, filter_repos)
+
+    run_with_bundle_path(bundle_path_callback)
 
 def host_repos_all_apply_user_bundle(filter_repos):
     pass
