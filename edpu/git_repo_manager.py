@@ -50,12 +50,14 @@ def get_host_repos(filter_repos):
     return result
 
 
-def host_repos_run(command, filter_repos):
+def host_repos_run(command, filter_repos, show_annotations=True):
     for repo_alias, repo in get_host_repos(filter_repos).items():
-        print(repo_alias)
+        if show_annotations:
+            print(repo_alias)
         command(repo_alias, repo)
-        print()
-        print()
+        if show_annotations:
+            print()
+            print()
 
 
 def host_repos_run_with_path(command, filter_repos):
@@ -141,9 +143,10 @@ def host_repos_all_create_bundle(filter_repos):
 def host_repos_all_get_user_bundle_info(filter_repos):
     def get_user_bundle_info(repo_alias, repo):
         now_hash = edpu.git_tools.rev_parse(repo.path, 'HEAD')
-        print(repo_alias + ' ' + now_hash)
+        print(now_hash + ' ' + repo_alias)
 
-    host_repos_run(get_user_bundle_info, filter_repos)
+    host_repos_run(get_user_bundle_info, filter_repos, False)
+    print()
 
 def host_repos_all_create_user_bundle(filter_repos):
     pass
