@@ -161,6 +161,8 @@ def host_repos_all_create_user_bundle(filter_repos):
             hash_, alias = line.split(' ', 1)
             user_info[alias] = hash_
 
+        user_info_new = dict(user_info)
+
         def create_user_bundle(repo_alias, repo):
             user_hash = user_info.get(repo_alias)
             if user_hash is not None:
@@ -173,10 +175,15 @@ def host_repos_all_create_user_bundle(filter_repos):
                         repo.path,
                         bundle_path + '\\' + repo_alias + '.bundle',
                         user_hash + '..' + 'HEAD')
+                    user_info_new[repo_alias] = now_hash
             else:
                 print('No {0} bundle requested'.format(repo_alias))
 
         host_repos_run(create_user_bundle, filter_repos)
+
+        if user_info != user_info_new:
+            with codecs.open(edpu_user.git_repo_data.get_user_bundle_info_new_path(), 'w', 'utf-8') as f:
+                f.write('|'.join(map(lambda e: e[1] + ' ' + e[0], user_info_new.items())))
 
     run_with_bundle_path(bundle_path_callback)
 
