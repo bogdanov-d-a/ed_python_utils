@@ -1,9 +1,9 @@
 import codecs
-import edpu.datetime_utils
+from . import datetime_utils
 
 def make_report(data, report_filename):
     with codecs.open(report_filename, 'w', 'utf-8') as report_file:
-        report_file.write('Created at: ' + edpu.datetime_utils.get_now_datetime_str() + '\n')
+        report_file.write('Created at: ' + datetime_utils.get_now_datetime_str() + '\n')
         report_file.write(data)
 
 def make_reports(names, report_processor, src_path_provider=lambda n: n + '.py',

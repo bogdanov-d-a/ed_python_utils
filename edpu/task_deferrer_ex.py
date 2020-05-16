@@ -1,4 +1,4 @@
-import edpu.task_deferrer
+from . import task_deferrer
 
 def get_data(item_keys_all, item_data):
     item_data_keys = set()
@@ -12,6 +12,6 @@ def get_data(item_keys_all, item_data):
     unregistered = item_keys_all - item_data_keys
 
     return 'Registered:\n' + \
-        edpu.task_deferrer.get_info(item_data_for_td, show_future=True) + '\n' + \
+        task_deferrer.get_info(item_data_for_td, show_future=True) + '\n' + \
         'Unregistered:\n' + \
         '\n'.join(sorted(unregistered))

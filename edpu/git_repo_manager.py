@@ -3,16 +3,16 @@ import codecs
 import datetime
 import os
 import edpu_user.git_repo_data
-import edpu.host_alias
-import edpu.path_manager
-import edpu.git_tools
-import edpu.user_interaction
-import edpu.pause_at_end
-import edpu.git_repo_data
+from edpu import host_alias
+from edpu import path_manager
+from edpu import git_tools
+from edpu import user_interaction
+from edpu import pause_at_end
+from edpu import git_repo_data
 import edpu_user.python_launcher
 import edpu_user.password_provider
-import edpu.file_encryptor
-import edpu.datetime_utils
+from edpu import file_encryptor
+from edpu import datetime_utils
 
 
 class Data:
@@ -24,7 +24,7 @@ class Data:
 
 
 def get_host_repos(filter_repos):
-    host = edpu.host_alias.get()
+    host = host_alias.get()
     result = {}
 
     repos = edpu_user.git_repo_data.get().items()
@@ -34,18 +34,18 @@ def get_host_repos(filter_repos):
     for repo_alias, repo in repos:
         path_alias = repo.host_to_path.get(host)
         if path_alias is not None:
-            path = edpu.path_manager.get_host_data().get(path_alias)
+            path = path_manager.get_host_data().get(path_alias)
 
             storage_remotes = {}
             for storage_alias, storage_path_alias in repo.remotes.storage.items():
-                storage_data = edpu.path_manager.get_storage_data_auto(storage_alias)
+                storage_data = path_manager.get_storage_data_auto(storage_alias)
                 if storage_data is not None:
                     storage_path = storage_data.get(storage_path_alias)
                     if storage_path is not None:
                         storage_remotes[storage_alias] = storage_path
 
             result[repo_alias] = Data(path,
-                edpu.git_repo_data.Remotes(repo.remotes.native, storage_remotes),
+                git_repo_data.Remotes(repo.remotes.native, storage_remotes),
                 repo.branches, repo.bundles)
 
     return result
@@ -81,16 +81,16 @@ def run_with_bundle_path(f):
 
 
 def host_repos_status(filter_repos):
-    host_repos_run_with_path(edpu.git_tools.status, filter_repos)
+    host_repos_run_with_path(git_tools.status, filter_repos)
 
 def host_repos_fetch(filter_repos):
-    host_repos_run_with_path(edpu.git_tools.fetch, filter_repos)
+    host_repos_run_with_path(git_tools.fetch, filter_repos)
 
 def host_repos_all_refs(filter_repos):
-    host_repos_run_with_path(edpu.git_tools.all_refs, filter_repos)
+    host_repos_run_with_path(git_tools.all_refs, filter_repos)
 
 def host_repos_all_stash(filter_repos):
-    host_repos_run_with_path(edpu.git_tools.all_stash, filter_repos)
+    host_repos_run_with_path(git_tools.all_stash, filter_repos)
 
 def host_repos_all_create_bundle(filter_repos):
     def bundle_path_callback(bundle_path):
@@ -100,7 +100,7 @@ def host_repos_all_create_bundle(filter_repos):
                 target_aliases.add(target_alias)
         target_aliases = sorted(target_aliases)
 
-        target_alias = target_aliases[edpu.user_interaction.pick_option('Pick target', target_aliases)]
+        target_alias = target_aliases[user_interaction.pick_option('Pick target', target_aliases)]
         password = edpu_user.password_provider.get()
 
         def create_bundle(repo_alias, repo):
@@ -118,7 +118,7 @@ def host_repos_all_create_bundle(filter_repos):
                 hash_file_path = edpu_user.git_repo_data.get_bundle_hash_path(target_alias, repo_alias)
                 last_hash = load_line(hash_file_path)
                 last_hash_or_root = 'root' if last_hash is None else last_hash
-                now_hash = edpu.git_tools.rev_parse(repo.path, 'HEAD')
+                now_hash = git_tools.rev_parse(repo.path, 'HEAD')
                 if last_hash == now_hash:
                     print('No changes found: HEAD is ' + last_hash)
                 else:
@@ -127,12 +127,12 @@ def host_repos_all_create_bundle(filter_repos):
                         refs = 'HEAD'
                     else:
                         refs = last_hash + '..' + 'HEAD'
-                    bundle_file_path = bundle_path + '\\' + target_alias + '-' + repo_alias + '-' + edpu.datetime_utils.get_now_datetime_str() + '.bundle'
-                    edpu.git_tools.create_bundle(
+                    bundle_file_path = bundle_path + '\\' + target_alias + '-' + repo_alias + '-' + datetime_utils.get_now_datetime_str() + '.bundle'
+                    git_tools.create_bundle(
                         repo.path,
                         bundle_file_path,
                         refs)
-                    edpu.file_encryptor.encrypt(bundle_file_path, password, bundle_file_path + '.7z')
+                    file_encryptor.encrypt(bundle_file_path, password, bundle_file_path + '.7z')
                     save_line(now_hash, hash_file_path)
             else:
                 print('No {0} bundle provided'.format(target_alias))
@@ -146,7 +146,7 @@ def host_repos_all_get_user_bundle_info(filter_repos):
 
     def get_user_bundle_info(repo_alias, repo):
         nonlocal result
-        now_hash = edpu.git_tools.rev_parse(repo.path, 'HEAD')
+        now_hash = git_tools.rev_parse(repo.path, 'HEAD')
         result.append(now_hash + ' ' + repo_alias)
 
     host_repos_run(get_user_bundle_info, filter_repos, False)
@@ -166,12 +166,12 @@ def host_repos_all_create_user_bundle(filter_repos):
         def create_user_bundle(repo_alias, repo):
             user_hash = user_info.get(repo_alias)
             if user_hash is not None:
-                now_hash = edpu.git_tools.rev_parse(repo.path, 'HEAD')
+                now_hash = git_tools.rev_parse(repo.path, 'HEAD')
                 if user_hash == now_hash:
                     print('No changes found: HEAD is ' + user_hash)
                 else:
                     print('Packing {0}..{1}'.format(user_hash, now_hash))
-                    edpu.git_tools.create_bundle(
+                    git_tools.create_bundle(
                         repo.path,
                         bundle_path + '\\' + repo_alias + '.bundle',
                         user_hash + '..' + 'HEAD')
@@ -196,7 +196,7 @@ def host_repos_all_apply_user_bundle(filter_repos):
         bundle_file_path = bundle_path + '\\' + repo_alias + '.bundle'
         if os.path.exists(bundle_file_path):
             print('Applying bundle')
-            edpu.git_tools.pull_remote(
+            git_tools.pull_remote(
                 repo.path,
                 bundle_file_path)
         else:
@@ -205,10 +205,10 @@ def host_repos_all_apply_user_bundle(filter_repos):
     host_repos_run(apply_user_bundle, filter_repos)
 
 def host_repos_fsck(filter_repos):
-    host_repos_run_with_path(edpu.git_tools.fsck, filter_repos)
+    host_repos_run_with_path(git_tools.fsck, filter_repos)
 
 def host_repos_gc(filter_repos):
-    host_repos_run_with_path(edpu.git_tools.gc, filter_repos)
+    host_repos_run_with_path(git_tools.gc, filter_repos)
 
 def handle_all_storage(repo, handler):
     for alias, storage_path in repo.remotes.storage.items():
@@ -217,34 +217,34 @@ def handle_all_storage(repo, handler):
 
 def host_repos_fetch_storage(filter_repos):
     def fetch_all_storage(_, repo):
-        handle_all_storage(repo, lambda path: edpu.git_tools.fetch_remote(repo.path, path))
+        handle_all_storage(repo, lambda path: git_tools.fetch_remote(repo.path, path))
     host_repos_run(fetch_all_storage, filter_repos)
 
 def host_repos_pull_storage(filter_repos):
     def pull_all_storage(_, repo):
-        handle_all_storage(repo, lambda path: edpu.git_tools.pull_with_checkout_multi(repo.path, path, repo.branches))
+        handle_all_storage(repo, lambda path: git_tools.pull_with_checkout_multi(repo.path, path, repo.branches))
     host_repos_run(pull_all_storage, filter_repos)
 
 def host_repos_push_storage(filter_repos):
     def push_all_storage(_, repo):
-        handle_all_storage(repo, lambda path: edpu.git_tools.push_all(repo.path, path))
+        handle_all_storage(repo, lambda path: git_tools.push_all(repo.path, path))
     host_repos_run(push_all_storage, filter_repos)
 
 def host_repos_fsck_storage(filter_repos):
     def fsck_all_storage(_, repo):
-        handle_all_storage(repo, lambda path: edpu.git_tools.fsck(path))
+        handle_all_storage(repo, lambda path: git_tools.fsck(path))
     host_repos_run(fsck_all_storage, filter_repos)
 
 def host_repos_pull_native(filter_repos):
     def pull_repo_native(_, repo):
         for remote in repo.remotes.native:
-            edpu.git_tools.fetch_merge_with_checkout_multi(repo.path, remote, repo.branches)
+            git_tools.fetch_merge_with_checkout_multi(repo.path, remote, repo.branches)
     host_repos_run(pull_repo_native, filter_repos)
 
 def host_repos_push_native(filter_repos):
     def push_repo_native(_, repo):
         for remote in repo.remotes.native:
-            edpu.git_tools.push_multi(repo.path, remote, repo.branches)
+            git_tools.push_multi(repo.path, remote, repo.branches)
     host_repos_run(push_repo_native, filter_repos)
 
 
@@ -301,7 +301,7 @@ def main():
         bootstrap_mode = False
 
         while True:
-            action = edpu.user_interaction.pick_option('Pick action', [
+            action = user_interaction.pick_option('Pick action', [
                 'Status all',
                 'Ref status all',
                 'Fetch all',
@@ -364,4 +364,4 @@ def main():
 
 
 if __name__ == '__main__':
-    edpu.pause_at_end.run(main, 'Program finished successfully')
+    pause_at_end.run(main, 'Program finished successfully')

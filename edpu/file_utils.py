@@ -1,7 +1,7 @@
 import codecs
 import os
-import edpu.datetime_utils
-import edpu.explorer_launcher
+from . import datetime_utils
+from . import explorer_launcher
 
 def create_dir_helper(root_dir, prefix):
     index = None
@@ -24,9 +24,9 @@ def create_dir_helper(root_dir, prefix):
             index += 1
 
 def create_and_open_dir_with_datetime(root_dir):
-    dt = edpu.datetime_utils.get_now_datetime_str()
+    dt = datetime_utils.get_now_datetime_str()
     dir_path = create_dir_helper(root_dir, dt)
-    edpu.explorer_launcher.open_dir_in_explorer(dir_path)
+    explorer_launcher.open_dir_in_explorer(dir_path)
 
 
 def eval_file(filename, eval_fn=eval):

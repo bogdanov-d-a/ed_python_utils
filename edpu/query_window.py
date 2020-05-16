@@ -1,6 +1,6 @@
 import tkinter
 import traceback
-import edpu.tkinter_utils
+from . import tkinter_utils
 
 
 def make_exception_wrapper(callback):
@@ -34,7 +34,7 @@ def run(data_provider, title='Default title'):
     out_text_sb.config(command=out_text.yview)
 
     calc()
-    edpu.tkinter_utils.center_window(root)
+    tkinter_utils.center_window(root)
     tkinter.mainloop()
 
 

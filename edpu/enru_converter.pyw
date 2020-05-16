@@ -1,5 +1,5 @@
 from tkinter import *
-import edpu.tkinter_utils
+from edpu import tkinter_utils
 
 
 def main():
@@ -126,7 +126,7 @@ def main():
     text.config(yscrollcommand=text_sb.set)
     text_sb.config(command=text.yview)
 
-    edpu.tkinter_utils.center_window(root)
+    tkinter_utils.center_window(root)
     mainloop()
 
 

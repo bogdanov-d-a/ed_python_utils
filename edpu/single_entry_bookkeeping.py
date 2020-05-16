@@ -1,5 +1,5 @@
 from decimal import *
-import edpu.calc_time_utils
+from . import calc_time_utils
 
 def fail():
     raise Exception('fail')
@@ -36,7 +36,7 @@ def get_decimal_value_def():
     return (Decimal(0), lambda v: -v, lambda v1, v2: v1 + v2, Decimal, str)
 
 def get_time_value_def():
-    return (0, lambda v: -v, lambda v1, v2: v1 + v2, edpu.calc_time_utils.parse_duration, edpu.calc_time_utils.duration_string_with_negative)
+    return (0, lambda v: -v, lambda v1, v2: v1 + v2, calc_time_utils.parse_duration, calc_time_utils.duration_string_with_negative)
 
 def get_debt_subject_area():
     return ('debt', 'give', 'take')

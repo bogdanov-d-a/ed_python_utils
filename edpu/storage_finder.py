@@ -1,5 +1,5 @@
 import os
-import edpu.user_interaction
+from . import user_interaction
 
 try:
     import win32api
@@ -43,7 +43,7 @@ def keep_getting_storage_path(name):
         if path is not None:
             return path
 
-        if not edpu.user_interaction.yes_no_prompt('Try to find ' + name + ' again'):
+        if not user_interaction.yes_no_prompt('Try to find ' + name + ' again'):
             return None
 
 
@@ -53,4 +53,4 @@ def pick_storage():
         print('No storage available')
         return None
     keys = list(storage.keys())
-    return keys[edpu.user_interaction.pick_option('Pick storage', keys)]
+    return keys[user_interaction.pick_option('Pick storage', keys)]
