@@ -1,12 +1,10 @@
 import getpass
 import hashlib
 
-def get_and_verify_password(verify_sha1):
+def get_and_verify_password(verify_key, salt):
     while True:
         password = getpass.getpass()
-        sha1 = hashlib.sha1()
-        sha1.update(password.encode('utf-8'))
-        user_sha1 = sha1.hexdigest()
-        if user_sha1 == verify_sha1:
+        key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+        if key == verify_key:
             return password
-        print('SHA1 mismatch, got ' + user_sha1)
+        print('pbkdf2_hmac key mismatch, got ' + str(key))
