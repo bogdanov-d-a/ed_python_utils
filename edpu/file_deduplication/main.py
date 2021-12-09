@@ -3,6 +3,9 @@ from ed_ibds import hash_facade
 
 
 def copy_data_to_bundles(data_path, bundles_path, data_index_path, split_to_dirs, keep_ext):
+    if os.path.exists(data_index_path):
+        fail()
+
     bundles = scan_bundles(bundles_path, split_to_dirs)
     data_index = []
 
