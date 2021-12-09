@@ -47,5 +47,5 @@ def load_data_index(data_index_path):
 
 def copy_no_overwrite(src, dst):
     if os.path.exists(dst):
-        raise Exception()
+        fail()
     shutil.copy(src, dst)
