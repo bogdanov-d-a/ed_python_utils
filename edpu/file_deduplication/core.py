@@ -2,6 +2,7 @@ from .utils import *
 from ed_ibds import file_tree_scanner
 from ed_ibds import collection_definition
 import os
+import shutil
 
 
 def scan_bundles(bundles_path, split_to_dirs):
@@ -42,3 +43,9 @@ def save_data_index(data_index, data_index_path):
 
 def load_data_index(data_index_path):
     return collection_definition.load_common_data(data_index_path)
+
+
+def copy_no_overwrite(src, dst):
+    if os.path.exists(dst):
+        raise Exception()
+    shutil.copy(src, dst)

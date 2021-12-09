@@ -1,6 +1,5 @@
 from .core import *
 from ed_ibds import hash_facade
-import shutil
 
 
 def copy_data_to_bundles(data_path, bundles_path, data_index_path, split_to_dirs, keep_ext):
@@ -18,7 +17,7 @@ def copy_data_to_bundles(data_path, bundles_path, data_index_path, split_to_dirs
             if split_to_dirs:
                 os.makedirs(os.path.dirname(bundle_path_abs), exist_ok=True)
             print('Copying ' + '\\'.join(data_path_item))
-            shutil.copy(data_path_item_abs, bundle_path_abs)
+            copy_no_overwrite(data_path_item_abs, bundle_path_abs)
 
     save_data_index(data_index, data_index_path)
 
@@ -31,7 +30,7 @@ def recreate_data_from_bundles(bundles_path, split_to_dirs, data_index_path, rec
         data_index_item_path_abs = os.path.join(recreate_data_path, data_index_item_path)
         os.makedirs(os.path.dirname(data_index_item_path_abs), exist_ok=True)
         print('Copying ' + data_index_item_path)
-        shutil.copy(os.path.join(bundles_path, '\\'.join(bundles[data_index_item_hash])), data_index_item_path_abs)
+        copy_no_overwrite(os.path.join(bundles_path, '\\'.join(bundles[data_index_item_hash])), data_index_item_path_abs)
 
 
 def backup_and_recover(backup_path, restore_path, bundles_path, data_index_path, split_to_dirs, keep_ext):
