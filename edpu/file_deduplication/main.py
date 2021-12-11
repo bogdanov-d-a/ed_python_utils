@@ -34,7 +34,7 @@ def recreate_data_from_bundles(bundles_path, split_to_dirs, data_index_path, rec
     data_index = load_data_index(data_index_path)
     os.makedirs(recreate_data_path)
     for data_index_item_path, data_index_item_hash in data_index:
-        data_index_item_path_abs = os.path.join(recreate_data_path, data_index_item_path)
+        data_index_item_path_abs = os.path.join(recreate_data_path, os.path.sep.join(data_index_item_path.split(DATA_INDEX_SEPARATOR)))
         os.makedirs(os.path.dirname(data_index_item_path_abs), exist_ok=True)
         print('Copying ' + data_index_item_path)
         copy_no_overwrite(os.path.join(bundles_path, os.path.sep.join(bundles[data_index_item_hash])), data_index_item_path_abs)
