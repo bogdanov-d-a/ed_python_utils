@@ -1,6 +1,5 @@
 import argparse
 import codecs
-import datetime
 import os
 import edpu_user.git_repo_data
 from edpu import host_alias
@@ -127,7 +126,7 @@ def host_repos_all_create_bundle(filter_repos):
                         refs = 'HEAD'
                     else:
                         refs = last_hash + '..' + 'HEAD'
-                    bundle_file_path = bundle_path + '\\' + target_alias + '-' + repo_alias + '-' + datetime_utils.get_now_datetime_str() + '.bundle'
+                    bundle_file_path = bundle_path + os.path.sep + target_alias + '-' + repo_alias + '-' + datetime_utils.get_now_datetime_str() + '.bundle'
                     git_tools.create_bundle(
                         repo.path,
                         bundle_file_path,
@@ -173,7 +172,7 @@ def host_repos_all_create_user_bundle(filter_repos):
                     print('Packing {0}..{1}'.format(user_hash, now_hash))
                     git_tools.create_bundle(
                         repo.path,
-                        bundle_path + '\\' + repo_alias + '.bundle',
+                        bundle_path + os.path.sep + repo_alias + '.bundle',
                         user_hash + '..' + 'HEAD')
                     user_info_new[repo_alias] = now_hash
             else:
@@ -193,7 +192,7 @@ def host_repos_all_apply_user_bundle(filter_repos):
         raise Exception(bundle_path + ' doesn\'t exist')
 
     def apply_user_bundle(repo_alias, repo):
-        bundle_file_path = bundle_path + '\\' + repo_alias + '.bundle'
+        bundle_file_path = bundle_path + os.path.sep + repo_alias + '.bundle'
         if os.path.exists(bundle_file_path):
             print('Applying bundle')
             git_tools.pull_remote(

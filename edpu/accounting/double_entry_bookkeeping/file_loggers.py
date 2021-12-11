@@ -1,5 +1,6 @@
 from .logger import *
 import codecs
+import os
 
 
 class FileLoggers:
@@ -8,7 +9,7 @@ class FileLoggers:
 
     def __del__(self):
         for logger in self._loggers:
-            with codecs.open('reports\\' + logger.name + '.txt', 'w', 'utf-8') as report_file:
+            with codecs.open('reports' + os.path.sep + logger.name + '.txt', 'w', 'utf-8') as report_file:
                 report_file.write(logger.data)
 
     def make_logger(self, name):
