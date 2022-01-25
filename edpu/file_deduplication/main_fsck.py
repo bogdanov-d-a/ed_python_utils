@@ -1,5 +1,6 @@
 from .fsck import *
 from ed_ibds import hash_facade
+from edpu import user_interaction
 
 
 def fsck_reachable(bundles_path, split_to_dirs, data_index_paths):
@@ -43,3 +44,21 @@ def fsck(bundles_path, split_to_dirs, data_index_paths):
         return ('fsck_bundles', fsck_bundles_result)
 
     return ('fsck', 0)
+
+
+def gc_no_fsck(bundles_path, split_to_dirs, data_index_paths):
+    bundles = scan_bundles(bundles_path, split_to_dirs)
+    bundles_hashes = get_bundles_hashset(bundles)
+    data_index_hashes = get_data_index_files_hashset(data_index_paths)
+    unreachable_hashes = bundles_hashes - data_index_hashes
+
+    if user_interaction.yes_no_prompt('Delete ' + str(len(unreachable_hashes)) + ' of ' + str(len(bundles_hashes)) + ' bundles?'):
+        for unreachable_hash in unreachable_hashes:
+            bundle_path = bundles[unreachable_hash]
+            bundle_path_abs = os.path.join(bundles_path, os.path.sep.join(bundle_path))
+            delete_file_wrapper(bundle_path_abs)
+
+
+def gc(bundles_path, split_to_dirs, data_index_paths):
+    gc_no_fsck(bundles_path, split_to_dirs, data_index_paths)
+    fsck_reachable(bundles_path, split_to_dirs, data_index_paths)
