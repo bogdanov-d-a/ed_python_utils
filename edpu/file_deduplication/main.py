@@ -15,6 +15,7 @@ def copy_data_to_bundles(data_path, bundles_path, data_index_path, split_to_dirs
 
     for data_path_item in file_tree_scanner.scan(data_path, []):
         data_path_item_abs = os.path.join(data_path, os.path.sep.join(data_path_item))
+        print('Hashing ' + DATA_INDEX_SEPARATOR.join(data_path_item))
         bundle_hash = hash_facade.sha1(data_path_item_abs)
         data_index.append((DATA_INDEX_SEPARATOR.join(data_path_item), bundle_hash))
 
@@ -23,7 +24,7 @@ def copy_data_to_bundles(data_path, bundles_path, data_index_path, split_to_dirs
             bundle_path_abs = os.path.join(bundles_path, os.path.sep.join(bundles[bundle_hash]))
             if split_to_dirs:
                 os.makedirs(os.path.dirname(bundle_path_abs), exist_ok=True)
-            print('Copying ' + DATA_INDEX_SEPARATOR.join(data_path_item))
+            print('Copying ' + bundle_hash)
             copy_no_overwrite(data_path_item_abs, bundle_path_abs)
 
     save_data_index(data_index, data_index_path)

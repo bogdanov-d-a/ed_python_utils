@@ -22,6 +22,7 @@ def fsck_bundles(bundles_path, split_to_dirs, bundles_filter=None):
         if bundles_filter is not None and bundle_hash not in bundles_filter:
             continue
         bundle_path_abs = os.path.join(bundles_path, os.path.sep.join(bundle_path))
+        #print('Hashing ' + bundle_hash)
         if bundle_hash != hash_facade.sha1(bundle_path_abs):
             hash_errors.append(bundle_hash)
 
