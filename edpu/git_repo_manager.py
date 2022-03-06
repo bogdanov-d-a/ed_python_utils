@@ -3,7 +3,6 @@ import codecs
 import os
 import edpu_user.git_repo_data
 from edpu import host_alias
-from edpu import path_manager
 from edpu import git_tools
 from edpu import user_interaction
 from edpu import pause_at_end
@@ -12,6 +11,7 @@ import edpu_user.python_launcher
 import edpu_user.password_provider
 from edpu import file_encryptor
 from edpu import datetime_utils
+from edpu.storage_finder import find_all_storage
 
 
 class Data:
@@ -30,22 +30,20 @@ def get_host_repos(filter_repos):
     if filter_repos is not None:
         repos = filter(lambda elem: elem[0] in filter_repos, repos)
 
+    all_storage = find_all_storage()
+
     for repo_alias, repo in repos:
-        path_alias = repo.host_to_path.get(host)
-        if path_alias is not None:
-            path = path_manager.get_host_data().get(path_alias)
+        path = repo.host_to_path.get(host)
 
-            storage_remotes = {}
-            for storage_alias, storage_path_alias in repo.remotes.storage.items():
-                storage_data = path_manager.get_storage_data_auto(storage_alias)
-                if storage_data is not None:
-                    storage_path = storage_data.get(storage_path_alias)
-                    if storage_path is not None:
-                        storage_remotes[storage_alias] = storage_path
+        storage_remotes = {}
+        for storage_alias, storage_path in repo.remotes.storage.items():
+            storage_root = all_storage.get(storage_alias)
+            if storage_root is not None:
+                storage_remotes[storage_alias] = storage_root + storage_path
 
-            result[repo_alias] = Data(path,
-                git_repo_data.Remotes(repo.remotes.native, storage_remotes),
-                repo.branches, repo.bundles)
+        result[repo_alias] = Data(path,
+            git_repo_data.Remotes(repo.remotes.native, storage_remotes),
+            repo.branches, repo.bundles)
 
     return result
 
