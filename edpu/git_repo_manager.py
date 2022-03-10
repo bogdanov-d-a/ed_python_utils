@@ -33,6 +33,8 @@ def get_host_repos(repos, filter_repos):
 
     for repo_alias, repo in repos_items:
         path = repo.host_to_path.get(host)
+        if path is None:
+            continue
 
         storage_remotes = {}
         for storage_alias, storage_path in repo.remotes.storage.items():
