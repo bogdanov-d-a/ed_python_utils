@@ -36,8 +36,17 @@ def pick_option_multi(prompt, options):
     selection = set()
 
     while True:
-        print(selection)
-        user_data = int(input())
+        print_data = []
+        for selection_item in selection:
+            print_data.append(options[selection_item])
+        print(', '.join(print_data))
+
+        user_data_str = input()
+        try:
+            user_data = int(user_data_str)
+        except:
+            print('Not a number')
+            continue
 
         if user_data == 0:
             return selection
@@ -47,7 +56,7 @@ def pick_option_multi(prompt, options):
         elif user_data > len(options):
             print('Number is too high')
         else:
-            if user_data in selection:
-                selection.remove(user_data)
+            if user_data - 1 in selection:
+                selection.remove(user_data - 1)
             else:
-                selection.add(user_data)
+                selection.add(user_data - 1)
