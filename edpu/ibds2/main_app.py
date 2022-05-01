@@ -1,3 +1,4 @@
+import os
 from edpu import user_interaction
 from edpu import pause_at_end
 from .constants import *
@@ -11,6 +12,7 @@ def run(user_data):
         ACTIONS = [
             'Update definition',
             'Update data',
+            'Find recycle dirs',
         ]
 
         action = user_interaction.pick_option('Choose an action', ACTIONS)
@@ -46,6 +48,16 @@ def run(user_data):
                 storage_device,
                 lambda collection_alias, collection_paths: update_data.update_data(collection_paths.get(DEF_PATH_KEY), collection_paths.get(DATA_PATH_KEY), collection_paths.get(DATA_PATH_KEY) + 'Recycle', data_sources_provider(collection_alias))
             )
+
+        elif action == 2:
+            storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
+
+            def handler(_, collection_paths):
+                recycle_path = collection_paths.get(DATA_PATH_KEY) + 'Recycle'
+                if os.path.isdir(recycle_path):
+                    print(recycle_path + ' exists')
+
+            handle_all_aliases_for_storage_device(user_data, storage_device, handler)
 
         else:
             raise Exception('unexpected action')
