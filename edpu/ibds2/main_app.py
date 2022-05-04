@@ -13,6 +13,7 @@ def run(user_data):
             'Update definition',
             'Update data',
             'Find recycle dirs',
+            'Compare definitions (diff tool)',
         ]
 
         action = user_interaction.pick_option('Choose an action', ACTIONS)
@@ -58,6 +59,28 @@ def run(user_data):
                     print(recycle_path + ' exists')
 
             handle_all_aliases_for_storage_device(user_data, storage_device, handler)
+
+        elif action == 3:
+            storage_device_a = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
+            storage_device_b = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
+
+            diff_tool_handler = user_data.get(DIFF_TOOL_HANDLER)
+
+            def get_def_paths(storage_device):
+                result = {}
+
+                def handler(collection_alias, collection_paths):
+                    result[collection_alias] = collection_paths.get(DEF_PATH_KEY)
+
+                handle_all_aliases_for_storage_device(user_data, storage_device, handler)
+
+                return result
+
+            def_paths_a = get_def_paths(storage_device_a)
+            def_paths_b = get_def_paths(storage_device_b)
+
+            for collection_alias in set(def_paths_a.keys()).intersection(set(def_paths_b.keys())):
+                diff_tool_handler(def_paths_a.get(collection_alias), def_paths_b.get(collection_alias))
 
         else:
             raise Exception('unexpected action')
