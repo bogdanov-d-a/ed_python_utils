@@ -72,7 +72,7 @@ def run(user_data):
                 def handler(collection_alias, collection_paths):
                     result[collection_alias] = collection_paths.get(DEF_PATH_KEY)
 
-                handle_all_aliases_for_storage_device(user_data, storage_device, handler)
+                handle_all_aliases_for_storage_device(user_data, storage_device, handler, find_data_path=False)
 
                 return result
 

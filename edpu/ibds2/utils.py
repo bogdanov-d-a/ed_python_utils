@@ -106,7 +106,7 @@ def get_storage_path(storage_device_name, storage_path_cache):
     return storage_path
 
 
-def get_collection_paths(user_data, collection_alias, storage_device_name, storage_path_cache):
+def get_collection_paths(user_data, collection_alias, storage_device_name, storage_path_cache, find_data_path=True):
     collection_dict = user_data.get(COLLECTION_DICT_KEY)
     storage_devices = user_data.get(STORAGE_DEVICES_KEY)
     data_path = user_data.get(DATA_PATH_KEY)
@@ -116,20 +116,23 @@ def get_collection_paths(user_data, collection_alias, storage_device_name, stora
     collection_storage_device_data = collection_storage_devices.get(storage_device_name)
     storage_device = storage_devices.get(storage_device_name)
 
-    abs_data_path = collection_storage_device_data
-    if storage_device.get(IS_REMOVABLE_KEY):
-        abs_data_path = get_storage_path(storage_device_name, storage_path_cache) + abs_data_path
+    if find_data_path:
+        abs_data_path = collection_storage_device_data
+        if storage_device.get(IS_REMOVABLE_KEY):
+            abs_data_path = get_storage_path(storage_device_name, storage_path_cache) + abs_data_path
+    else:
+        abs_data_path = None
 
     abs_def_path = os.path.join(data_path, collection_alias, storage_device_name)
 
     return { DEF_PATH_KEY: abs_def_path, DATA_PATH_KEY: abs_data_path }
 
 
-def handle_all_aliases_for_storage_device(user_data, storage_device_name, handler):
+def handle_all_aliases_for_storage_device(user_data, storage_device_name, handler, find_data_path=True):
     collection_dict = user_data.get(COLLECTION_DICT_KEY)
     storage_path_cache = {}
 
     for collection_alias, collection_data in collection_dict.items():
         if storage_device_name in collection_data.get(STORAGE_DEVICES_KEY):
-            collection_paths = get_collection_paths(user_data, collection_alias, storage_device_name, storage_path_cache)
+            collection_paths = get_collection_paths(user_data, collection_alias, storage_device_name, storage_path_cache, find_data_path)
             handler(collection_alias, collection_paths)
