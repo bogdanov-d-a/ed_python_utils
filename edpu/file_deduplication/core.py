@@ -77,6 +77,25 @@ def load_file_index(file_index_path, has_mtime):
         return data_
 
 
+def save_dir_index(dir_index, dir_index_path):
+    with codecs.open(dir_index_path, 'w', 'utf-8-sig') as output:
+        for dir_index_elem in sorted(dir_index):
+            output.write(dir_index_elem)
+            output.write('\n')
+
+
+def load_dir_index(dir_index_path):
+    with codecs.open(dir_index_path, 'r', 'utf-8-sig') as input_:
+        data_ = []
+
+        for line in input_.readlines():
+            if line[-1] == '\n':
+                line = line[:-1]
+            data_.append(line)
+
+        return data_
+
+
 def copy_no_overwrite(src, dst):
     if os.path.exists(dst):
         fail()
