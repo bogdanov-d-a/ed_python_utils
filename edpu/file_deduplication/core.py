@@ -1,6 +1,6 @@
 from .utils import *
 from ed_ibds import file_tree_scanner
-from ed_ibds import collection_definition
+import codecs
 import os
 import shutil
 
@@ -38,11 +38,43 @@ def gen_bundle_path(bundle_hash, split_to_dirs, ext_opt):
 
 
 def save_data_index(data_index, data_index_path):
-    collection_definition.save_common_data(sorted(data_index, key=lambda t: t[0]), data_index_path)
+    with codecs.open(data_index_path, 'w', 'utf-8-sig') as output:
+        for data_index_elem in sorted(data_index, key=lambda t: t[0]):
+            if len(data_index_elem) == 2:
+                path, hash_ = data_index_elem
+            elif len(data_index_elem) == 3:
+                path, hash_, mtime = data_index_elem
+            else:
+                fail()
+
+            if 'mtime' in locals():
+                output.write(str(mtime))
+                output.write(' ')
+
+            output.write(hash_)
+            output.write(' ')
+            output.write(path)
+            output.write('\n')
 
 
-def load_data_index(data_index_path):
-    return collection_definition.load_common_data(data_index_path)
+def load_data_index(data_index_path, has_mtime):
+    with codecs.open(data_index_path, 'r', 'utf-8-sig') as input_:
+        data_ = []
+
+        for line in input_.readlines():
+            if line[-1] == '\n':
+                line = line[:-1]
+
+            parts = line.split(' ', 2 if has_mtime else 1)
+
+            if len(parts) == 2:
+                data_.append((parts[1], parts[0]))
+            elif len(parts) == 3:
+                data_.append((parts[2], parts[1], float(parts[0])))
+            else:
+                fail()
+
+        return data_
 
 
 def copy_no_overwrite(src, dst):
