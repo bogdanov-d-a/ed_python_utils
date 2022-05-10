@@ -10,17 +10,17 @@ def scan_bundles_hashset(bundles_path, split_to_dirs):
     return get_bundles_hashset(scan_bundles(bundles_path, split_to_dirs))
 
 
-def get_data_index_hashset(data_index):
+def get_file_index_hashset(file_index):
     hashes = set()
-    for _, data_index_item_hash in data_index:
-        hashes.add(data_index_item_hash)
+    for _, file_index_item_hash in file_index:
+        hashes.add(file_index_item_hash)
     return hashes
 
 
-def get_data_index_files_hashset(data_index_paths):
+def get_file_index_files_hashset(file_index_paths):
     hashes = set()
-    for data_index_path in data_index_paths:
-        hashes |= get_data_index_hashset(load_data_index(data_index_path))
+    for file_index_path in file_index_paths:
+        hashes |= get_file_index_hashset(load_file_index(file_index_path))
     return hashes
 
 

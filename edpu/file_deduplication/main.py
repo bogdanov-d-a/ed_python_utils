@@ -6,12 +6,12 @@ import os
 DATA_INDEX_SEPARATOR = '\\'
 
 
-def copy_data_to_bundles(data_path, bundles_path, data_index_path, save_mtime, split_to_dirs, keep_ext):
-    if os.path.exists(data_index_path):
+def copy_data_to_bundles(data_path, bundles_path, file_index_path, save_mtime, split_to_dirs, keep_ext):
+    if os.path.exists(file_index_path):
         fail()
 
     bundles = scan_bundles(bundles_path, split_to_dirs)
-    data_index = []
+    file_index = []
 
     for data_path_item in file_tree_scanner.scan(data_path, []):
         data_path_item_abs = os.path.join(data_path, os.path.sep.join(data_path_item))
@@ -19,9 +19,9 @@ def copy_data_to_bundles(data_path, bundles_path, data_index_path, save_mtime, s
         bundle_hash = file_hashing.sha1_file(data_path_item_abs)
 
         if save_mtime:
-            data_index.append((DATA_INDEX_SEPARATOR.join(data_path_item), bundle_hash, os.path.getmtime(data_path_item_abs)))
+            file_index.append((DATA_INDEX_SEPARATOR.join(data_path_item), bundle_hash, os.path.getmtime(data_path_item_abs)))
         else:
-            data_index.append((DATA_INDEX_SEPARATOR.join(data_path_item), bundle_hash))
+            file_index.append((DATA_INDEX_SEPARATOR.join(data_path_item), bundle_hash))
 
         if bundle_hash not in bundles:
             bundles[bundle_hash] = gen_bundle_path(bundle_hash, split_to_dirs, os.path.splitext(data_path_item[-1])[1] if keep_ext else None)
@@ -31,31 +31,31 @@ def copy_data_to_bundles(data_path, bundles_path, data_index_path, save_mtime, s
             print('Copying ' + bundle_hash)
             copy_no_overwrite(data_path_item_abs, bundle_path_abs)
 
-    save_data_index(data_index, data_index_path)
+    save_file_index(file_index, file_index_path)
 
 
-def recreate_data_from_bundles(bundles_path, split_to_dirs, data_index_path, recreate_data_path, restore_mtime):
+def recreate_data_from_bundles(bundles_path, split_to_dirs, file_index_path, recreate_data_path, restore_mtime):
     bundles = scan_bundles(bundles_path, split_to_dirs)
-    data_index = load_data_index(data_index_path, restore_mtime)
+    file_index = load_file_index(file_index_path, restore_mtime)
     os.makedirs(recreate_data_path)
 
-    for data_index_elem in data_index:
+    for file_index_elem in file_index:
         if restore_mtime:
-            data_index_item_path, data_index_item_hash, data_index_item_mtime = data_index_elem
+            file_index_item_path, file_index_item_hash, file_index_item_mtime = file_index_elem
         else:
-            data_index_item_path, data_index_item_hash = data_index_elem
+            file_index_item_path, file_index_item_hash = file_index_elem
 
-        data_index_item_path_abs = os.path.join(recreate_data_path, os.path.sep.join(data_index_item_path.split(DATA_INDEX_SEPARATOR)))
-        os.makedirs(os.path.dirname(data_index_item_path_abs), exist_ok=True)
-        print('Copying ' + data_index_item_path)
-        copy_no_overwrite(os.path.join(bundles_path, os.path.sep.join(bundles[data_index_item_hash])), data_index_item_path_abs)
+        file_index_item_path_abs = os.path.join(recreate_data_path, os.path.sep.join(file_index_item_path.split(DATA_INDEX_SEPARATOR)))
+        os.makedirs(os.path.dirname(file_index_item_path_abs), exist_ok=True)
+        print('Copying ' + file_index_item_path)
+        copy_no_overwrite(os.path.join(bundles_path, os.path.sep.join(bundles[file_index_item_hash])), file_index_item_path_abs)
         if restore_mtime:
-            os.utime(data_index_item_path_abs, (data_index_item_mtime, data_index_item_mtime))
+            os.utime(file_index_item_path_abs, (file_index_item_mtime, file_index_item_mtime))
 
 
-def backup_and_recover(backup_path, restore_path, bundles_path, data_index_path, save_mtime, split_to_dirs, keep_ext):
+def backup_and_recover(backup_path, restore_path, bundles_path, file_index_path, save_mtime, split_to_dirs, keep_ext):
     print('copy_data_to_bundles')
-    copy_data_to_bundles(backup_path, bundles_path, data_index_path, save_mtime, split_to_dirs, keep_ext)
+    copy_data_to_bundles(backup_path, bundles_path, file_index_path, save_mtime, split_to_dirs, keep_ext)
 
     print('recreate_data_from_bundles')
-    recreate_data_from_bundles(bundles_path, split_to_dirs, data_index_path, restore_path, save_mtime)
+    recreate_data_from_bundles(bundles_path, split_to_dirs, file_index_path, restore_path, save_mtime)

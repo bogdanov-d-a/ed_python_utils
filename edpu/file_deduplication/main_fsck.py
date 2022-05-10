@@ -3,10 +3,10 @@ from edpu import file_hashing
 from edpu import user_interaction
 
 
-def fsck_reachable(bundles_path, split_to_dirs, data_index_paths):
+def fsck_reachable(bundles_path, split_to_dirs, file_index_paths):
     bundles_hashes = scan_bundles_hashset(bundles_path, split_to_dirs)
-    data_index_hashes = get_data_index_files_hashset(data_index_paths)
-    missing_hashes = data_index_hashes - bundles_hashes
+    file_index_hashes = get_file_index_files_hashset(file_index_paths)
+    missing_hashes = file_index_hashes - bundles_hashes
 
     for missing_hash in missing_hashes:
         print(missing_hash)
@@ -34,23 +34,23 @@ def fsck_bundles(bundles_path, split_to_dirs, bundles_filter=None):
     return len(hash_errors)
 
 
-def fsck(bundles_path, split_to_dirs, data_index_paths):
-    fsck_reachable_result = fsck_reachable(bundles_path, split_to_dirs, data_index_paths)
+def fsck(bundles_path, split_to_dirs, file_index_paths):
+    fsck_reachable_result = fsck_reachable(bundles_path, split_to_dirs, file_index_paths)
     if fsck_reachable_result != 0:
         return ('fsck_reachable', fsck_reachable_result)
 
-    fsck_bundles_result = fsck_bundles(bundles_path, split_to_dirs, get_data_index_files_hashset(data_index_paths))
+    fsck_bundles_result = fsck_bundles(bundles_path, split_to_dirs, get_file_index_files_hashset(file_index_paths))
     if fsck_bundles_result != 0:
         return ('fsck_bundles', fsck_bundles_result)
 
     return ('fsck', 0)
 
 
-def gc_no_fsck(bundles_path, split_to_dirs, data_index_paths):
+def gc_no_fsck(bundles_path, split_to_dirs, file_index_paths):
     bundles = scan_bundles(bundles_path, split_to_dirs)
     bundles_hashes = get_bundles_hashset(bundles)
-    data_index_hashes = get_data_index_files_hashset(data_index_paths)
-    unreachable_hashes = bundles_hashes - data_index_hashes
+    file_index_hashes = get_file_index_files_hashset(file_index_paths)
+    unreachable_hashes = bundles_hashes - file_index_hashes
 
     if user_interaction.yes_no_prompt('Delete ' + str(len(unreachable_hashes)) + ' of ' + str(len(bundles_hashes)) + ' bundles?'):
         for unreachable_hash in unreachable_hashes:
@@ -59,6 +59,6 @@ def gc_no_fsck(bundles_path, split_to_dirs, data_index_paths):
             delete_file_wrapper(bundle_path_abs)
 
 
-def gc(bundles_path, split_to_dirs, data_index_paths):
-    gc_no_fsck(bundles_path, split_to_dirs, data_index_paths)
-    fsck_reachable(bundles_path, split_to_dirs, data_index_paths)
+def gc(bundles_path, split_to_dirs, file_index_paths):
+    gc_no_fsck(bundles_path, split_to_dirs, file_index_paths)
+    fsck_reachable(bundles_path, split_to_dirs, file_index_paths)

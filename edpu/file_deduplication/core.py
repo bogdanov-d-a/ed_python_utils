@@ -37,13 +37,13 @@ def gen_bundle_path(bundle_hash, split_to_dirs, ext_opt):
     return bundle_path
 
 
-def save_data_index(data_index, data_index_path):
-    with codecs.open(data_index_path, 'w', 'utf-8-sig') as output:
-        for data_index_elem in sorted(data_index, key=lambda t: t[0]):
-            if len(data_index_elem) == 2:
-                path, hash_ = data_index_elem
-            elif len(data_index_elem) == 3:
-                path, hash_, mtime = data_index_elem
+def save_file_index(file_index, file_index_path):
+    with codecs.open(file_index_path, 'w', 'utf-8-sig') as output:
+        for file_index_elem in sorted(file_index, key=lambda t: t[0]):
+            if len(file_index_elem) == 2:
+                path, hash_ = file_index_elem
+            elif len(file_index_elem) == 3:
+                path, hash_, mtime = file_index_elem
             else:
                 fail()
 
@@ -57,8 +57,8 @@ def save_data_index(data_index, data_index_path):
             output.write('\n')
 
 
-def load_data_index(data_index_path, has_mtime):
-    with codecs.open(data_index_path, 'r', 'utf-8-sig') as input_:
+def load_file_index(file_index_path, has_mtime):
+    with codecs.open(file_index_path, 'r', 'utf-8-sig') as input_:
         data_ = []
 
         for line in input_.readlines():
