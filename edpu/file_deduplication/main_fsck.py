@@ -1,5 +1,5 @@
 from .fsck import *
-from ed_ibds import hash_facade
+from edpu import file_hashing
 from edpu import user_interaction
 
 
@@ -24,7 +24,7 @@ def fsck_bundles(bundles_path, split_to_dirs, bundles_filter=None):
             continue
         bundle_path_abs = os.path.join(bundles_path, os.path.sep.join(bundle_path))
         #print('Hashing ' + bundle_hash)
-        if bundle_hash != hash_facade.sha1(bundle_path_abs):
+        if bundle_hash != file_hashing.sha1_file(bundle_path_abs):
             hash_errors.append(bundle_hash)
 
     for hash_error in hash_errors:

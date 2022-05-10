@@ -1,5 +1,5 @@
 from .core import *
-from ed_ibds import hash_facade
+from edpu import file_hashing
 import os
 
 
@@ -16,7 +16,7 @@ def copy_data_to_bundles(data_path, bundles_path, data_index_path, split_to_dirs
     for data_path_item in file_tree_scanner.scan(data_path, []):
         data_path_item_abs = os.path.join(data_path, os.path.sep.join(data_path_item))
         print('Hashing ' + DATA_INDEX_SEPARATOR.join(data_path_item))
-        bundle_hash = hash_facade.sha1(data_path_item_abs)
+        bundle_hash = file_hashing.sha1_file(data_path_item_abs)
         data_index.append((DATA_INDEX_SEPARATOR.join(data_path_item), bundle_hash))
 
         if bundle_hash not in bundles:
