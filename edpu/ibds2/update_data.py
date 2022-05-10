@@ -96,8 +96,9 @@ def update_data(root_def_path, root_data_path, root_data_path_recycle, data_sour
             setmtime(data_path_abs, def_walk_data.get(MTIME_KEY))
 
     def action_remove_empty_dir(data_path):
+        data_path_abs = path_to_data_root(data_path)
         try:
-            os.rmdir(data_path)
+            os.rmdir(data_path_abs)
         except:
             pass
 
