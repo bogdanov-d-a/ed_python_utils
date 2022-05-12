@@ -11,7 +11,7 @@ def copy_data_to_bundles(data_path, bundles_path, file_index_path, dir_index_pat
     if os.path.exists(file_index_path):
         fail()
 
-    if dir_index_path is not None and os.path.exists(dir_index_path):
+    if dir_index_path is not None and (os.path.exists(dir_index_path) or file_index_path == dir_index_path):
         fail()
 
     walk_result = file_tree_walker.walk(
