@@ -7,13 +7,10 @@ class CbPack:
     def __init__(self, master, text, row, command=None):
         self.var = IntVar(master)
 
-        def command_handler():
-            command(self)
-
         c = Checkbutton(
             master, text=text,
             variable=self.var,
-            command=command_handler)
+            command=lambda: command(self))
         c.grid(row=row, sticky=W)
 
 
@@ -55,7 +52,10 @@ def show_picker(checklists):
     buttons = []
 
     def get_command(index):
-        return lambda: show_checklist(checklists[index][1], checklists[index][0])
+        def command():
+            show_checklist(checklists[index][1], checklists[index][0])
+            return False
+        return command
 
     index = 0
     for text, _ in checklists:
