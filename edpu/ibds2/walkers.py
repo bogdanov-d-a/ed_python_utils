@@ -14,7 +14,6 @@ def walk_data(data_path):
 
     for file_path in data_walk.get(TYPE_FILE):
         file_path_key = path_to_key(file_path)
-        abs_file_path = path_to_root(file_path, data_path)
         result.get(TYPE_FILE).add(file_path_key)
 
     return result
