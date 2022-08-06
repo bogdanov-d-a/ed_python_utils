@@ -6,7 +6,7 @@ from .def_file import load_def_file
 
 def walk_data(data_path):
     data_walk = file_tree_walker.walk(data_path)
-    result = { TYPE_DIR: set(), TYPE_FILE: {} }
+    result = { TYPE_DIR: set(), TYPE_FILE: set() }
 
     for dir_path in data_walk.get(TYPE_DIR):
         dir_path_key = path_to_key(dir_path)
@@ -15,7 +15,7 @@ def walk_data(data_path):
     for file_path in data_walk.get(TYPE_FILE):
         file_path_key = path_to_key(file_path)
         abs_file_path = path_to_root(file_path, data_path)
-        result.get(TYPE_FILE)[file_path_key] = getmtime(abs_file_path)
+        result.get(TYPE_FILE).add(file_path_key)
 
     return result
 
