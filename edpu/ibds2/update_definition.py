@@ -2,7 +2,7 @@ from .walkers import *
 from .def_file import save_def_file
 
 
-def update_definition(root_data_path, root_def_path):
+def update_definition(root_data_path, root_def_path, skip_mtime):
     data_walk = walk_data(root_data_path)
     def_walk = walk_def(root_def_path)
 
@@ -34,6 +34,9 @@ def update_definition(root_data_path, root_def_path):
         save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), getmtime(data_path_abs))
 
     def action_update_file(data_path, def_path):
+        if skip_mtime:
+            return
+
         def_data = def_walk.get(TYPE_FILE).get(path_to_key(data_path))
 
         data_path_abs = path_to_data_root(data_path)

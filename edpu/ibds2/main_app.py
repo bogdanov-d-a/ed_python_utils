@@ -23,7 +23,7 @@ def run(user_data):
             handle_all_aliases_for_storage_device(
                 user_data,
                 storage_device,
-                lambda _, collection_paths: update_definition.update_definition(collection_paths.get(DATA_PATH_KEY), collection_paths.get(DEF_PATH_KEY))
+                lambda _, collection_paths: update_definition.update_definition(collection_paths.get(DATA_PATH_KEY), collection_paths.get(DEF_PATH_KEY), user_data.get(SKIP_MTIME))
             )
 
         elif action == 1:
