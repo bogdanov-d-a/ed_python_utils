@@ -6,4 +6,7 @@ def run(data):
 
     while True:
         index = user_interaction.pick_option('Pick alias', aliases)
-        pyperclip.copy(data[aliases[index]])
+        alias = aliases[index]
+        pyperclip.copy(data[alias])
+        print('Copied ' + alias)
+        print()
