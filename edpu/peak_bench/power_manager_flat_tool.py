@@ -5,7 +5,7 @@ if __name__ == '__main__':
     process_count = 6
 
     # HVY-WAP9 ECO power profile
-    pack_iterations = 1
+    pack_iterations = 1000
     sleep_between_peaks_time = 0.3
 
     peak_bench(process_count, pack_iterations, sleep_between_peaks_time, 'power_manager_flat_stop')

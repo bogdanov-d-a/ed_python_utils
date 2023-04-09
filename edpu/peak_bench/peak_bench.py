@@ -1,4 +1,4 @@
-from bench_core import bench_pack
+from bench_core import bench
 from multiprocessing_core import MultiprocessingCore
 from stop_strategy_core import StopStrategyCore
 import time
@@ -7,7 +7,7 @@ def peak_bench(process_count, pack_iterations, sleep_between_peaks_time, stop_fi
     stop_strategy = StopStrategyCore(stop_file_name)
 
     while not stop_strategy.need_stop():
-        multiprocessing = MultiprocessingCore(process_count, bench_pack, [pack_iterations])
+        multiprocessing = MultiprocessingCore(process_count, bench, [pack_iterations])
 
         try:
             multiprocessing.start()
