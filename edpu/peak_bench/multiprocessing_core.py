@@ -1,8 +1,9 @@
-from multiprocessing import Process
-
 class MultiprocessingCore:
     def __init__(self, process_count, target, args):
+        from multiprocessing import Process
+
         self._processes = []
+
         for _ in range(process_count):
             self._processes.append(Process(target=target, args=args))
 
