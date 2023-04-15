@@ -5,7 +5,7 @@ def run(items):
     def get_command(index):
         def impl():
             pyperclip.copy(items[index])
-            return False
+            return True
         return impl
 
     buttons = []

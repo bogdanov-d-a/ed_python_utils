@@ -13,7 +13,7 @@ def run(buttons, auto_pick=None):
 
     def get_command(index):
         def impl():
-            if buttons[index][1]():
+            if buttons[index][1]() != False:
                 master.destroy()
         return impl
 
