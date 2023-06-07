@@ -35,7 +35,7 @@ def data_path_to_def_path(path_, type_):
 
 def hash_file(path):
     print('Calculating hash for ' + path)
-    return file_hashing.sha1_file(path)
+    return file_hashing.sha512_file(path)
 
 
 def getmtime(path):
