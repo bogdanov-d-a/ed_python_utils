@@ -20,3 +20,7 @@ def hash_file(file_name, hasher):
 
 def sha1_file(file_name):
     return hash_file(file_name, hashlib.sha1())
+
+
+def sha512_file(file_name):
+    return hash_file(file_name, hashlib.sha512())
