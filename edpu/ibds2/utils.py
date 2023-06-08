@@ -68,7 +68,7 @@ def key_to_path(key):
 
 
 def intersection_handler(content_type, main_list, aux_list, use_intersection, action):
-    for main_content in main_list.get(content_type):
+    for main_content in sorted(main_list.get(content_type)):
         if (main_content in aux_list.get(content_type)) == use_intersection:
             action(key_to_path(main_content))
 
