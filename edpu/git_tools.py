@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 mock = False
@@ -25,9 +26,13 @@ def put_blank_line():
     print()
 
 def run_git_command(path, args):
+    if not os.path.isdir(path):
+        raise Exception(path + ' doesn\'t exist')
     run_command(path, ['git', '--no-pager'] + args)
 
 def run_git_command_for_result(path, args):
+    if not os.path.isdir(path):
+        raise Exception(path + ' doesn\'t exist')
     return run_command_for_result(path, ['git', '--no-pager'] + args).decode('utf-8').rstrip('\n')
 
 def status(path):
