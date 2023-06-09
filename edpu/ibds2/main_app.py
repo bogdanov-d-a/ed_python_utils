@@ -79,7 +79,7 @@ def run(user_data):
             def_paths_a = get_def_paths(storage_device_a)
             def_paths_b = get_def_paths(storage_device_b)
 
-            for collection_alias in set(def_paths_a.keys()).intersection(set(def_paths_b.keys())):
+            for collection_alias in sorted(set(def_paths_a.keys()).intersection(set(def_paths_b.keys()))):
                 diff_tool_handler(def_paths_a.get(collection_alias), def_paths_b.get(collection_alias))
 
         else:
