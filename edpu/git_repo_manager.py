@@ -225,6 +225,9 @@ def host_repos_push_storage(repos, filter_repos):
     def push_all_storage(_, repo):
         def handler(path):
             if not os.path.isdir(path):
+                parent_path = os.path.split(path)[0]
+                if not os.path.isdir(parent_path):
+                    raise Exception(parent_path + ' doesn\'t exist')
                 print(path + ' is missing, creating')
                 os.makedirs(path)
                 git_tools.init_bare(path)
