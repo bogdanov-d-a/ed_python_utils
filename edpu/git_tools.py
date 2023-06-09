@@ -88,6 +88,9 @@ def push_multi(path, remote_path, branches):
 def push_all(path, remote_path):
     run_git_command(path, ['push', '--all', remote_path])
 
+def init_bare(path):
+    run_git_command(path, ['init', '--bare'])
+
 def merge_with_checkout(path, remote_path, local_branch, remote_branch=None):
     if remote_branch is None:
         remote_branch = local_branch

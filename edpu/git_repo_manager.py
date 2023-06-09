@@ -223,7 +223,13 @@ def host_repos_pull_storage(repos, filter_repos):
 
 def host_repos_push_storage(repos, filter_repos):
     def push_all_storage(_, repo):
-        handle_all_storage(repo, lambda path: git_tools.push_all(repo.path, path))
+        def handler(path):
+            if not os.path.isdir(path):
+                print(path + ' is missing, creating')
+                os.makedirs(path)
+                git_tools.init_bare(path)
+            git_tools.push_all(repo.path, path)
+        handle_all_storage(repo, handler)
     host_repos_run(push_all_storage, repos, filter_repos)
 
 def host_repos_fsck_storage(repos, filter_repos):
