@@ -89,7 +89,7 @@ def host_repos_all_refs(repos, filter_repos):
 def host_repos_all_stash(repos, filter_repos):
     host_repos_run_with_path(git_tools.all_stash, repos, filter_repos)
 
-def host_repos_all_create_bundle(bundle_hash_path_provider, bundle_path, repos, filter_repos):
+def host_repos_all_create_bundle(bundle_hash_path_provider, bundle_path, bundle_block_reasons, repos, filter_repos):
     def bundle_path_callback(bundle_path):
         target_aliases = set([])
         for _, repo in get_host_repos(repos, filter_repos).items():
@@ -98,6 +98,10 @@ def host_repos_all_create_bundle(bundle_hash_path_provider, bundle_path, repos, 
         target_aliases = sorted(target_aliases)
 
         target_alias = target_aliases[user_interaction.pick_option('Pick target', target_aliases)]
+
+        if target_alias in bundle_block_reasons:
+            raise Exception(target_alias + ' blocked, reason ' + bundle_block_reasons.get(target_alias))
+
         password = edpu_user.password_provider.get()
 
         def create_bundle(repo_alias, repo):
@@ -286,7 +290,7 @@ def main(data_provider):
         elif args.action == 'stash_all':
             host_repos_all_stash(data_provider.get_repos(), bootstrap_mode_filter())
         elif args.action == 'create_bundle_all':
-            host_repos_all_create_bundle(lambda target_alias, repo_alias: data_provider.get_bundle_hash_path(target_alias, repo_alias), data_provider.get_bundle_path(), data_provider.get_repos(), bootstrap_mode_filter())
+            host_repos_all_create_bundle(lambda target_alias, repo_alias: data_provider.get_bundle_hash_path(target_alias, repo_alias), data_provider.get_bundle_path(), data_provider.get_bundle_block_reasons(), data_provider.get_repos(), bootstrap_mode_filter())
         elif args.action == 'get_user_bundle_info':
             host_repos_all_get_user_bundle_info(data_provider.get_user_bundle_info_path(), data_provider.get_repos(), bootstrap_mode_filter())
         elif args.action == 'create_user_bundle':
