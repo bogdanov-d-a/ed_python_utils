@@ -275,57 +275,67 @@ def main(data_provider):
     actions = [
         (
             'status_all',
-            'Status all',
+            'Status',
             lambda: host_repos_status(data_provider.get_repos(), bootstrap_mode_filter())
         ),
         (
             'ref_status_all',
-            'Ref status all',
+            'List refs',
             lambda: host_repos_all_refs(data_provider.get_repos(), bootstrap_mode_filter())
         ),
         (
+            'stash_all',
+            'List stash',
+            lambda: host_repos_all_stash(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
             'fetch_all',
-            'Fetch all',
+            'Fetch native',
             lambda: host_repos_fetch(data_provider.get_repos(), bootstrap_mode_filter())
         ),
         (
             'fetch_storage_all',
-            'Fetch storage all',
+            'Fetch storage',
             lambda: host_repos_fetch_storage(data_provider.get_repos(), bootstrap_mode_filter())
         ),
         (
+            'pull_native_all',
+            'Pull native',
+            lambda: host_repos_pull_native(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
             'pull_storage_all',
-            'Pull storage all',
+            'Pull storage',
             lambda: host_repos_pull_storage(data_provider.get_repos(), bootstrap_mode_filter())
         ),
         (
+            'push_native_all',
+            'Push native',
+            push_native_all_action_handler
+        ),
+        (
             'push_storage_all',
-            'Push storage all',
+            'Push storage',
             lambda: host_repos_push_storage(data_provider.get_repos(), bootstrap_mode_filter())
         ),
         (
-            'run_fsck_storage_all',
-            'Run fsck storage all',
-            lambda: host_repos_fsck_storage(data_provider.get_repos(), bootstrap_mode_filter())
-        ),
-        (
             'run_fsck_all',
-            'Run fsck all',
+            'Run fsck',
             lambda: host_repos_fsck(data_provider.get_repos(), bootstrap_mode_filter())
         ),
         (
+            'run_fsck_storage_all',
+            'Run fsck storage',
+            lambda: host_repos_fsck_storage(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
             'gc_all',
-            'Run gc all',
+            'Run gc',
             lambda: host_repos_gc(data_provider.get_repos(), bootstrap_mode_filter())
         ),
         (
-            'stash_all',
-            'Stash all',
-            lambda: host_repos_all_stash(data_provider.get_repos(), bootstrap_mode_filter())
-        ),
-        (
             'create_bundle_all',
-            'Create bundle all',
+            'Create bundle',
             lambda: host_repos_all_create_bundle(lambda target_alias, repo_alias: data_provider.get_bundle_hash_path(target_alias, repo_alias), data_provider.get_bundle_path(), data_provider.get_bundle_block_reasons(), data_provider.get_repos(), bootstrap_mode_filter())
         ),
         (
@@ -342,16 +352,6 @@ def main(data_provider):
             'apply_user_bundle',
             'Apply user bundle',
             lambda: host_repos_all_apply_user_bundle(data_provider.get_bundle_path(), data_provider.get_repos(), bootstrap_mode_filter())
-        ),
-        (
-            'pull_native_all',
-            'Pull native all',
-            lambda: host_repos_pull_native(data_provider.get_repos(), bootstrap_mode_filter())
-        ),
-        (
-            'push_native_all',
-            'Push native all',
-            push_native_all_action_handler
         ),
     ]
 
