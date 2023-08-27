@@ -87,6 +87,11 @@ def host_repos_fetch(repos, filter_repos):
 def host_repos_all_refs(repos, filter_repos):
     host_repos_run_with_path(git_tools.all_refs, repos, filter_repos)
 
+def host_repos_all_storage_refs(repos, filter_repos):
+    def ref_all_storage(_, repo):
+        handle_all_storage(repo, lambda path: git_tools.all_refs(path))
+    host_repos_run(ref_all_storage, repos, filter_repos)
+
 def host_repos_all_stash(repos, filter_repos):
     host_repos_run_with_path(git_tools.all_stash, repos, filter_repos)
 
@@ -282,6 +287,11 @@ def main(data_provider):
             'ref_status_all',
             'List refs',
             lambda: host_repos_all_refs(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'ref_status_storage_all',
+            'List storage refs',
+            lambda: host_repos_all_storage_refs(data_provider.get_repos(), bootstrap_mode_filter())
         ),
         (
             'stash_all',
