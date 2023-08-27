@@ -1,5 +1,6 @@
 import argparse
 import codecs
+import operator
 import os
 from edpu import host_alias
 from edpu import git_tools
@@ -263,111 +264,134 @@ def main(data_provider):
     parser.add_argument('--bootstrap', action='store_true')
     args = parser.parse_args()
 
+    bootstrap_mode_filter = lambda: data_provider.get_bootstrap_repos() if args.bootstrap else None
+
+    def push_native_all_action_handler():
+        filter_ = data_provider.get_autopush_repos()
+        if args.bootstrap:
+            filter_ &= bootstrap_mode_filter()
+        host_repos_push_native(data_provider.get_repos(), filter_)
+
+    actions = [
+        (
+            'status_all',
+            'Status all',
+            lambda: host_repos_status(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'ref_status_all',
+            'Ref status all',
+            lambda: host_repos_all_refs(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'fetch_all',
+            'Fetch all',
+            lambda: host_repos_fetch(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'fetch_storage_all',
+            'Fetch storage all',
+            lambda: host_repos_fetch_storage(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'pull_storage_all',
+            'Pull storage all',
+            lambda: host_repos_pull_storage(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'push_storage_all',
+            'Push storage all',
+            lambda: host_repos_push_storage(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'run_fsck_storage_all',
+            'Run fsck storage all',
+            lambda: host_repos_fsck_storage(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'run_fsck_all',
+            'Run fsck all',
+            lambda: host_repos_fsck(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'gc_all',
+            'Run gc all',
+            lambda: host_repos_gc(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'stash_all',
+            'Stash all',
+            lambda: host_repos_all_stash(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'create_bundle_all',
+            'Create bundle all',
+            lambda: host_repos_all_create_bundle(lambda target_alias, repo_alias: data_provider.get_bundle_hash_path(target_alias, repo_alias), data_provider.get_bundle_path(), data_provider.get_bundle_block_reasons(), data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'get_user_bundle_info',
+            'Get user bundle info',
+            lambda: host_repos_all_get_user_bundle_info(data_provider.get_user_bundle_info_path(), data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'create_user_bundle',
+            'Create user bundle',
+            lambda: host_repos_all_create_user_bundle(data_provider.get_user_bundle_info_new_path(), data_provider.get_bundle_path(), data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'apply_user_bundle',
+            'Apply user bundle',
+            lambda: host_repos_all_apply_user_bundle(data_provider.get_bundle_path(), data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'pull_native_all',
+            'Pull native all',
+            lambda: host_repos_pull_native(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'push_native_all',
+            'Push native all',
+            push_native_all_action_handler
+        ),
+    ]
+
+    bootstrap_mode = False
+
+    def flip_bootstrap_mode_action_handler():
+        nonlocal bootstrap_mode
+        bootstrap_mode = not bootstrap_mode
+        print('bootstrap_mode == ' + str(bootstrap_mode))
+
+    actions_in_place = [
+        (
+            'Flip bootstrap_mode',
+            flip_bootstrap_mode_action_handler
+        ),
+    ]
+
     if args.action is not None:
         print('action == ' + args.action)
         print('bootstrap == ' + str(args.bootstrap))
         print()
 
-        bootstrap_mode_filter = lambda: data_provider.get_bootstrap_repos() if args.bootstrap else None
-        if args.action == 'status_all':
-            host_repos_status(data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'ref_status_all':
-            host_repos_all_refs(data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'fetch_all':
-            host_repos_fetch(data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'fetch_storage_all':
-            host_repos_fetch_storage(data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'pull_storage_all':
-            host_repos_pull_storage(data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'push_storage_all':
-            host_repos_push_storage(data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'run_fsck_storage_all':
-            host_repos_fsck_storage(data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'run_fsck_all':
-            host_repos_fsck(data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'gc_all':
-            host_repos_gc(data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'stash_all':
-            host_repos_all_stash(data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'create_bundle_all':
-            host_repos_all_create_bundle(lambda target_alias, repo_alias: data_provider.get_bundle_hash_path(target_alias, repo_alias), data_provider.get_bundle_path(), data_provider.get_bundle_block_reasons(), data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'get_user_bundle_info':
-            host_repos_all_get_user_bundle_info(data_provider.get_user_bundle_info_path(), data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'create_user_bundle':
-            host_repos_all_create_user_bundle(data_provider.get_user_bundle_info_new_path(), data_provider.get_bundle_path(), data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'apply_user_bundle':
-            host_repos_all_apply_user_bundle(data_provider.get_bundle_path(), data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'pull_native_all':
-            host_repos_pull_native(data_provider.get_repos(), bootstrap_mode_filter())
-        elif args.action == 'push_native_all':
-            filter_ = data_provider.get_autopush_repos()
-            if args.bootstrap:
-                filter_ &= bootstrap_mode_filter()
-            host_repos_push_native(data_provider.get_repos(), filter_)
-        else:
-            raise Exception('unexpected action ' + args.action)
-    else:
-        bootstrap_mode = False
+        def find_action_by_id(id):
+            for action in actions:
+                if action[0] == args.action:
+                    return action
+            raise Exception('unexpected action ' + id)
 
+        find_action_by_id(args.action)[2]()
+    else:
         while True:
-            action = user_interaction.pick_option('Pick action', [
-                'Status all',
-                'Ref status all',
-                'Fetch all',
-                'Fetch storage all',
-                'Pull storage all',
-                'Push storage all',
-                'Run fsck storage all',
-                'Run fsck all',
-                'Run gc all',
-                'Stash all',
-                'Create bundle all',
-                'Get user bundle info',
-                'Create user bundle',
-                'Apply user bundle',
-                'Pull native all',
-                'Push native all',
-                'Flip bootstrap_mode',
-            ])
+            action = user_interaction.pick_option('Pick action', list(map(operator.itemgetter(1), actions)) + list(map(operator.itemgetter(0), actions_in_place)))
 
             def run_action(action_str):
                 edpu_user.python_launcher.start_with_python3('git_repo_manager.py --action ' + action_str + (' --bootstrap' if bootstrap_mode else ''), '.')
 
-            if action == 0:
-                run_action('status_all')
-            elif action == 1:
-                run_action('ref_status_all')
-            elif action == 2:
-                run_action('fetch_all')
-            elif action == 3:
-                run_action('fetch_storage_all')
-            elif action == 4:
-                run_action('pull_storage_all')
-            elif action == 5:
-                run_action('push_storage_all')
-            elif action == 6:
-                run_action('run_fsck_storage_all')
-            elif action == 7:
-                run_action('run_fsck_all')
-            elif action == 8:
-                run_action('gc_all')
-            elif action == 9:
-                run_action('stash_all')
-            elif action == 10:
-                run_action('create_bundle_all')
-            elif action == 11:
-                run_action('get_user_bundle_info')
-            elif action == 12:
-                run_action('create_user_bundle')
-            elif action == 13:
-                run_action('apply_user_bundle')
-            elif action == 14:
-                run_action('pull_native_all')
-            elif action == 15:
-                run_action('push_native_all')
-            elif action == 16:
-                bootstrap_mode = not bootstrap_mode
-                print('bootstrap_mode == ' + str(bootstrap_mode))
+            if action < len(actions):
+                run_action(actions[action][0])
+            elif action - len(actions) < len(actions_in_place):
+                actions_in_place[action - len(actions)][1]()
             else:
                 raise Exception('unexpected action')
 
