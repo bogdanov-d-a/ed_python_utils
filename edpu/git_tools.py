@@ -38,6 +38,9 @@ def run_git_command_for_result(path, args):
 def status(path):
     run_git_command(path, ['status'])
 
+def remotes(path):
+    run_git_command(path, ['remote', '-vv'])
+
 def fetch(path):
     run_git_command(path, ['fetch', '--all'])
 

@@ -81,6 +81,9 @@ def run_with_bundle_path(bundle_path, f):
 def host_repos_status(repos, filter_repos):
     host_repos_run_with_path(git_tools.status, repos, filter_repos)
 
+def host_repos_remotes(repos, filter_repos):
+    host_repos_run_with_path(git_tools.remotes, repos, filter_repos)
+
 def host_repos_fetch(repos, filter_repos):
     host_repos_run_with_path(git_tools.fetch, repos, filter_repos)
 
@@ -292,6 +295,11 @@ def main(data_provider):
             'ref_status_storage_all',
             'List storage refs',
             lambda: host_repos_all_storage_refs(data_provider.get_repos(), bootstrap_mode_filter())
+        ),
+        (
+            'remote_status_all',
+            'List remotes',
+            lambda: host_repos_remotes(data_provider.get_repos(), bootstrap_mode_filter())
         ),
         (
             'stash_all',
