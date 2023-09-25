@@ -1,3 +1,4 @@
+import operator
 import os
 from edpu import user_interaction
 from edpu import pause_at_end
@@ -9,24 +10,16 @@ from . import update_data
 
 def run(user_data):
     def main():
-        ACTIONS = [
-            'Update definition',
-            'Update data',
-            'Find recycle dirs',
-            'Compare definitions (diff tool)',
-        ]
-
-        action = user_interaction.pick_option('Choose an action', ACTIONS)
-
-        if action == 0:
+        def action_update_definition():
             storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
+
             handle_all_aliases_for_storage_device(
                 user_data,
                 storage_device,
                 lambda _, collection_paths: update_definition.update_definition(collection_paths.get(DATA_PATH_KEY), collection_paths.get(DEF_PATH_KEY), user_data.get(SKIP_MTIME))
             )
 
-        elif action == 1:
+        def action_update_data():
             storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
             source_storage_devices = pick_storage_device_multi(user_data.get(STORAGE_DEVICES_KEY))
 
@@ -50,7 +43,7 @@ def run(user_data):
                 lambda collection_alias, collection_paths: update_data.update_data(collection_paths.get(DEF_PATH_KEY), collection_paths.get(DATA_PATH_KEY), collection_paths.get(DATA_PATH_KEY) + 'Recycle', data_sources_provider(collection_alias))
             )
 
-        elif action == 2:
+        def action_find_recycle_dirs():
             storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
 
             def handler(_, collection_paths):
@@ -60,7 +53,7 @@ def run(user_data):
 
             handle_all_aliases_for_storage_device(user_data, storage_device, handler)
 
-        elif action == 3:
+        def action_compare_definitions():
             storage_device_a = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
             storage_device_b = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
 
@@ -82,6 +75,17 @@ def run(user_data):
             for collection_alias in sorted(set(def_paths_a.keys()).intersection(set(def_paths_b.keys()))):
                 diff_tool_handler(def_paths_a.get(collection_alias), def_paths_b.get(collection_alias))
 
+        ACTIONS = [
+            ('Update definition', action_update_definition),
+            ('Update data', action_update_data),
+            ('Find recycle dirs', action_find_recycle_dirs),
+            ('Compare definitions (diff tool)', action_compare_definitions),
+        ]
+
+        action = user_interaction.pick_option('Choose an action', list(map(operator.itemgetter(0), ACTIONS)))
+
+        if action < len(ACTIONS):
+            ACTIONS[action][1]()
         else:
             raise Exception('unexpected action')
 
