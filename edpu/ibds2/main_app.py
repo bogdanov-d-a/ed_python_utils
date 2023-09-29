@@ -6,6 +6,8 @@ from .constants import *
 from .utils import *
 from . import update_definition
 from . import update_data
+from . import create_bundle
+from . import apply_bundle
 
 
 def run(user_data):
@@ -75,11 +77,32 @@ def run(user_data):
             for collection_alias in sorted(set(def_paths_a.keys()).intersection(set(def_paths_b.keys()))):
                 diff_tool_handler(def_paths_a.get(collection_alias), def_paths_b.get(collection_alias))
 
+        def action_create_bundle():
+            collection_dict = user_data.get(COLLECTION_DICT_KEY)
+
+            storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
+            bundle_alias = pick_bundle_alias(user_data.get(BUNDLE_ALIASES_KEY))
+            collection_alias = pick_collection_alias(collection_dict)
+            bundle_slice_alias = pick_bundle_slice_alias(collection_dict.get(collection_alias).get(BUNDLE_SLICES_KEY))
+
+            create_bundle.create_bundle(user_data, storage_device, bundle_alias, collection_alias, bundle_slice_alias)
+
+        def action_apply_bundle():
+            collection_dict = user_data.get(COLLECTION_DICT_KEY)
+
+            storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
+            collection_alias = pick_collection_alias(collection_dict)
+            bundle_slice_alias = pick_bundle_slice_alias(collection_dict.get(collection_alias).get(BUNDLE_SLICES_KEY))
+
+            apply_bundle.apply_bundle(user_data, storage_device, collection_alias, bundle_slice_alias, user_data.get(APPLY_BUNDLES_KEY))
+
         ACTIONS = [
             ('Update definition', action_update_definition),
             ('Update data', action_update_data),
             ('Find recycle dirs', action_find_recycle_dirs),
             ('Compare definitions (diff tool)', action_compare_definitions),
+            ('Create bundle', action_create_bundle),
+            ('Apply bundle', action_apply_bundle),
         ]
 
         action = user_interaction.pick_option('Choose an action', list(map(operator.itemgetter(0), ACTIONS)))
