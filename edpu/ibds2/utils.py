@@ -252,6 +252,7 @@ class Packer:
     def _copy(self, out_ref, out_bin):
         for in_data_key, in_data_path in self._in_data:
             with open(in_data_path, 'rb') as in_data_file:
+                print('Packing ' + in_data_path)
                 copy_size = copy_in_chunks(in_data_file, out_bin)
                 out_ref.write(str(copy_size) + ' ' + in_data_key + '\n')
 
@@ -292,6 +293,8 @@ class Unpacker:
             if os.path.exists(out_name):
                 raise Exception('os.path.exists(out_name)')
 
+            print('Unpacking ' + out_name)
+
             os.makedirs(os.path.dirname(out_name), exist_ok=True)
 
             with open(out_name, 'wb') as out:
@@ -299,4 +302,6 @@ class Unpacker:
                     raise Exception('copy_in_chunks(bin, out, out_size) != out_size')
 
             for out_name in out_names[1:]:
+                print('Copying ' + out_name)
+                os.makedirs(os.path.dirname(out_name), exist_ok=True)
                 copy_no_overwrite(out_names[0], out_name)
