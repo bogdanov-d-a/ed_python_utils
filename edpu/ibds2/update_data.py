@@ -28,7 +28,7 @@ def update_data(root_def_path, root_data_path, root_data_path_recycle, data_sour
 
     def find_file_by_hash(hash_):
         recycle_files = recycle_file_lists.get(hash_)
-        if recycle_files is not None:
+        if recycle_files is not None and len(recycle_files) > 0:
             recycle_file = recycle_files[0]
             recycle_file_lists[hash_] = recycle_files[1:]
             return (path_to_data_root(recycle_file), True)
