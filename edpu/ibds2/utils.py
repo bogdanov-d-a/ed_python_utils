@@ -194,9 +194,9 @@ def copy_no_overwrite(src, dst):
     shutil.copy(src, dst)
 
 
-def read_in_chunks(file_object, size=None, chunk_size=1024):
+def read_in_chunks(file_object, size=None, chunk_size=1024*1024):
     """Lazy function (generator) to read a file piece by piece.
-    Default chunk size: 1k."""
+    Default chunk size: 1M."""
 
     processed = 0
 
