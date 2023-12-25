@@ -16,6 +16,7 @@ def update_data(root_def_path, root_data_path, root_data_path_recycle, data_sour
                 data_source_hash_to_location[hash_] = (key_to_path(path_), data_source_data_path)
 
     recycle_file_lists = {}
+    empty_dirs = set()
 
     def path_to_data_root(path):
         return path_to_root(path, root_data_path)
@@ -96,11 +97,18 @@ def update_data(root_def_path, root_data_path, root_data_path_recycle, data_sour
             setmtime(data_path_abs, def_walk_data.get(MTIME_KEY))
 
     def action_remove_empty_dir(data_path):
-        data_path_abs = path_to_data_root(data_path)
-        try:
-            os.rmdir(data_path_abs)
-        except:
-            pass
+        empty_dirs.add(tuple(data_path))
+
+    def remove_empty_dir():
+        for empty_dir in list(empty_dirs):
+            try:
+                os.rmdir(path_to_data_root(list(empty_dir)))
+                empty_dirs.remove(empty_dir)
+                return True
+            except:
+                pass
+
+        return False
 
     intersection_handler(TYPE_DIR, def_walk, data_walk, False, action_create_dir)
 
@@ -113,3 +121,7 @@ def update_data(root_def_path, root_data_path, root_data_path_recycle, data_sour
             move_for_recycling(recycle_file)
 
     intersection_handler(TYPE_DIR, data_walk, def_walk, False, action_remove_empty_dir)
+
+    while len(empty_dirs) > 0:
+        if not remove_empty_dir():
+            raise Exception()
