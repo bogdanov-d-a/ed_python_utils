@@ -415,4 +415,4 @@ def main(data_provider):
 
 
 def run(data_provider):
-    pause_at_end.run(lambda: main(data_provider), 'Program finished successfully')
+    pause_at_end.run(lambda: main(data_provider), 'Program completed successfully')
