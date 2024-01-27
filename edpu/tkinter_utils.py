@@ -1,7 +1,7 @@
-import tkinter
+from tkinter import Tk
 
 
-def center_window(win):
+def center_window(win: Tk) -> None:
     win.update_idletasks()
     width = win.winfo_width()
     height = win.winfo_height()
