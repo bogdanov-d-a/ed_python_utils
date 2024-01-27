@@ -1,16 +1,19 @@
+from typing import Callable
 from edpu import button_window
 import pyperclip
 
-def run(items):
-    def get_command(index):
-        def impl():
+
+def run(items: list[str]) -> None:
+    def get_command(index: int) -> Callable[[], bool]:
+        def impl() -> bool:
             pyperclip.copy(items[index])
             return True
+
         return impl
 
-    buttons = []
+    buttons: button_window.ButtonDefs = []
 
-    index = 0
+    index: int = 0
     for item in items:
         buttons.append(('[' + item + ']', get_command(index)))
         index += 1
