@@ -1,53 +1,66 @@
-def fail(msg='fail'):
+from typeguard import typechecked
+from typing import NoReturn
+
+
+@typechecked
+def fail(msg: str='fail') -> NoReturn:
     raise Exception(msg)
 
-def hm_to_m(hours, minutes):
-    if type(hours) is not int:
-        fail()
+
+@typechecked
+def hm_to_m(hours: int, minutes: int) -> int:
     if hours < 0:
         fail()
-    if type(minutes) is not int:
-        fail()
     if minutes < 0:
         fail()
+
     return hours * 60 + minutes
 
-def m_to_hm(minutes):
-    if type(minutes) is not int:
-        fail()
+
+@typechecked
+def m_to_hm(minutes: int) -> tuple[int, int]:
     if minutes < 0:
         fail()
-    return (int(minutes / 60), minutes % 60)
 
-def validate_time(time):
-    if type(time) is not int:
-        fail()
+    return (minutes // 60, minutes % 60)
+
+
+@typechecked
+def validate_time(time: int) -> int:
     if time < 0:
         fail()
 
-def validate_time_point(time):
+    return time
+
+
+@typechecked
+def validate_time_point(time: int) -> int:
     validate_time(time)
+
     if time >= 24 * 60:
         fail()
 
-def parse_time_point(str_):
-    if type(str_) is not str:
-        fail()
+    return time
+
+
+@typechecked
+def parse_time_point(str_: str) -> int:
     if len(str_) != 5:
         fail(str_)
     if str_[2] != ':':
         fail(str_)
 
-    h = int(str_[:2])
-    m = int(str_[3:])
+    h: int = int(str_[:2])
+    m: int = int(str_[3:])
+
     if h >= 24 or m >= 60:
         fail(str_)
 
-    result = hm_to_m(int(str_[:2]), int(str_[3:]))
-    validate_time_point(result)
-    return result
+    return validate_time_point(hm_to_m(h, m))
 
-def get_duration_postfix_mult(postfix):
+
+@typechecked
+def get_duration_postfix_mult(postfix: str) -> int:
     if postfix == 'm':
         return 1
     elif postfix == 'h':
@@ -55,37 +68,49 @@ def get_duration_postfix_mult(postfix):
     else:
         fail(postfix + ' postfix')
 
-def parse_duration(str_):
-    result = 0
+
+@typechecked
+def parse_duration(str_: str) -> int:
+    result: int = 0
+
     for part in str_.split(' '):
-        mult = get_duration_postfix_mult(part[-1:])
+        mult: int = get_duration_postfix_mult(part[-1:])
         result += mult * int(part[:-1])
+
     return result
 
-def time_format_helper(num):
-    if type(num) is not int:
-        fail()
+
+@typechecked
+def time_format_helper(num: int) -> str:
     if num < 0:
         fail()
-    grow = 2 - len(str(num))
+    grow: int = 2 - len(str(num))
     if grow < 0:
         fail()
     return '0' * grow + str(num)
 
-def time_point_string(tp):
+
+@typechecked
+def time_point_string(tp: int) -> str:
     validate_time_point(tp)
     h, m = m_to_hm(tp)
     return time_format_helper(h) + ':' + time_format_helper(m)
 
-def duration_string(d):
+
+@typechecked
+def duration_string(d: int) -> str:
     h, m = m_to_hm(d)
-    result = ''
+    result: str = ''
+
     if h != 0:
         result += str(h) + 'h '
+
     result += str(m) + 'm'
     return result
 
-def duration_string_with_negative(d, show_pos=False):
+
+@typechecked
+def duration_string_with_negative(d: int, show_pos: bool=False) -> str:
     if d < 0:
         prefix = '-('
         suffix = ')'
@@ -96,4 +121,5 @@ def duration_string_with_negative(d, show_pos=False):
         else:
             prefix = ''
             suffix = ''
+
     return prefix + duration_string(abs(d)) + suffix
