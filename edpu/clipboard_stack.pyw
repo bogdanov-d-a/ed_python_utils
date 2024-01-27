@@ -1,46 +1,46 @@
-from tkinter import *
+import tkinter
 from edpu import tkinter_utils
 import pyperclip
 
 
-def main():
-    root = Tk()
+def main() -> None:
+    root = tkinter.Tk()
     root.title('Clipboard stack')
 
-    stack = []
+    stack: list[str] = []
 
-    def update_out_text():
-        out_text.delete(1.0, END)
-        out_text.insert(END, '\n----------\n'.join(stack))
+    def update_out_text() -> None:
+        out_text.delete(1.0, tkinter.END)
+        out_text.insert(tkinter.END, '\n----------\n'.join(stack))
 
-    def push():
+    def push() -> None:
         stack.append(pyperclip.paste())
         update_out_text()
 
-    def pop():
+    def pop() -> None:
         if len(stack) > 0:
             pyperclip.copy(stack.pop())
             update_out_text()
 
-    push_button = Button(root, text='Push (F6)', command=push)
-    push_button.pack(side=TOP, fill=X)
-    root.bind('<F6>', lambda e: push())
+    push_button = tkinter.Button(root, text='Push (F6)', command=push)
+    push_button.pack(side=tkinter.TOP, fill=tkinter.X)
+    root.bind('<F6>', lambda _: push())
 
-    pop_button = Button(root, text='Pop (F7)', command=pop)
-    pop_button.pack(side=TOP, fill=X)
-    root.bind('<F7>', lambda e: pop())
+    pop_button = tkinter.Button(root, text='Pop (F7)', command=pop)
+    pop_button.pack(side=tkinter.TOP, fill=tkinter.X)
+    root.bind('<F7>', lambda _: pop())
 
-    out_text = Text(root, height=40, width=120)
-    out_text_sb = Scrollbar(root)
+    out_text = tkinter.Text(root, height=40, width=120)
+    out_text_sb = tkinter.Scrollbar(root)
 
-    out_text.pack(side=LEFT, fill=Y)
-    out_text_sb.pack(side=LEFT, fill=Y)
+    out_text.pack(side=tkinter.LEFT, fill=tkinter.Y)
+    out_text_sb.pack(side=tkinter.LEFT, fill=tkinter.Y)
 
     out_text.config(yscrollcommand=out_text_sb.set)
     out_text_sb.config(command=out_text.yview)
 
     tkinter_utils.center_window(root)
-    mainloop()
+    tkinter.mainloop()
 
 
 if __name__ == '__main__':
