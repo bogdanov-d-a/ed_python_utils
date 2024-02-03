@@ -1,6 +1,7 @@
 import traceback
+from typing import Callable, Optional
 
-def run(f, wait_on_success=None):
+def run(f: Callable[[], None], wait_on_success: Optional[str]=None) -> None:
     try:
         f()
     except:

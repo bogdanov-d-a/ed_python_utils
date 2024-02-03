@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from . import user_interaction
 
 try:
@@ -9,11 +10,11 @@ except:
     win32api_loaded = False
 
 
-def get_drive_letters():
+def get_drive_letters() -> list[str]:
     return win32api.GetLogicalDriveStrings().split('\000')[:-1] if win32api_loaded else edpu_user.storage_finder.get_drive_letters()
 
 
-def get_path_marker(dir_path):
+def get_path_marker(dir_path: str) -> Optional[str]:
     file_path = dir_path + '.pathmarker'
 
     if not os.path.exists(file_path):
@@ -23,8 +24,8 @@ def get_path_marker(dir_path):
         return file.readline().rstrip('\n')
 
 
-def find_all_storage():
-    dict_ = {}
+def find_all_storage() -> dict[str, str]:
+    dict_: dict[str, str] = {}
 
     for drive_letter in get_drive_letters():
         path_marker = get_path_marker(drive_letter)
@@ -36,7 +37,7 @@ def find_all_storage():
     return dict_
 
 
-def keep_getting_storage_path(name):
+def keep_getting_storage_path(name: str) -> str:
     while True:
         path = find_all_storage().get(name)
 
@@ -44,10 +45,10 @@ def keep_getting_storage_path(name):
             return path
 
         if not user_interaction.yes_no_prompt('Try to find ' + name + ' again'):
-            return None
+            raise Exception('keep_getting_storage_path ' + name + ' cancelled')
 
 
-def pick_storage():
+def pick_storage() -> Optional[str]:
     storage = find_all_storage()
     if len(storage) == 0:
         print('No storage available')

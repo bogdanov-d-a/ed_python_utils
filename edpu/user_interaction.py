@@ -1,4 +1,4 @@
-def yes_no_prompt(msg):
+def yes_no_prompt(msg: str) -> bool:
     while True:
         print(msg + " (y/n)?")
         user_input = input().lower()
@@ -9,8 +9,8 @@ def yes_no_prompt(msg):
             return False
 
 
-def pick_option(prompt, options):
-    index = 1
+def pick_option(prompt: str, options: list[str]) -> int:
+    index: int = 1
     for option in options:
         print(str(index) + '. ' + option)
         index += 1
@@ -26,17 +26,17 @@ def pick_option(prompt, options):
     return result - 1
 
 
-def pick_option_multi(prompt, options):
-    index = 1
+def pick_option_multi(prompt: str, options: list[str]) -> set[int]:
+    index: int = 1
     for option in options:
         print(str(index) + '. ' + option)
         index += 1
 
     print(prompt)
-    selection = set()
+    selection: set[int] = set()
 
     while True:
-        print_data = []
+        print_data: list[str] = []
         for selection_item in selection:
             print_data.append(options[selection_item])
         print(', '.join(print_data))
