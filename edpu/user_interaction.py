@@ -1,3 +1,17 @@
+from typing import Any
+
+
+def list_to_dict(list_: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+
+    for key, value in list_:
+        if key in result:
+            raise Exception('key in result')
+        result[key] = value
+
+    return result
+
+
 def yes_no_prompt(msg: str) -> bool:
     while True:
         print(msg + " (y/n)?")
@@ -60,3 +74,23 @@ def pick_option_multi(prompt: str, options: list[str]) -> set[int]:
                 selection.remove(user_data - 1)
             else:
                 selection.add(user_data - 1)
+
+
+def pick_str_option(prompt: str, options: dict[str, str]) -> str:
+    while True:
+        for option_cmd, option_text in sorted(options.items()):
+            print(option_cmd + ': ' + option_text)
+
+        print(prompt)
+        result = input()
+
+        if result not in options:
+            continue
+
+        return result
+
+
+def pick_str_option_ex(prompt: str, options: list[tuple[str, str, Any]]) -> Any:
+    pick: dict[str, str] = list_to_dict(list(map(lambda e: (e[0], e[1]), options)))
+    result = list_to_dict(list(map(lambda e: (e[0], e[2]), options)))
+    return result[pick_str_option(prompt, pick)]
