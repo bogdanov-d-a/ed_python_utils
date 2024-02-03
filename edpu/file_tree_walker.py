@@ -1,4 +1,5 @@
 import os
+import time
 from typing import Callable
 
 
@@ -11,9 +12,10 @@ def walk(root_path: str, ignore_callback: Callable[[str, list[str]], bool]=lambd
         raise Exception(root_path + ' does not exist')
 
     result: dict[str, list[list[str]]] = { TYPE_DIR: [], TYPE_FILE: [] }
+    file_count = 0
+    last_progress_print = time.time()
 
     print('Walking dir ' + root_path)
-    file_count = 0
 
     for cur_root_path, dirs, files in os.walk(root_path):
         rel_path_text = os.path.relpath(cur_root_path, root_path)
@@ -25,9 +27,15 @@ def walk(root_path: str, ignore_callback: Callable[[str, list[str]], bool]=lambd
 
         def handler(elems: list[str], type: str) -> None:
             nonlocal file_count
+            nonlocal last_progress_print
 
             if type == TYPE_FILE:
                 file_count += len(elems)
+
+            now = time.time()
+            if now - last_progress_print > 0.5:
+                last_progress_print = now
+                print('Walking progress - ' + str(file_count))
 
             for elem in elems:
                 if not ignore_callback(type, rel_path + [elem]):
