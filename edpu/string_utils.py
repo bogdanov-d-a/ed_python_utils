@@ -1,9 +1,9 @@
-def removeprefix(str_, prefix):
+def removeprefix(str_: str, prefix: str) -> str:
     if str_.find(prefix) == 0:
         return str_[len(prefix):]
     return str_
 
-def removesuffix(str_, suffix):
+def removesuffix(str_: str, suffix: str) -> str:
     if len(suffix) > len(str_):
         return str_
     str_suffix_pos = str_.find(suffix)

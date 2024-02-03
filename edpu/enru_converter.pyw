@@ -1,13 +1,13 @@
-from tkinter import *
+import tkinter
 from edpu import tkinter_utils
 
 
-def main():
-    root = Tk()
+def main() -> None:
+    root = tkinter.Tk()
     root.title('EnRu converter')
 
-    def proc_char(c, reverse):
-        data_ = [
+    def proc_char(c: str, reverse: bool) -> str:
+        data_: list[tuple[str, str]] = [
             ('`', 'ё'),
             ('~', 'Ё'),
             ('@', '"'),
@@ -97,37 +97,37 @@ def main():
 
         return c
 
-    def proc_text(text, reverse):
+    def proc_text(text: str, reverse: bool) -> str:
         result = ''
         for c in text:
             result += proc_char(c, reverse)
         return result
 
-    def convert(reverse):
-        text_data = text.get("1.0", END)
+    def convert(reverse: bool) -> None:
+        text_data = text.get("1.0", tkinter.END)
         text_data = proc_text(text_data, reverse)
-        text.delete(1.0, END)
-        text.insert(END, text_data)
+        text.delete(1.0, tkinter.END)
+        text.insert(tkinter.END, text_data)
 
-    button = Button(root, text='En->Ru (F5)', command=lambda: convert(False))
-    button.pack(side=TOP, fill=X)
-    root.bind('<F5>', lambda e: convert(False))
+    button = tkinter.Button(root, text='En->Ru (F5)', command=lambda: convert(False))
+    button.pack(side=tkinter.TOP, fill=tkinter.X)
+    root.bind('<F5>', lambda _: convert(False))
 
-    buttonRev = Button(root, text='Ru->En (F6)', command=lambda: convert(True))
-    buttonRev.pack(side=TOP, fill=X)
-    root.bind('<F6>', lambda e: convert(True))
+    buttonRev = tkinter.Button(root, text='Ru->En (F6)', command=lambda: convert(True))
+    buttonRev.pack(side=tkinter.TOP, fill=tkinter.X)
+    root.bind('<F6>', lambda _: convert(True))
 
-    text = Text(root, height=40, width=120)
-    text_sb = Scrollbar(root)
+    text = tkinter.Text(root, height=40, width=120)
+    text_sb = tkinter.Scrollbar(root)
 
-    text.pack(side=LEFT, fill=Y)
-    text_sb.pack(side=LEFT, fill=Y)
+    text.pack(side=tkinter.LEFT, fill=tkinter.Y)
+    text_sb.pack(side=tkinter.LEFT, fill=tkinter.Y)
 
     text.config(yscrollcommand=text_sb.set)
     text_sb.config(command=text.yview)
 
     tkinter_utils.center_window(root)
-    mainloop()
+    tkinter.mainloop()
 
 
 if __name__ == '__main__':

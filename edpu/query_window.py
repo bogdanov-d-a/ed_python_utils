@@ -1,9 +1,10 @@
 import tkinter
 import traceback
+from typing import Callable
 from . import tkinter_utils
 
 
-def make_exception_wrapper(callback):
+def make_exception_wrapper(callback: Callable[[], str]) -> Callable[[], str]:
     def wrapper():
         try:
             return callback()
@@ -12,15 +13,15 @@ def make_exception_wrapper(callback):
     return wrapper
 
 
-def run(data_provider, title='Default title'):
+def run(data_provider: Callable[[], str], title: str='Default title') -> None:
     root = tkinter.Tk()
     root.title(title)
 
-    def calc():
+    def calc() -> None:
         out_text.delete(1.0, tkinter.END)
         out_text.insert(tkinter.END, data_provider())
 
-    root.bind('<F5>', lambda e: calc())
+    root.bind('<F5>', lambda _: calc())
 
     calc_button = tkinter.Button(root, text='Refresh (F5)', command=calc)
     out_text = tkinter.Text(root, height=40, width=120)
@@ -38,5 +39,5 @@ def run(data_provider, title='Default title'):
     tkinter.mainloop()
 
 
-def run_with_exception_wrapper(data_provider, title='Default title'):
+def run_with_exception_wrapper(data_provider: Callable[[], str], title: str='Default title') -> None:
     run(make_exception_wrapper(data_provider), title)

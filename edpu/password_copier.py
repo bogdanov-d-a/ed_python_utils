@@ -1,7 +1,7 @@
 from edpu import user_interaction
 import pyperclip
 
-def run(data):
+def run(data: dict[str, str]) -> None:
     aliases = sorted(data.keys())
 
     while True:
