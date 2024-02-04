@@ -1,6 +1,10 @@
 import traceback
 from typing import Callable, Optional
 
+
+DEFAULT_MESSAGE = 'Program completed successfully'
+
+
 def run(f: Callable[[], None], wait_on_success: Optional[str]=None) -> None:
     try:
         f()
