@@ -280,6 +280,13 @@ def main(data_provider):
             filter_ &= bootstrap_mode_filter()
         host_repos_push_native(data_provider.get_repos(), filter_)
 
+    bootstrap_mode = False
+
+    def flip_bootstrap_mode_action_handler():
+        nonlocal bootstrap_mode
+        bootstrap_mode = not bootstrap_mode
+        print('bootstrap_mode == ' + str(bootstrap_mode))
+
     actions = [
         (
             'status_all',
@@ -371,17 +378,8 @@ def main(data_provider):
             'Apply user bundle',
             lambda: host_repos_all_apply_user_bundle(data_provider.get_bundle_path(), data_provider.get_repos(), bootstrap_mode_filter())
         ),
-    ]
-
-    bootstrap_mode = False
-
-    def flip_bootstrap_mode_action_handler():
-        nonlocal bootstrap_mode
-        bootstrap_mode = not bootstrap_mode
-        print('bootstrap_mode == ' + str(bootstrap_mode))
-
-    actions_in_place = [
         (
+            None,
             'Flip bootstrap_mode',
             flip_bootstrap_mode_action_handler
         ),
@@ -401,18 +399,17 @@ def main(data_provider):
         find_action_by_id(args.action)[2]()
     else:
         while True:
-            action = user_interaction.pick_option('Pick action', list(map(operator.itemgetter(1), actions)) + list(map(operator.itemgetter(0), actions_in_place)))
+            action = user_interaction.pick_option('Pick action', list(map(operator.itemgetter(1), actions)))
 
             def run_action(action_str):
                 edpu_user.python_launcher.start_with_python3('git_repo_manager.py --action ' + action_str + (' --bootstrap' if bootstrap_mode else ''), '.')
 
-            if action < len(actions):
-                run_action(actions[action][0])
-            elif action - len(actions) < len(actions_in_place):
-                actions_in_place[action - len(actions)][1]()
+            action_str = actions[action][0]
+            if action_str is not None:
+                run_action(action_str)
             else:
-                raise Exception('unexpected action')
+                actions[action][2]()
 
 
 def run(data_provider):
-    pause_at_end.run(lambda: main(data_provider), 'Program completed successfully')
+    pause_at_end.run(lambda: main(data_provider), pause_at_end.DEFAULT_MESSAGE)
