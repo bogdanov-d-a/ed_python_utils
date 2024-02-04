@@ -1,6 +1,5 @@
 import argparse
 import codecs
-import operator
 import os
 from edpu import host_alias
 from edpu import git_tools
@@ -287,128 +286,158 @@ def main(data_provider):
         bootstrap_mode = not bootstrap_mode
         print('bootstrap_mode == ' + str(bootstrap_mode))
 
+    action_cmd_id = 0
+    action_name_id = 1
+    action_handler_id = 2
+    action_in_place_id = 3
+
     actions = [
         (
-            'status_all',
+            's',
             'Status',
-            lambda: host_repos_status(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_status(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'ref_status_all',
+            'lref',
             'List refs',
-            lambda: host_repos_all_refs(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_all_refs(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'ref_status_storage_all',
+            'lrefs',
             'List storage refs',
-            lambda: host_repos_all_storage_refs(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_all_storage_refs(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'remote_status_all',
+            'lrem',
             'List remotes',
-            lambda: host_repos_remotes(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_remotes(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'stash_all',
+            'lst',
             'List stash',
-            lambda: host_repos_all_stash(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_all_stash(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'fetch_all',
+            'fen',
             'Fetch native',
-            lambda: host_repos_fetch(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_fetch(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'fetch_storage_all',
+            'fes',
             'Fetch storage',
-            lambda: host_repos_fetch_storage(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_fetch_storage(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'pull_native_all',
+            'pln',
             'Pull native',
-            lambda: host_repos_pull_native(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_pull_native(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'pull_storage_all',
+            'pls',
             'Pull storage',
-            lambda: host_repos_pull_storage(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_pull_storage(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'push_native_all',
+            'psn',
             'Push native',
-            push_native_all_action_handler
+            push_native_all_action_handler,
+            False
         ),
         (
-            'push_storage_all',
+            'pss',
             'Push storage',
-            lambda: host_repos_push_storage(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_push_storage(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'run_fsck_all',
+            'fsck',
             'Run fsck',
-            lambda: host_repos_fsck(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_fsck(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'run_fsck_storage_all',
+            'fscks',
             'Run fsck storage',
-            lambda: host_repos_fsck_storage(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_fsck_storage(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'gc_all',
+            'gc',
             'Run gc',
-            lambda: host_repos_gc(data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_gc(data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'create_bundle_all',
+            'bc',
             'Create bundle',
-            lambda: host_repos_all_create_bundle(lambda target_alias, repo_alias: data_provider.get_bundle_hash_path(target_alias, repo_alias), data_provider.get_bundle_path(), data_provider.get_bundle_block_reasons(), data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_all_create_bundle(lambda target_alias, repo_alias: data_provider.get_bundle_hash_path(target_alias, repo_alias), data_provider.get_bundle_path(), data_provider.get_bundle_block_reasons(), data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'get_user_bundle_info',
+            'bui',
             'Get user bundle info',
-            lambda: host_repos_all_get_user_bundle_info(data_provider.get_user_bundle_info_path(), data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_all_get_user_bundle_info(data_provider.get_user_bundle_info_path(), data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'create_user_bundle',
+            'buc',
             'Create user bundle',
-            lambda: host_repos_all_create_user_bundle(data_provider.get_user_bundle_info_new_path(), data_provider.get_bundle_path(), data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_all_create_user_bundle(data_provider.get_user_bundle_info_new_path(), data_provider.get_bundle_path(), data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            'apply_user_bundle',
+            'bua',
             'Apply user bundle',
-            lambda: host_repos_all_apply_user_bundle(data_provider.get_bundle_path(), data_provider.get_repos(), bootstrap_mode_filter())
+            lambda: host_repos_all_apply_user_bundle(data_provider.get_bundle_path(), data_provider.get_repos(), bootstrap_mode_filter()),
+            False
         ),
         (
-            None,
+            'fbm',
             'Flip bootstrap_mode',
-            flip_bootstrap_mode_action_handler
+            flip_bootstrap_mode_action_handler,
+            True
         ),
     ]
+
+    def find_action_by_cmd(cmd):
+        for action in actions:
+            if action[action_cmd_id] == cmd:
+                return action
+        raise Exception('unexpected action ' + cmd)
 
     if args.action is not None:
         print('action == ' + args.action)
         print('bootstrap == ' + str(args.bootstrap))
         print()
 
-        def find_action_by_id(id):
-            for action in actions:
-                if action[0] == args.action:
-                    return action
-            raise Exception('unexpected action ' + id)
+        action = find_action_by_cmd(args.action)
 
-        find_action_by_id(args.action)[2]()
+        if action[action_in_place_id]:
+            raise Exception('unsupported in-place action ' + args.action)
+
+        action[action_handler_id]()
     else:
         while True:
-            action = user_interaction.pick_option('Pick action', list(map(operator.itemgetter(1), actions)))
+            actions_dict = user_interaction.list_to_dict(list(map(lambda e: (e[action_cmd_id], e[action_name_id]), actions)))
+            action_cmd = user_interaction.pick_str_option('Pick action', actions_dict)
+            action = find_action_by_cmd(action_cmd)
 
-            def run_action(action_str):
-                edpu_user.python_launcher.start_with_python3('git_repo_manager.py --action ' + action_str + (' --bootstrap' if bootstrap_mode else ''), '.')
+            def run_action(action_cmd):
+                edpu_user.python_launcher.start_with_python3('git_repo_manager.py --action ' + action_cmd + (' --bootstrap' if bootstrap_mode else ''), '.')
 
-            action_str = actions[action][0]
-            if action_str is not None:
-                run_action(action_str)
+            if not action[action_in_place_id]:
+                run_action(action_cmd)
             else:
-                actions[action][2]()
+                action[action_handler_id]()
 
 
 def run(data_provider):
