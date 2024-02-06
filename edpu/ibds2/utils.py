@@ -88,7 +88,11 @@ def get_storage_device_list(storage_devices):
 
 def pick_storage_device(storage_devices):
     storage_device_list = get_storage_device_list(storage_devices)
-    return storage_device_list[user_interaction.pick_option('Choose storage device', storage_device_list)]
+    storage_device_list_cmds = user_interaction.generate_cmds(storage_device_list)
+    storage_device_list_cmds_dict = user_interaction.list_to_dict(storage_device_list_cmds)
+
+    str_options = user_interaction.pick_str_option_multi('Choose storage device', storage_device_list_cmds, lambda set_: 'only one device allowed' if len(set_) != 1 else None)
+    return storage_device_list_cmds_dict[str_options[0]]
 
 
 def pick_storage_device_multi(storage_devices):
