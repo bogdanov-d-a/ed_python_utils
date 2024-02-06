@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Callable, Optional
 
 
 def list_to_dict(list_: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -105,7 +105,7 @@ def pick_str_option_ex(prompt: str, options: list[tuple[str, str, Any]]) -> Any:
     return result[pick_str_option(prompt, pick)]
 
 
-def pick_str_option_multi(prompt: str, options: list[tuple[str, str]]) -> list[str]:
+def pick_str_option_multi(prompt: str, options: list[tuple[str, str]], validator: Callable[[set[str]], Optional[str]]=lambda _: None) -> list[str]:
     option_cmds = set(map(lambda e: e[0], options))
 
     for option_cmd in option_cmds:
@@ -127,6 +127,11 @@ def pick_str_option_multi(prompt: str, options: list[tuple[str, str]]) -> list[s
                 return None
 
             user_char_set.add(user_char)
+
+        validator_result = validator(user_char_set)
+        if validator_result is not None:
+            print(validator_result)
+            return None
 
         return user_char_set
 
