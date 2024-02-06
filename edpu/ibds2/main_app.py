@@ -1,4 +1,3 @@
-import operator
 import os
 from edpu import user_interaction
 from edpu import pause_at_end
@@ -96,20 +95,16 @@ def run(user_data):
 
             apply_bundle.apply_bundle(user_data, storage_device, collection_alias, bundle_slice_alias, user_data.get(APPLY_BUNDLES_KEY))
 
-        ACTIONS = [
-            ('Update definition', action_update_definition),
-            ('Update data', action_update_data),
-            ('Find recycle dirs', action_find_recycle_dirs),
-            ('Compare definitions (diff tool)', action_compare_definitions),
-            ('Create bundle', action_create_bundle),
-            ('Apply bundle', action_apply_bundle),
+        actions = [
+            ('s', 'Update definition', action_update_definition),
+            ('u', 'Update data', action_update_data),
+            ('r', 'Find recycle dirs', action_find_recycle_dirs),
+            ('c', 'Compare definitions (diff tool)', action_compare_definitions),
+            ('bc', 'Create bundle', action_create_bundle),
+            ('ba', 'Apply bundle', action_apply_bundle),
         ]
 
-        action = user_interaction.pick_option('Choose an action', list(map(operator.itemgetter(0), ACTIONS)))
+        action = user_interaction.pick_str_option_ex('Choose an action', actions)
+        action()
 
-        if action < len(ACTIONS):
-            ACTIONS[action][1]()
-        else:
-            raise Exception('unexpected action')
-
-    pause_at_end.run(main, 'Program completed successfully')
+    pause_at_end.run(main, pause_at_end.DEFAULT_MESSAGE)
