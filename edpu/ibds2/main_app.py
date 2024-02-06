@@ -1,6 +1,8 @@
 import os
-from edpu import user_interaction
+import shutil
+from edpu.file_tree_walker import TYPE_FILE
 from edpu import pause_at_end
+from edpu import user_interaction
 from .constants import *
 from .utils import *
 from . import apply_bundle
@@ -9,6 +11,7 @@ from . import create_bundle
 from . import update_data
 from . import update_definition
 from . import utils
+from . import walkers
 
 
 def run(user_data):
@@ -49,8 +52,15 @@ def run(user_data):
         def action_find_recycle_dirs():
             def handler(_, collection_paths):
                 recycle_path = collection_paths.get(DATA_PATH_KEY) + 'Recycle'
+
                 if os.path.isdir(recycle_path):
                     print(recycle_path + ' exists')
+
+                    for recycle_file in sorted(walkers.walk_data(recycle_path)[TYPE_FILE]):
+                        print(recycle_file)
+
+                    if user_interaction.yes_no_prompt('Delete ' + recycle_path):
+                        shutil.rmtree(recycle_path)
 
             for storage_device in utils.get_storage_device_list(user_data.get(STORAGE_DEVICES_KEY)):
                 print(storage_device)
