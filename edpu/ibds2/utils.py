@@ -93,10 +93,12 @@ def pick_storage_device(storage_devices):
 
 def pick_storage_device_multi(storage_devices):
     storage_device_list = get_storage_device_list(storage_devices)
+    storage_device_list_cmds = user_interaction.generate_cmds(storage_device_list)
+    storage_device_list_cmds_dict = user_interaction.list_to_dict(storage_device_list_cmds)
 
     result = []
-    for picked_index in user_interaction.pick_option_multi('Choose storage devices', storage_device_list):
-        result.append(storage_device_list[picked_index])
+    for picked_cmd in user_interaction.pick_str_option_multi('Choose storage devices', storage_device_list_cmds):
+        result.append(storage_device_list_cmds_dict[picked_cmd])
 
     return result
 
