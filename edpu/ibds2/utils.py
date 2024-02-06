@@ -81,7 +81,7 @@ def intersection_handler(content_type, main_list, aux_list, use_intersection, ac
 def get_storage_device_list(storage_devices):
     storage_device_list = []
     for device_name, device_data in storage_devices.items():
-        if device_data.get(IS_REMOVABLE_KEY) or device_data.get(IS_SCAN_AVAILABLE_KEY):
+        if device_data.get(IS_SCAN_AVAILABLE_KEY):
             storage_device_list.append(device_name)
     return storage_device_list
 
