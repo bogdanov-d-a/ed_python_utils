@@ -3,10 +3,11 @@ from edpu import user_interaction
 from edpu import pause_at_end
 from .constants import *
 from .utils import *
-from . import update_definition
-from . import update_data
-from . import create_bundle
 from . import apply_bundle
+from . import compare_definitions
+from . import create_bundle
+from . import update_data
+from . import update_definition
 
 
 def run(user_data):
@@ -74,7 +75,11 @@ def run(user_data):
             def_paths_b = get_def_paths(storage_device_b)
 
             for collection_alias in sorted(set(def_paths_a.keys()).intersection(set(def_paths_b.keys()))):
-                diff_tool_handler(def_paths_a.get(collection_alias), def_paths_b.get(collection_alias))
+                path_a = def_paths_a.get(collection_alias)
+                path_b = def_paths_b.get(collection_alias)
+
+                if not compare_definitions.same_defs(path_a, path_b):
+                    diff_tool_handler(path_a, path_b)
 
         def action_create_bundle():
             collection_dict = user_data.get(COLLECTION_DICT_KEY)
