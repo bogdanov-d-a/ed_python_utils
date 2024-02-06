@@ -8,6 +8,7 @@ from . import compare_definitions
 from . import create_bundle
 from . import update_data
 from . import update_definition
+from . import utils
 
 
 def run(user_data):
@@ -46,14 +47,14 @@ def run(user_data):
             )
 
         def action_find_recycle_dirs():
-            storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
-
             def handler(_, collection_paths):
                 recycle_path = collection_paths.get(DATA_PATH_KEY) + 'Recycle'
                 if os.path.isdir(recycle_path):
                     print(recycle_path + ' exists')
 
-            handle_all_aliases_for_storage_device(user_data, storage_device, handler)
+            for storage_device in utils.get_storage_device_list(user_data.get(STORAGE_DEVICES_KEY)):
+                print(storage_device)
+                handle_all_aliases_for_storage_device(user_data, storage_device, handler)
 
         def action_compare_definitions():
             storage_device_a = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
