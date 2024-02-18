@@ -107,6 +107,15 @@ def pick_storage_device_multi(storage_devices):
     return result
 
 
+def get_bundle_aliases(user_data):
+    set_ = set()
+
+    for collection_data in user_data[COLLECTION_DICT_KEY].values():
+        set_ |= set(collection_data[BUNDLE_ALIASES_KEY].keys())
+
+    return sorted(set_)
+
+
 def pick_bundle_alias(bundle_aliases):
     bundle_aliases_list = list(sorted(bundle_aliases))
     return bundle_aliases_list[user_interaction.pick_option('Choose bundle alias', bundle_aliases_list)]

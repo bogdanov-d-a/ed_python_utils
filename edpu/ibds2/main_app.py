@@ -93,14 +93,17 @@ def run(user_data):
                     diff_tool_handler(path_a, path_b)
 
         def action_create_bundle():
-            collection_dict = user_data.get(COLLECTION_DICT_KEY)
-
             storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
-            bundle_alias = pick_bundle_alias(user_data.get(BUNDLE_ALIASES_KEY))
-            collection_alias = pick_collection_alias(collection_dict)
-            bundle_slice_alias = pick_bundle_slice_alias(collection_dict.get(collection_alias).get(BUNDLE_SLICES_KEY))
+            bundle_alias = pick_bundle_alias(get_bundle_aliases(user_data))
 
-            create_bundle.create_bundle(user_data, storage_device, bundle_alias, collection_alias, bundle_slice_alias)
+            for collection_alias, collection_data in user_data[COLLECTION_DICT_KEY].items():
+                if bundle_alias not in collection_data[BUNDLE_ALIASES_KEY]:
+                    continue
+
+                for bundle_slice_alias in collection_data[BUNDLE_ALIASES_KEY][bundle_alias]:
+                    create_bundle.create_bundle(user_data, storage_device, bundle_alias, collection_alias, bundle_slice_alias)
+                    print(collection_alias + ' - ' + bundle_slice_alias)
+                    input()
 
         def action_apply_bundle():
             collection_dict = user_data.get(COLLECTION_DICT_KEY)
