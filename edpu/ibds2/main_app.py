@@ -1,5 +1,7 @@
 import os
 import shutil
+from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import Manager
 from edpu.file_tree_walker import TYPE_FILE
 from edpu import pause_at_end
 from edpu import user_interaction
@@ -14,26 +16,45 @@ from . import utils
 from . import walkers
 
 
+def same_defs_helper(args):
+    path_a, path_b = args
+    return compare_definitions.same_defs(path_a, path_b)
+
+
 def run(user_data):
     def main():
         def action_update_definition():
             storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
+            aliases = list(get_all_aliases_for_storage_device(user_data, storage_device))
 
-            handle_all_aliases_for_storage_device(
-                user_data,
-                storage_device,
-                lambda _, collection_paths: update_definition.update_definition(collection_paths.get(DATA_PATH_KEY), collection_paths.get(DEF_PATH_KEY), user_data.get(SKIP_MTIME))
-            )
+            manager = Manager()
+            data_mutex = manager.Lock()
+
+            with ProcessPoolExecutor(min(len(aliases), user_data[COLLECTION_PROCESSING_WORKERS])) as executor:
+                futures = list(map(
+                    lambda alias: executor.submit(
+                        update_definition.update_definition,
+                        alias[1].get(DATA_PATH_KEY),
+                        alias[1].get(DEF_PATH_KEY),
+                        user_data.get(SKIP_MTIME),
+                        data_mutex
+                    ),
+                    aliases
+                ))
+
+                for future in futures:
+                    future.result()
 
         def action_update_data():
             storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
             source_storage_devices = pick_storage_device_multi(user_data.get(STORAGE_DEVICES_KEY))
 
-            collection_dict = user_data.get(COLLECTION_DICT_KEY)
+            aliases = list(get_all_aliases_for_storage_device(user_data, storage_device))
+
             storage_path_cache = {}
 
             def data_sources_provider(collection_alias):
-                collection_data = collection_dict.get(collection_alias)
+                collection_data = user_data.get(COLLECTION_DICT_KEY).get(collection_alias)
                 data_sources = []
 
                 for source_storage_device in source_storage_devices:
@@ -43,28 +64,40 @@ def run(user_data):
 
                 return data_sources
 
-            handle_all_aliases_for_storage_device(
-                user_data,
-                storage_device,
-                lambda collection_alias, collection_paths: update_data.update_data(collection_paths.get(DEF_PATH_KEY), collection_paths.get(DATA_PATH_KEY), collection_paths.get(DATA_PATH_KEY) + 'Recycle', data_sources_provider(collection_alias))
-            )
+            manager = Manager()
+            data_mutex = manager.Lock()
+
+            with ProcessPoolExecutor(min(len(aliases), user_data[COLLECTION_PROCESSING_WORKERS])) as executor:
+                futures = list(map(
+                    lambda alias: executor.submit(
+                        update_data.update_data,
+                        alias[1].get(DEF_PATH_KEY),
+                        alias[1].get(DATA_PATH_KEY),
+                        alias[1].get(DATA_PATH_KEY) + 'Recycle',
+                        data_sources_provider(alias[0]),
+                        data_mutex
+                    ),
+                    aliases
+                ))
+
+                for future in futures:
+                    future.result()
 
         def action_find_recycle_dirs():
-            def handler(_, collection_paths):
-                recycle_path = collection_paths.get(DATA_PATH_KEY) + 'Recycle'
-
-                if os.path.isdir(recycle_path):
-                    print(recycle_path + ' exists')
-
-                    for recycle_file in sorted(walkers.walk_data(recycle_path)[TYPE_FILE]):
-                        print(recycle_file)
-
-                    if user_interaction.yes_no_prompt('Delete ' + recycle_path):
-                        shutil.rmtree(recycle_path)
-
             for storage_device in utils.get_storage_device_list(user_data.get(STORAGE_DEVICES_KEY)):
                 print(storage_device)
-                handle_all_aliases_for_storage_device(user_data, storage_device, handler)
+
+                for _, collection_paths in get_all_aliases_for_storage_device(user_data, storage_device):
+                    recycle_path = collection_paths.get(DATA_PATH_KEY) + 'Recycle'
+
+                    if os.path.isdir(recycle_path):
+                        print(recycle_path + ' exists')
+
+                        for recycle_file in sorted(walkers.walk_data(recycle_path)[TYPE_FILE]):
+                            print(recycle_file)
+
+                        if user_interaction.yes_no_prompt('Delete ' + recycle_path):
+                            shutil.rmtree(recycle_path)
 
         def action_compare_definitions():
             storage_device_a = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
@@ -73,24 +106,29 @@ def run(user_data):
             diff_tool_handler = user_data.get(DIFF_TOOL_HANDLER)
 
             def get_def_paths(storage_device):
-                result = {}
-
-                def handler(collection_alias, collection_paths):
-                    result[collection_alias] = collection_paths.get(DEF_PATH_KEY)
-
-                handle_all_aliases_for_storage_device(user_data, storage_device, handler, find_data_path=False)
-
-                return result
+                return {
+                    collection_alias: collection_paths.get(DEF_PATH_KEY)
+                    for collection_alias, collection_paths
+                    in get_all_aliases_for_storage_device(user_data, storage_device, find_data_path=False)
+                }
 
             def_paths_a = get_def_paths(storage_device_a)
             def_paths_b = get_def_paths(storage_device_b)
 
-            for collection_alias in sorted(set(def_paths_a.keys()).intersection(set(def_paths_b.keys()))):
-                path_a = def_paths_a.get(collection_alias)
-                path_b = def_paths_b.get(collection_alias)
+            def_paths_list = list(map(
+                lambda collection_alias: [def_paths_a.get(collection_alias), def_paths_b.get(collection_alias)],
+                sorted(set(def_paths_a.keys()).intersection(set(def_paths_b.keys())))
+            ))
 
-                if not compare_definitions.same_defs(path_a, path_b):
-                    diff_tool_handler(path_a, path_b)
+            with ProcessPoolExecutor(min(len(def_paths_list), user_data[COLLECTION_PROCESSING_WORKERS])) as executor:
+                same_defs_list = list(executor.map(
+                    same_defs_helper,
+                    def_paths_list
+                ))
+
+            for def_paths, same_defs in zip(def_paths_list, same_defs_list):
+                if not same_defs:
+                    diff_tool_handler(def_paths[0], def_paths[1])
 
         def action_create_bundle():
             storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))

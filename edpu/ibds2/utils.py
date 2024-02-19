@@ -175,14 +175,14 @@ def get_bundle_snap_path(user_data, bundle_alias, collection_alias, bundle_slice
     return os.path.join(user_data.get(BUNDLE_SNAPS_PATH_KEY), get_bundle_file_name(bundle_alias, collection_alias, bundle_slice_alias) + '.txt')
 
 
-def handle_all_aliases_for_storage_device(user_data, storage_device_name, handler, find_data_path=True):
+def get_all_aliases_for_storage_device(user_data, storage_device_name, find_data_path=True):
     collection_dict = user_data.get(COLLECTION_DICT_KEY)
     storage_path_cache = {}
 
     for collection_alias, collection_data in collection_dict.items():
         if storage_device_name in collection_data.get(STORAGE_DEVICES_KEY):
             collection_paths = get_collection_paths(user_data, collection_alias, storage_device_name, storage_path_cache, find_data_path)
-            handler(collection_alias, collection_paths)
+            yield (collection_alias, collection_paths)
 
 
 def save_hashset_data(hashset_data, file_path):

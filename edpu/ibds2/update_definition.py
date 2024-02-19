@@ -1,10 +1,20 @@
 from .walkers import *
 from .def_file import save_def_file
+from concurrent.futures import ProcessPoolExecutor
 
 
-def update_definition(root_data_path, root_def_path, skip_mtime):
-    data_walk = walk_data(root_data_path)
-    def_walk = walk_def(root_def_path)
+def walk_data_with_mutex(path, mutex):
+    with mutex:
+        return walk_data(path)
+
+
+def update_definition(root_data_path, root_def_path, skip_mtime, data_mutex):
+    with ProcessPoolExecutor(2) as executor:
+        data_walk_future = executor.submit(walk_data_with_mutex, root_data_path, data_mutex)
+        def_walk_future = executor.submit(walk_def, root_def_path)
+
+        data_walk = data_walk_future.result()
+        def_walk = def_walk_future.result()
 
     def path_to_def_root(path):
         return path_to_root(path, root_def_path)
@@ -31,19 +41,22 @@ def update_definition(root_data_path, root_def_path, skip_mtime):
     def action_create_file(data_path, def_path):
         data_path_abs = path_to_data_root(data_path)
         def_makedirs_helper(def_path)
-        save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), getmtime(data_path_abs))
+
+        with data_mutex:
+            save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), getmtime(data_path_abs))
 
     def action_update_file(data_path, def_path):
         if skip_mtime:
             return
 
         def_data = def_walk.get(TYPE_FILE).get(path_to_key(data_path))
-
         data_path_abs = path_to_data_root(data_path)
-        actual_mtime = getmtime(data_path_abs)
 
-        if def_data.get(MTIME_KEY) != actual_mtime:
-            save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), actual_mtime)
+        with data_mutex:
+            actual_mtime = getmtime(data_path_abs)
+
+            if def_data.get(MTIME_KEY) != actual_mtime:
+                save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), actual_mtime)
 
     def intersection_handler_with_def_path(content_type, main_list, aux_list, use_intersection, action):
         intersection_handler(content_type, main_list, aux_list, use_intersection, lambda data_path: action(data_path, data_path_to_def_path(data_path, content_type)))
