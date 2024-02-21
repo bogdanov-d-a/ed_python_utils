@@ -10,6 +10,7 @@ import edpu_user.python_launcher
 import edpu_user.password_provider
 from edpu import file_encryptor
 from edpu import datetime_utils
+from edpu import guided_directory_use
 from edpu.storage_finder import find_all_storage
 
 
@@ -61,20 +62,6 @@ def host_repos_run(command, repos, filter_repos, show_annotations=True):
 
 def host_repos_run_with_path(command, repos, filter_repos):
     host_repos_run(lambda _, repo: command(repo.path), repos, filter_repos)
-
-
-def run_with_bundle_path(bundle_path, f):
-    if os.path.exists(bundle_path):
-        raise Exception(bundle_path + ' exists')
-    os.mkdir(bundle_path)
-
-    try:
-        f(bundle_path)
-    finally:
-        try:
-            os.rmdir(bundle_path)
-        except:
-            pass
 
 
 def host_repos_status(repos, filter_repos):
@@ -148,7 +135,7 @@ def host_repos_all_create_bundle(bundle_hash_path_provider, bundle_path, bundle_
 
         host_repos_run(create_bundle, repos, filter_repos)
 
-    run_with_bundle_path(bundle_path, bundle_path_callback)
+    guided_directory_use.run_with_path(bundle_path, bundle_path_callback)
 
 def host_repos_all_get_user_bundle_info(user_bundle_info_path, repos, filter_repos):
     result = []
@@ -194,7 +181,7 @@ def host_repos_all_create_user_bundle(user_bundle_info_new_path, bundle_path, re
             with codecs.open(user_bundle_info_new_path, 'w', 'utf-8') as f:
                 f.write('|'.join(map(lambda e: e[1] + ' ' + e[0], user_info_new.items())))
 
-    run_with_bundle_path(bundle_path, bundle_path_callback)
+    guided_directory_use.run_with_path(bundle_path, bundle_path_callback)
 
 def host_repos_all_apply_user_bundle(bundle_path, repos, filter_repos):
     if not os.path.exists(bundle_path):
