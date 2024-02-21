@@ -3,6 +3,7 @@ import shutil
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import Manager
 from edpu.file_tree_walker import TYPE_FILE
+from edpu import guided_directory_use
 from edpu import pause_at_end
 from edpu import user_interaction
 from .constants import *
@@ -131,17 +132,20 @@ def run(user_data):
                     diff_tool_handler(def_paths[0], def_paths[1])
 
         def action_create_bundle():
-            storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
-            bundle_alias = pick_bundle_alias(get_bundle_aliases(user_data))
+            def bundles_path_callback(_):
+                storage_device = pick_storage_device(user_data.get(STORAGE_DEVICES_KEY))
+                bundle_alias = pick_bundle_alias(get_bundle_aliases(user_data))
 
-            for collection_alias, collection_data in user_data[COLLECTION_DICT_KEY].items():
-                if bundle_alias not in collection_data[BUNDLE_ALIASES_KEY]:
-                    continue
+                for collection_alias, collection_data in user_data[COLLECTION_DICT_KEY].items():
+                    if bundle_alias not in collection_data[BUNDLE_ALIASES_KEY]:
+                        continue
 
-                for bundle_slice_alias in collection_data[BUNDLE_ALIASES_KEY][bundle_alias]:
-                    create_bundle.create_bundle(user_data, storage_device, bundle_alias, collection_alias, bundle_slice_alias)
-                    print(collection_alias + ' - ' + bundle_slice_alias)
-                    input()
+                    for bundle_slice_alias in collection_data[BUNDLE_ALIASES_KEY][bundle_alias]:
+                        create_bundle.create_bundle(user_data, storage_device, bundle_alias, collection_alias, bundle_slice_alias)
+                        print(collection_alias + ' - ' + bundle_slice_alias)
+                        input()
+
+            guided_directory_use.run_with_path(user_data.get(BUNDLES_PATH_KEY), bundles_path_callback)
 
         def action_apply_bundle():
             collection_dict = user_data.get(COLLECTION_DICT_KEY)
