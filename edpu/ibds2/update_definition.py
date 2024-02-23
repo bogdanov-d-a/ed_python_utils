@@ -43,9 +43,7 @@ def update_definition(root_data_path, root_def_path, skip_mtime, data_mutex):
     def action_create_file(data_path, def_path):
         data_path_abs = path_to_data_root(data_path)
         def_makedirs_helper(def_path)
-
-        with data_mutex:
-            save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), getmtime(data_path_abs, getmtime_progress_printer))
+        save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), getmtime(data_path_abs, getmtime_progress_printer))
 
     def action_update_file(data_path, def_path):
         if skip_mtime:
@@ -53,19 +51,18 @@ def update_definition(root_data_path, root_def_path, skip_mtime, data_mutex):
 
         def_data = def_walk.get(TYPE_FILE).get(path_to_key(data_path))
         data_path_abs = path_to_data_root(data_path)
+        actual_mtime = getmtime(data_path_abs, getmtime_progress_printer)
 
-        with data_mutex:
-            actual_mtime = getmtime(data_path_abs, getmtime_progress_printer)
-
-            if def_data.get(MTIME_KEY) != actual_mtime:
-                save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), actual_mtime)
+        if def_data.get(MTIME_KEY) != actual_mtime:
+            save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), actual_mtime)
 
     def intersection_handler_with_def_path(content_type, main_list, aux_list, use_intersection, action):
         intersection_handler(content_type, main_list, aux_list, use_intersection, lambda data_path: action(data_path, data_path_to_def_path(data_path, content_type)))
 
-    intersection_handler_with_def_path(TYPE_DIR, def_walk, data_walk, False, action_remove)
-    intersection_handler_with_def_path(TYPE_DIR, data_walk, def_walk, False, action_create_dir)
+    with data_mutex:
+        intersection_handler_with_def_path(TYPE_DIR, def_walk, data_walk, False, action_remove)
+        intersection_handler_with_def_path(TYPE_DIR, data_walk, def_walk, False, action_create_dir)
 
-    intersection_handler_with_def_path(TYPE_FILE, def_walk, data_walk, False, action_remove)
-    intersection_handler_with_def_path(TYPE_FILE, data_walk, def_walk, False, action_create_file)
-    intersection_handler_with_def_path(TYPE_FILE, data_walk, def_walk, True, action_update_file)
+        intersection_handler_with_def_path(TYPE_FILE, def_walk, data_walk, False, action_remove)
+        intersection_handler_with_def_path(TYPE_FILE, data_walk, def_walk, False, action_create_file)
+        intersection_handler_with_def_path(TYPE_FILE, data_walk, def_walk, True, action_update_file)

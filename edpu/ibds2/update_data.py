@@ -83,13 +83,11 @@ def update_data(root_def_path, root_data_path, root_data_path_recycle, data_sour
         os.rename(path_to_data_root(path_), path_to_data_recycle_root(path_))
 
     def action_create_dir(data_path):
-        with data_mutex:
-            makedirs_helper(data_path, root_data_path, False)
+        makedirs_helper(data_path, root_data_path, False)
 
     def action_recycle_file(data_path):
         data_path_abs = path_to_data_root(data_path)
-        with data_mutex:
-            hash_ = hash_file(data_path_abs)
+        hash_ = hash_file(data_path_abs)
         if hash_ not in recycle_file_lists:
             recycle_file_lists[hash_] = []
         recycle_file_lists.get(hash_).append(data_path)
@@ -103,27 +101,24 @@ def update_data(root_def_path, root_data_path, root_data_path_recycle, data_sour
             return
 
         data_path_abs = path_to_data_root(data_path)
-
-        with data_mutex:
-            copy_or_move_file(file_by_hash, data_path_abs, can_move)
-            setmtime(data_path_abs, def_walk_data.get(MTIME_KEY), setmtime_progress_printer)
+        copy_or_move_file(file_by_hash, data_path_abs, can_move)
+        setmtime(data_path_abs, def_walk_data.get(MTIME_KEY), setmtime_progress_printer)
 
     def action_update_file(data_path):
         data_path_abs = path_to_data_root(data_path)
         def_walk_data = def_walk.get(TYPE_FILE).get(path_to_key(data_path))
 
-        with data_mutex:
-            if def_walk_data.get(MTIME_KEY) != getmtime(data_path_abs, getmtime_progress_printer):
-                if hash_file(data_path_abs) != def_walk_data.get(HASH_KEY):
-                    file_by_hash, can_move = find_file_by_hash(def_walk_data.get(HASH_KEY))
-                    if file_by_hash is None:
-                        print('File not found, hash ' + def_walk_data.get(HASH_KEY))
-                        return
+        if def_walk_data.get(MTIME_KEY) != getmtime(data_path_abs, getmtime_progress_printer):
+            if hash_file(data_path_abs) != def_walk_data.get(HASH_KEY):
+                file_by_hash, can_move = find_file_by_hash(def_walk_data.get(HASH_KEY))
+                if file_by_hash is None:
+                    print('File not found, hash ' + def_walk_data.get(HASH_KEY))
+                    return
 
-                    move_for_recycling(data_path)
-                    copy_or_move_file(file_by_hash, data_path_abs, can_move)
+                move_for_recycling(data_path)
+                copy_or_move_file(file_by_hash, data_path_abs, can_move)
 
-                setmtime(data_path_abs, def_walk_data.get(MTIME_KEY), setmtime_progress_printer)
+            setmtime(data_path_abs, def_walk_data.get(MTIME_KEY), setmtime_progress_printer)
 
     def action_remove_empty_dir(data_path):
         empty_dirs.add(tuple(data_path))
@@ -139,20 +134,19 @@ def update_data(root_def_path, root_data_path, root_data_path_recycle, data_sour
 
         return False
 
-    intersection_handler(TYPE_DIR, def_walk, data_walk, False, action_create_dir)
-
-    intersection_handler(TYPE_FILE, data_walk, def_walk, False, action_recycle_file)
-    intersection_handler(TYPE_FILE, def_walk, data_walk, False, action_create_file)
-    intersection_handler(TYPE_FILE, def_walk, data_walk, True, action_update_file)
-
     with data_mutex:
+        intersection_handler(TYPE_DIR, def_walk, data_walk, False, action_create_dir)
+
+        intersection_handler(TYPE_FILE, data_walk, def_walk, False, action_recycle_file)
+        intersection_handler(TYPE_FILE, def_walk, data_walk, False, action_create_file)
+        intersection_handler(TYPE_FILE, def_walk, data_walk, True, action_update_file)
+
         for recycle_files in recycle_file_lists.values():
             for recycle_file in recycle_files:
                 move_for_recycling(recycle_file)
 
-    intersection_handler(TYPE_DIR, data_walk, def_walk, False, action_remove_empty_dir)
+        intersection_handler(TYPE_DIR, data_walk, def_walk, False, action_remove_empty_dir)
 
-    with data_mutex:
         while len(empty_dirs) > 0:
             if not remove_empty_dir():
                 raise Exception()
