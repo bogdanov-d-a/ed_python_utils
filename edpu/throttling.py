@@ -6,10 +6,14 @@ import time
 class TimeBased:
     def __init__(self: TimeBased, period: float) -> None:
         self._period = period
-        self._last = time.time()
+        self._last = None
 
     def need_alert(self: TimeBased) -> bool:
         now = time.time()
+
+        if self._last is None:
+            self._last = now
+            return False
 
         if now - self._last > self._period:
             self._last = now
