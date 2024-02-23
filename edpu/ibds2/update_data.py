@@ -39,6 +39,9 @@ def update_data(root_def_path, root_data_path, root_data_path_recycle, data_sour
     recycle_file_lists = {}
     empty_dirs = set()
 
+    getmtime_progress_printer = make_getmtime_progress_printer(root_data_path)
+    setmtime_progress_printer = make_setmtime_progress_printer(root_data_path)
+
     def path_to_data_root(path):
         return path_to_root(path, root_data_path)
 
@@ -103,14 +106,14 @@ def update_data(root_def_path, root_data_path, root_data_path_recycle, data_sour
 
         with data_mutex:
             copy_or_move_file(file_by_hash, data_path_abs, can_move)
-            setmtime(data_path_abs, def_walk_data.get(MTIME_KEY))
+            setmtime(data_path_abs, def_walk_data.get(MTIME_KEY), setmtime_progress_printer)
 
     def action_update_file(data_path):
         data_path_abs = path_to_data_root(data_path)
         def_walk_data = def_walk.get(TYPE_FILE).get(path_to_key(data_path))
 
         with data_mutex:
-            if def_walk_data.get(MTIME_KEY) != getmtime(data_path_abs):
+            if def_walk_data.get(MTIME_KEY) != getmtime(data_path_abs, getmtime_progress_printer):
                 if hash_file(data_path_abs) != def_walk_data.get(HASH_KEY):
                     file_by_hash, can_move = find_file_by_hash(def_walk_data.get(HASH_KEY))
                     if file_by_hash is None:
@@ -120,7 +123,7 @@ def update_data(root_def_path, root_data_path, root_data_path_recycle, data_sour
                     move_for_recycling(data_path)
                     copy_or_move_file(file_by_hash, data_path_abs, can_move)
 
-                setmtime(data_path_abs, def_walk_data.get(MTIME_KEY))
+                setmtime(data_path_abs, def_walk_data.get(MTIME_KEY), setmtime_progress_printer)
 
     def action_remove_empty_dir(data_path):
         empty_dirs.add(tuple(data_path))

@@ -16,6 +16,8 @@ def update_definition(root_data_path, root_def_path, skip_mtime, data_mutex):
         data_walk = data_walk_future.result()
         def_walk = def_walk_future.result()
 
+    getmtime_progress_printer = make_getmtime_progress_printer(root_data_path)
+
     def path_to_def_root(path):
         return path_to_root(path, root_def_path)
 
@@ -43,7 +45,7 @@ def update_definition(root_data_path, root_def_path, skip_mtime, data_mutex):
         def_makedirs_helper(def_path)
 
         with data_mutex:
-            save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), getmtime(data_path_abs))
+            save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), getmtime(data_path_abs, getmtime_progress_printer))
 
     def action_update_file(data_path, def_path):
         if skip_mtime:
@@ -53,7 +55,7 @@ def update_definition(root_data_path, root_def_path, skip_mtime, data_mutex):
         data_path_abs = path_to_data_root(data_path)
 
         with data_mutex:
-            actual_mtime = getmtime(data_path_abs)
+            actual_mtime = getmtime(data_path_abs, getmtime_progress_printer)
 
             if def_data.get(MTIME_KEY) != actual_mtime:
                 save_def_file(path_to_def_root(def_path), hash_file(data_path_abs), actual_mtime)

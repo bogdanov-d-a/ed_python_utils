@@ -1,11 +1,17 @@
+from typing import Callable
 from edpu import file_tree_walker
 from .constants import *
 from .utils import *
 from .def_file import load_def_file
 
 
+def make_file_progress_printer(period: float, annotation: str, path_: str) -> Callable[[int], None]:
+    from edpu.throttling import TimeBasedAggregator
+    return TimeBasedAggregator.make_number_sum_printer(period, f'walkers.{annotation} {path_}')
+
+
 def walk_data(data_path):
-    data_walk = file_tree_walker.walk(data_path)
+    data_walk = file_tree_walker.walk(data_path, file_progress=make_file_progress_printer(0.5, 'walk_data', data_path))
     result = { TYPE_DIR: set(), TYPE_FILE: set() }
 
     for dir_path in data_walk.get(TYPE_DIR):
@@ -20,7 +26,7 @@ def walk_data(data_path):
 
 
 def walk_def(def_path):
-    def_walk = file_tree_walker.walk(def_path, lambda type_, _: type_ == TYPE_DIR).get(TYPE_FILE)
+    def_walk = file_tree_walker.walk(def_path, lambda type_, _: type_ == TYPE_DIR, make_file_progress_printer(0.1, 'walk_def', def_path)).get(TYPE_FILE)
     result = { TYPE_DIR: set(), TYPE_FILE: {} }
 
     for def_file_path in def_walk:

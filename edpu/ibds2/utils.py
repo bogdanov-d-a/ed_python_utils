@@ -43,12 +43,27 @@ def hash_file(path):
     return file_hashing.sha512_file(path)
 
 
-def getmtime(path):
+def getmtime(path, progress_fn):
+    progress_fn()
     return os.path.getmtime(path)
 
 
-def setmtime(path, time):
+def make_getmtime_progress_printer(path_):
+    return make_count_printer('getmtime', path_)
+
+
+def setmtime(path, time, progress_fn):
+    progress_fn()
     os.utime(path, (time, time))
+
+
+def make_setmtime_progress_printer(path_):
+    return make_count_printer('setmtime', path_)
+
+
+def make_count_printer(annotation, path_):
+    from edpu.throttling import TimeBasedAggregator
+    return TimeBasedAggregator.make_count_printer(0.5, f'{annotation} {path_}')
 
 
 def path_to_root(path, root):
