@@ -2,10 +2,6 @@ from typing import Any
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 
 
-HASH_KEY = 'hash'
-MTIME_KEY = 'mtime'
-
-
 INDEX_PATH_SEPARATOR = '\\'
 
 

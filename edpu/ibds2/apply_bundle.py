@@ -14,9 +14,8 @@ def apply_bundle(user_data: UserData, storage_device: str, collection_alias: str
 
     hash_to_data_map: dict[str, list[str]] = {}
 
-    for def_file in def_walk[TYPE_FILE].items():
-        def_file_path: str = def_file[0]
-        def_file_hash: str = def_file[1][HASH_KEY]
+    for def_file_path, def_file_data in def_walk.files.items():
+        def_file_hash = def_file_data.hash_
 
         if not re.search(bundle_slice, def_file_path):
             continue

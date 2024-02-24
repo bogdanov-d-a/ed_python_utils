@@ -31,8 +31,8 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         for data_source, data_source_def in zip(data_sources, data_source_defs):
             _, data_source_data_path = data_source
 
-            for path_, data in data_source_def[TYPE_FILE].items():
-                hash_: str = data[HASH_KEY]
+            for path_, data in data_source_def.files.items():
+                hash_ = data.hash_
 
                 if hash_ not in data_source_hash_to_location:
                     data_source_hash_to_location[hash_] = (utils.key_to_path(path_), data_source_data_path)
@@ -101,34 +101,34 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         recycle_file_lists[hash_].append(data_path)
 
     def action_create_file(data_path: list[str]) -> None:
-        def_walk_data = def_walk[TYPE_FILE][utils.path_to_key(data_path)]
+        def_walk_data = def_walk.files[utils.path_to_key(data_path)]
 
-        file_by_hash, can_move = find_file_by_hash(def_walk_data[HASH_KEY])
+        file_by_hash, can_move = find_file_by_hash(def_walk_data.hash_)
 
         if file_by_hash is None:
-            print('File not found, hash ' + def_walk_data[HASH_KEY])
+            print('File not found, hash ' + def_walk_data.hash_)
             return
 
         data_path_abs = path_to_data_root(data_path)
         copy_or_move_file(file_by_hash, data_path_abs, can_move)
-        utils.setmtime(data_path_abs, def_walk_data[MTIME_KEY], setmtime_progress_printer)
+        utils.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer)
 
     def action_update_file(data_path: list[str]) -> None:
         data_path_abs = path_to_data_root(data_path)
-        def_walk_data = def_walk[TYPE_FILE][utils.path_to_key(data_path)]
+        def_walk_data = def_walk.files[utils.path_to_key(data_path)]
 
-        if def_walk_data[MTIME_KEY] != utils.getmtime(data_path_abs, getmtime_progress_printer):
-            if utils.hash_file(data_path_abs) != def_walk_data[HASH_KEY]:
-                file_by_hash, can_move = find_file_by_hash(def_walk_data[HASH_KEY])
+        if def_walk_data.mtime != utils.getmtime(data_path_abs, getmtime_progress_printer):
+            if utils.hash_file(data_path_abs) != def_walk_data.hash_:
+                file_by_hash, can_move = find_file_by_hash(def_walk_data.hash_)
 
                 if file_by_hash is None:
-                    print('File not found, hash ' + def_walk_data[HASH_KEY])
+                    print('File not found, hash ' + def_walk_data.hash_)
                     return
 
                 move_for_recycling(data_path)
                 copy_or_move_file(file_by_hash, data_path_abs, can_move)
 
-            utils.setmtime(data_path_abs, def_walk_data[MTIME_KEY], setmtime_progress_printer)
+            utils.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer)
 
     def action_remove_empty_dir(data_path: list[str]) -> None:
         empty_dirs.add(tuple(data_path))
@@ -145,17 +145,19 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         return False
 
     with data_mutex:
-        utils.intersection_handler(TYPE_DIR, def_walk, data_walk, False, action_create_dir)
+        utils.intersection_handler(def_walk.dirs, data_walk[TYPE_DIR], False, action_create_dir)
 
-        utils.intersection_handler(TYPE_FILE, data_walk, def_walk, False, action_recycle_file)
-        utils.intersection_handler(TYPE_FILE, def_walk, data_walk, False, action_create_file)
-        utils.intersection_handler(TYPE_FILE, def_walk, data_walk, True, action_update_file)
+        def_walk_file_keys = set(def_walk.files.keys())
+
+        utils.intersection_handler(data_walk[TYPE_FILE], def_walk_file_keys, False, action_recycle_file)
+        utils.intersection_handler(def_walk_file_keys, data_walk[TYPE_FILE], False, action_create_file)
+        utils.intersection_handler(def_walk_file_keys, data_walk[TYPE_FILE], True, action_update_file)
 
         for recycle_files in recycle_file_lists.values():
             for recycle_file in recycle_files:
                 move_for_recycling(recycle_file)
 
-        utils.intersection_handler(TYPE_DIR, data_walk, def_walk, False, action_remove_empty_dir)
+        utils.intersection_handler(data_walk[TYPE_DIR], def_walk.dirs, False, action_remove_empty_dir)
 
         while len(empty_dirs) > 0:
             if not remove_empty_dir():

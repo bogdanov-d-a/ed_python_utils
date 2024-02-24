@@ -90,9 +90,9 @@ def key_to_path(key: str) -> list[str]:
     return key.split(INDEX_PATH_SEPARATOR)
 
 
-def intersection_handler(content_type: str, main_list, aux_list, use_intersection: bool, action: Callable[[list[str]], None]) -> None:
-    for main_content in sorted(main_list[content_type]):
-        if (main_content in aux_list[content_type]) == use_intersection:
+def intersection_handler(main_list: set[str], aux_list: set[str], use_intersection: bool, action: Callable[[list[str]], None]) -> None:
+    for main_content in main_list:
+        if (main_content in aux_list) == use_intersection:
             action(key_to_path(main_content))
 
 
