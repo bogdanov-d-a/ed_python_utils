@@ -2,9 +2,9 @@ import codecs
 from .constants import *
 
 
-def load_def_file(file_path):
+def load_def_file(file_path: str) -> dict[str, Any]:
     with codecs.open(file_path, 'r', 'utf-8-sig') as file:
-        result = {}
+        result: dict[str, Any] = {}
 
         cur_line = 0
         for line in file.readlines():
@@ -26,7 +26,7 @@ def load_def_file(file_path):
         raise Exception()
 
 
-def save_def_file(file_path, hash_, mtime):
+def save_def_file(file_path: str, hash_: str, mtime: float) -> None:
     with codecs.open(file_path, 'w', 'utf-8-sig') as file:
         file.write(hash_)
         file.write('\n')

@@ -1,3 +1,4 @@
+from typing import Any
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 
 
@@ -25,3 +26,9 @@ DEF_PATH_KEY = 'def_path'
 DIFF_TOOL_HANDLER = 'diff_tool_handler'
 COLLECTION_PROCESSING_WORKERS = 'collection_processing_workers'
 SKIP_MTIME = 'skip_mtime'
+
+
+UserData = dict[str, Any]
+StorageDevices = dict[str, dict[str, Any]]
+CollectionDict = dict[str, dict[str, Any]]
+CollectionStorageDevices = dict[str, str]
