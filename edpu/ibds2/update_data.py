@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import shutil
 from threading import Lock
@@ -55,20 +56,25 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
     def data_recycle_makedirs_helper(data_path: list[str]) -> None:
         utils.makedirs_helper(data_path, root_data_path_recycle, True)
 
-    def find_file_by_hash(hash_: str) -> tuple[Optional[str], Optional[bool]]:
+    class FindFileByHashResult:
+        def __init__(self: FindFileByHashResult, path_: str, can_move: bool) -> None:
+            self.path_ = path_
+            self.can_move = can_move
+
+    def find_file_by_hash(hash_: str) -> Optional[FindFileByHashResult]:
         recycle_files = recycle_file_lists.get(hash_)
 
         if recycle_files is not None and len(recycle_files) > 0:
             recycle_file = recycle_files[0]
             recycle_file_lists[hash_] = recycle_files[1:]
-            return (path_to_data_root(recycle_file), True)
+            return FindFileByHashResult(path_to_data_root(recycle_file), True)
 
         data_source_location = data_source_hash_to_location.get(hash_)
 
         if data_source_location is not None:
-            return (utils.path_to_root(data_source_location[0], data_source_location[1]), False)
+            return FindFileByHashResult(utils.path_to_root(data_source_location[0], data_source_location[1]), False)
 
-        return (None, None)
+        return None
 
     def copy_no_overwrite(src: str, dst: str) -> None:
         if os.path.exists(dst):
@@ -102,15 +108,14 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
 
     def action_create_file(data_path: list[str]) -> None:
         def_walk_data = def_walk.files[utils.path_to_key(data_path)]
+        find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
 
-        file_by_hash, can_move = find_file_by_hash(def_walk_data.hash_)
-
-        if file_by_hash is None:
+        if find_file_by_hash_result is None:
             print('File not found, hash ' + def_walk_data.hash_)
             return
 
         data_path_abs = path_to_data_root(data_path)
-        copy_or_move_file(file_by_hash, data_path_abs, can_move)
+        copy_or_move_file(find_file_by_hash_result.path_, data_path_abs, find_file_by_hash_result.can_move)
         utils.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer)
 
     def action_update_file(data_path: list[str]) -> None:
@@ -119,14 +124,14 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
 
         if def_walk_data.mtime != utils.getmtime(data_path_abs, getmtime_progress_printer):
             if utils.hash_file(data_path_abs) != def_walk_data.hash_:
-                file_by_hash, can_move = find_file_by_hash(def_walk_data.hash_)
+                find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
 
-                if file_by_hash is None:
+                if find_file_by_hash_result is None:
                     print('File not found, hash ' + def_walk_data.hash_)
                     return
 
                 move_for_recycling(data_path)
-                copy_or_move_file(file_by_hash, data_path_abs, can_move)
+                copy_or_move_file(find_file_by_hash_result.path_, data_path_abs, find_file_by_hash_result.can_move)
 
             utils.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer)
 
