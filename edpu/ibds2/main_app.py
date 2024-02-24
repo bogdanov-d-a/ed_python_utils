@@ -27,7 +27,7 @@ def run(user_data: UserData) -> None:
     def main() -> None:
         def action_update_definition() -> None:
             storage_device = utils.pick_storage_device(user_data[STORAGE_DEVICES_KEY])
-            aliases: list[tuple[str, dict[str, str]]] = list(utils.get_all_aliases_for_storage_device(user_data, storage_device))
+            aliases = list(utils.get_all_aliases_for_storage_device(user_data, storage_device))
 
             manager = Manager()
             data_mutex = manager.Lock()
@@ -36,8 +36,8 @@ def run(user_data: UserData) -> None:
                 futures = list(map(
                     lambda alias: executor.submit(
                         update_definition.update_definition,
-                        alias[1][DATA_PATH_KEY],
-                        alias[1][DEF_PATH_KEY],
+                        alias[1].get_data(),
+                        alias[1].def_,
                         user_data[SKIP_MTIME],
                         data_mutex
                     ),
@@ -51,7 +51,7 @@ def run(user_data: UserData) -> None:
             storage_device = utils.pick_storage_device(user_data[STORAGE_DEVICES_KEY])
             source_storage_devices = utils.pick_storage_device_multi(user_data[STORAGE_DEVICES_KEY])
 
-            aliases: list[tuple[str, dict[str, str]]] = list(utils.get_all_aliases_for_storage_device(user_data, storage_device))
+            aliases = list(utils.get_all_aliases_for_storage_device(user_data, storage_device))
 
             storage_path_cache: dict[str, str] = {}
 
@@ -61,8 +61,8 @@ def run(user_data: UserData) -> None:
 
                 for source_storage_device in source_storage_devices:
                     if source_storage_device in collection_data[STORAGE_DEVICES_KEY]:
-                        collection_paths: dict[str, str] = utils.get_collection_paths(user_data, collection_alias, source_storage_device, storage_path_cache)
-                        data_sources.append((collection_paths[DEF_PATH_KEY], collection_paths[DATA_PATH_KEY]))
+                        collection_paths = utils.get_collection_paths(user_data, collection_alias, source_storage_device, storage_path_cache)
+                        data_sources.append((collection_paths.def_, collection_paths.get_data()))
 
                 return data_sources
 
@@ -73,9 +73,9 @@ def run(user_data: UserData) -> None:
                 futures = list(map(
                     lambda alias: executor.submit(
                         update_data.update_data,
-                        alias[1][DEF_PATH_KEY],
-                        alias[1][DATA_PATH_KEY],
-                        alias[1][DATA_PATH_KEY] + 'Recycle',
+                        alias[1].def_,
+                        alias[1].get_data(),
+                        alias[1].get_data() + 'Recycle',
                         data_sources_provider(alias[0]),
                         data_mutex
                     ),
@@ -90,7 +90,7 @@ def run(user_data: UserData) -> None:
                 print(storage_device)
 
                 for _, collection_paths in utils.get_all_aliases_for_storage_device(user_data, storage_device):
-                    recycle_path: str = collection_paths[DATA_PATH_KEY] + 'Recycle'
+                    recycle_path = collection_paths.get_data() + 'Recycle'
 
                     if os.path.isdir(recycle_path):
                         print(recycle_path + ' exists')
@@ -109,7 +109,7 @@ def run(user_data: UserData) -> None:
 
             def get_def_paths(storage_device: str) -> dict[str, str]:
                 return {
-                    collection_alias: collection_paths[DEF_PATH_KEY]
+                    collection_alias: collection_paths.def_
                     for collection_alias, collection_paths
                     in utils.get_all_aliases_for_storage_device(user_data, storage_device, find_data_path=False)
                 }

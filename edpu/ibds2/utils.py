@@ -162,7 +162,18 @@ def get_storage_path(storage_device_name: str, storage_path_cache: dict[str, str
     return storage_path
 
 
-def get_collection_paths(user_data: UserData, collection_alias: str, storage_device_name: str, storage_path_cache: dict[str, str], find_data_path: bool=True) -> dict[str, Optional[str]]:
+class GetCollectionPathsResult:
+    def __init__(self: GetCollectionPathsResult, def_: str, data: Optional[str]) -> None:
+        self.def_ = def_
+        self._data = data
+
+    def get_data(self: GetCollectionPathsResult) -> str:
+        if self._data is None:
+            raise Exception()
+        return self._data
+
+
+def get_collection_paths(user_data: UserData, collection_alias: str, storage_device_name: str, storage_path_cache: dict[str, str], find_data_path: bool=True) -> GetCollectionPathsResult:
     collection_dict: CollectionDict = user_data[COLLECTION_DICT_KEY]
     storage_devices: StorageDevices = user_data[STORAGE_DEVICES_KEY]
     data_path: str = user_data[DATA_PATH_KEY]
@@ -181,7 +192,7 @@ def get_collection_paths(user_data: UserData, collection_alias: str, storage_dev
 
     abs_def_path = os.path.join(data_path, collection_alias, storage_device_name)
 
-    return { DEF_PATH_KEY: abs_def_path, DATA_PATH_KEY: abs_data_path }
+    return GetCollectionPathsResult(abs_def_path, abs_data_path)
 
 
 def get_bundle_file_name(bundle_alias: str, collection_alias: str, bundle_slice_alias: str) -> str:
@@ -196,7 +207,7 @@ def get_bundle_snap_path(user_data: UserData, bundle_alias: str, collection_alia
     return os.path.join(user_data[BUNDLE_SNAPS_PATH_KEY], get_bundle_file_name(bundle_alias, collection_alias, bundle_slice_alias) + '.txt')
 
 
-def get_all_aliases_for_storage_device(user_data: UserData, storage_device_name: str, find_data_path: bool=True) -> Iterator[tuple[str, dict[str, Optional[str]]]]:
+def get_all_aliases_for_storage_device(user_data: UserData, storage_device_name: str, find_data_path: bool=True) -> Iterator[tuple[str, GetCollectionPathsResult]]:
     collection_dict: CollectionDict = user_data[COLLECTION_DICT_KEY]
     storage_path_cache: dict[str, str] = {}
 

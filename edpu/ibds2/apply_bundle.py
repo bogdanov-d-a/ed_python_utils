@@ -7,9 +7,9 @@ import re
 
 def apply_bundle(user_data: UserData, storage_device: str, collection_alias: str, bundle_slice_alias: str, in_data_items: list[str]) -> None:
     storage_path_cache: dict[str, str] = {}
-    collection_paths: dict[str, str] = utils.get_collection_paths(user_data, collection_alias, storage_device, storage_path_cache)
+    collection_paths = utils.get_collection_paths(user_data, collection_alias, storage_device, storage_path_cache)
 
-    def_walk = walk_def(collection_paths[DEF_PATH_KEY])
+    def_walk = walk_def(collection_paths.def_)
     bundle_slice = user_data[COLLECTION_DICT_KEY][collection_alias][BUNDLE_SLICES_KEY][bundle_slice_alias]
 
     hash_to_data_map: dict[str, list[str]] = {}
@@ -23,7 +23,7 @@ def apply_bundle(user_data: UserData, storage_device: str, collection_alias: str
         if def_file_hash not in hash_to_data_map:
             hash_to_data_map[def_file_hash] = []
 
-        hash_to_data_map[def_file_hash].append(os.path.join(collection_paths[DATA_PATH_KEY], def_file_path))
+        hash_to_data_map[def_file_hash].append(os.path.join(collection_paths.get_data(), def_file_path))
 
     bundles_path = user_data[BUNDLES_PATH_KEY]
     in_data = list(map(lambda item: (os.path.join(bundles_path, item + '.txt'), os.path.join(bundles_path, item + '.bin')), in_data_items))
