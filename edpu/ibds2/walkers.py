@@ -34,6 +34,11 @@ class WalkDefResult:
         self.dirs = dirs
         self.files = files
 
+    def __eq__(self: WalkDefResult, other: WalkDefResult) -> bool:
+        if isinstance(other, self.__class__):
+            return self.dirs == other.dirs and self.files == other.files
+        return False
+
 
 def walk_def(def_path: str) -> WalkDefResult:
     def_walk = walk(def_path, lambda type_, _: type_ == TYPE_DIR, make_file_progress_printer(0.1, 'walk_def', def_path))[TYPE_FILE]

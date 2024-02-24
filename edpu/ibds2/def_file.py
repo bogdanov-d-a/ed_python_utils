@@ -8,6 +8,11 @@ class DefFileData:
         self.hash_ = hash_
         self.mtime = mtime
 
+    def __eq__(self: DefFileData, other: DefFileData) -> bool:
+        if isinstance(other, self.__class__):
+            return self.hash_ == other.hash_ and self.mtime == other.mtime
+        return False
+
 
 def load_def_file(file_path: str) -> DefFileData:
     with codecs.open(file_path, 'r', 'utf-8-sig') as file:
