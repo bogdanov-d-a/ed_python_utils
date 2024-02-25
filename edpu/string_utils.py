@@ -13,6 +13,10 @@ def removesuffix(str_: str, suffix: str) -> str:
     return str_
 
 
+def strip_crlf(str_: str) -> str:
+    return str_.rstrip('\n').rstrip('\r')
+
+
 def char_wrap(str_: str, char: str) -> str:
     return char + str_ + char
 

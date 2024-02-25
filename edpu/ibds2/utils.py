@@ -4,6 +4,7 @@ import os
 import shutil
 from typing import Callable, Iterator, Optional
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
+from edpu.string_utils import strip_crlf
 from .user_data import UserData, StorageDevices, CollectionDict
 from edpu import file_hashing
 from edpu import user_interaction
@@ -11,10 +12,6 @@ from edpu import storage_finder
 
 
 INDEX_PATH_SEPARATOR = '\\'
-
-
-def strip_crlf(str_: str) -> str:
-    return str_.rstrip('\n').rstrip('\r')
 
 
 def type_to_prefix(type_: str) -> str:
