@@ -2,31 +2,13 @@ from __future__ import annotations
 import os
 import shutil
 from typing import Callable, Iterator, Optional
-from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 from edpu.string_utils import strip_crlf
+from .type_prefix_converter import type_to_prefix, prefix_to_type
 from .path_key_converter import key_to_path
 from .user_data import UserData, StorageDevices, CollectionDict
 from edpu import file_hashing
 from edpu import user_interaction
 from edpu import storage_finder
-
-
-def type_to_prefix(type_: str) -> str:
-    if type_ == TYPE_DIR:
-        return 'd'
-    elif type_ == TYPE_FILE:
-        return 'f'
-    else:
-        raise Exception()
-
-
-def prefix_to_type(prefix: str) -> str:
-    if prefix == 'd':
-        return TYPE_DIR
-    elif prefix == 'f':
-        return TYPE_FILE
-    else:
-        raise Exception()
 
 
 def def_path_to_data_path(def_path: list[str]) -> tuple[str, list[str]]:
