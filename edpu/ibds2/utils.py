@@ -3,8 +3,8 @@ import os
 import shutil
 from typing import Callable, Iterator, Optional
 from edpu.string_utils import strip_crlf
-from .type_prefix_converter import type_to_prefix, prefix_to_type
-from .path_key_converter import key_to_path
+from .mappers.type_prefix import type_to_prefix, prefix_to_type
+from .mappers.path_key import key_to_path
 from .user_data import UserData, StorageDevices, CollectionDict
 from edpu import file_hashing
 from edpu import user_interaction
