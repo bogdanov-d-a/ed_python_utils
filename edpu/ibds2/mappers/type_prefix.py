@@ -1,19 +1,12 @@
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
+from edpu.mapper import Mapper
 
 
-def type_to_prefix(type_: str) -> str:
-    if type_ == TYPE_DIR:
-        return 'd'
-    elif type_ == TYPE_FILE:
-        return 'f'
-    else:
-        raise Exception()
+_mapper = Mapper([
+    (TYPE_DIR, 'd'),
+    (TYPE_FILE, 'f'),
+])
 
 
-def prefix_to_type(prefix: str) -> str:
-    if prefix == 'd':
-        return TYPE_DIR
-    elif prefix == 'f':
-        return TYPE_FILE
-    else:
-        raise Exception()
+type_to_prefix = _mapper.fwd
+prefix_to_type = _mapper.rev
