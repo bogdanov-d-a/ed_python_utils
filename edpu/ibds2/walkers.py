@@ -3,6 +3,7 @@ from typing import Callable
 from edpu.file_tree_walker import walk, TYPE_DIR, TYPE_FILE
 from . import utils
 from .def_file import DefFileData, load_def_file
+from .path_key_converter import path_to_key
 
 
 def make_file_progress_printer(period: float, annotation: str, path_: str) -> Callable[[int], None]:
@@ -15,11 +16,11 @@ def walk_data(data_path: str) -> dict[str, set[str]]:
     result: dict[str, set[str]] = { TYPE_DIR: set(), TYPE_FILE: set() }
 
     for dir_path in data_walk[TYPE_DIR]:
-        dir_path_key = utils.path_to_key(dir_path)
+        dir_path_key = path_to_key(dir_path)
         result[TYPE_DIR].add(dir_path_key)
 
     for file_path in data_walk[TYPE_FILE]:
-        file_path_key = utils.path_to_key(file_path)
+        file_path_key = path_to_key(file_path)
         result[TYPE_FILE].add(file_path_key)
 
     return result
@@ -47,7 +48,7 @@ def walk_def(def_path: str) -> WalkDefResult:
 
     for def_file_path in def_walk:
         type_, data_path = utils.def_path_to_data_path(def_file_path)
-        data_path_key = utils.path_to_key(data_path)
+        data_path_key = path_to_key(data_path)
 
         if type_ == TYPE_FILE:
             abs_def_file_path = utils.path_to_root(def_file_path, def_path)

@@ -4,13 +4,11 @@ import shutil
 from typing import Callable, Iterator, Optional
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 from edpu.string_utils import strip_crlf
+from .path_key_converter import key_to_path
 from .user_data import UserData, StorageDevices, CollectionDict
 from edpu import file_hashing
 from edpu import user_interaction
 from edpu import storage_finder
-
-
-INDEX_PATH_SEPARATOR = '\\'
 
 
 def type_to_prefix(type_: str) -> str:
@@ -80,14 +78,6 @@ def makedirs_helper(path: list[str], root: str, is_file: bool) -> None:
         path = path[:-1]
 
     os.makedirs(path_to_root(path, root), exist_ok=True)
-
-
-def path_to_key(path: list[str]) -> str:
-    return INDEX_PATH_SEPARATOR.join(path)
-
-
-def key_to_path(key: str) -> list[str]:
-    return key.split(INDEX_PATH_SEPARATOR)
 
 
 def intersection_handler(main_list: set[str], aux_list: set[str], use_intersection: bool, action: Callable[[list[str]], None]) -> None:

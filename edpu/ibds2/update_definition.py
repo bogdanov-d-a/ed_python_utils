@@ -1,8 +1,9 @@
 from threading import Lock
 from typing import Callable
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
-from .walkers import walk_def, walk_data
 from .def_file import DefFileData, save_def_file
+from .path_key_converter import path_to_key
+from .walkers import walk_def, walk_data
 from . import utils
 from concurrent.futures import ProcessPoolExecutor
 import os
@@ -54,7 +55,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
         if skip_mtime:
             return
 
-        def_data = def_walk.files[utils.path_to_key(data_path)]
+        def_data = def_walk.files[path_to_key(data_path)]
         data_path_abs = path_to_data_root(data_path)
         actual_mtime = utils.getmtime(data_path_abs, getmtime_progress_printer)
 

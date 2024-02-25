@@ -4,6 +4,7 @@ import shutil
 from threading import Lock
 from typing import Optional
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
+from .path_key_converter import path_to_key
 from .walkers import walk_def, walk_data
 from . import utils
 from concurrent.futures import ProcessPoolExecutor
@@ -107,7 +108,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         recycle_file_lists[hash_].append(data_path)
 
     def action_create_file(data_path: list[str]) -> None:
-        def_walk_data = def_walk.files[utils.path_to_key(data_path)]
+        def_walk_data = def_walk.files[path_to_key(data_path)]
         find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
 
         if find_file_by_hash_result is None:
@@ -120,7 +121,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
 
     def action_update_file(data_path: list[str]) -> None:
         data_path_abs = path_to_data_root(data_path)
-        def_walk_data = def_walk.files[utils.path_to_key(data_path)]
+        def_walk_data = def_walk.files[path_to_key(data_path)]
 
         if def_walk_data.mtime != utils.getmtime(data_path_abs, getmtime_progress_printer):
             if utils.hash_file(data_path_abs) != def_walk_data.hash_:
