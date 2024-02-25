@@ -1,5 +1,5 @@
-from .constants import *
 from .walkers import walk_def
+from .user_data import UserData
 from . import utils
 import os.path
 import re
@@ -10,7 +10,7 @@ def apply_bundle(user_data: UserData, storage_device: str, collection_alias: str
     collection_paths = utils.get_collection_paths(user_data, collection_alias, storage_device, storage_path_cache)
 
     def_walk = walk_def(collection_paths.def_)
-    bundle_slice = user_data[COLLECTION_DICT_KEY][collection_alias][BUNDLE_SLICES_KEY][bundle_slice_alias]
+    bundle_slice = user_data.collection_dict[collection_alias].bundle_slices[bundle_slice_alias]
 
     hash_to_data_map: dict[str, list[str]] = {}
 
@@ -25,7 +25,7 @@ def apply_bundle(user_data: UserData, storage_device: str, collection_alias: str
 
         hash_to_data_map[def_file_hash].append(os.path.join(collection_paths.get_data(), def_file_path))
 
-    bundles_path = user_data[BUNDLES_PATH_KEY]
+    bundles_path = user_data.bundles_path
     in_data = list(map(lambda item: (os.path.join(bundles_path, item + '.txt'), os.path.join(bundles_path, item + '.bin')), in_data_items))
     unused_hashes_path = os.path.join(bundles_path, 'unused_hashes.txt')
 

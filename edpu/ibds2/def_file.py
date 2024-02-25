@@ -1,6 +1,5 @@
 from __future__ import annotations
 import codecs
-from .constants import *
 
 
 class DefFileData:

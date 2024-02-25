@@ -1,9 +1,9 @@
 from threading import Lock
 from typing import Callable
+from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 from .walkers import walk_def, walk_data
 from .def_file import DefFileData, save_def_file
 from . import utils
-from .constants import *
 from concurrent.futures import ProcessPoolExecutor
 import os
 
@@ -13,7 +13,7 @@ def walk_data_with_mutex(path: str, mutex: Lock) -> dict[str, set[str]]:
         return walk_data(path)
 
 
-def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool, data_mutex: Lock) -> None:
+def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool, debug: bool, data_mutex: Lock) -> None:
     with ProcessPoolExecutor(2) as executor:
         data_walk_future = executor.submit(walk_data_with_mutex, root_data_path, data_mutex)
         def_walk_future = executor.submit(walk_def, root_def_path)
@@ -33,7 +33,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
         utils.makedirs_helper(def_path, root_def_path, True)
 
     def debug_remove(path: str) -> None:
-        if utils.debug:
+        if debug:
             print('debug_remove ' + path)
         else:
             os.remove(path)

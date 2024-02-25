@@ -3,10 +3,14 @@ from io import BufferedReader, BufferedWriter, TextIOWrapper
 import os
 import shutil
 from typing import Callable, Iterator, Optional
-from .constants import *
+from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
+from .user_data import UserData, StorageDevices, CollectionDict
 from edpu import file_hashing
 from edpu import user_interaction
 from edpu import storage_finder
+
+
+INDEX_PATH_SEPARATOR = '\\'
 
 
 def strip_crlf(str_: str) -> str:
@@ -100,7 +104,7 @@ def get_storage_device_list(storage_devices: StorageDevices) -> list[str]:
     storage_device_list: list[str] = []
 
     for device_name, device_data in storage_devices.items():
-        if device_data[IS_SCAN_AVAILABLE_KEY]:
+        if device_data.is_scan_available:
             storage_device_list.append(device_name)
 
     return storage_device_list
@@ -131,8 +135,8 @@ def pick_storage_device_multi(storage_devices: StorageDevices) -> list[str]:
 def get_bundle_aliases(user_data: UserData) -> list[str]:
     set_: set[str] = set()
 
-    for collection_data in user_data[COLLECTION_DICT_KEY].values():
-        set_ |= set(collection_data[BUNDLE_ALIASES_KEY].keys())
+    for collection_data in user_data.collection_dict.values():
+        set_ |= set(collection_data.bundle_aliases.keys())
 
     return sorted(set_)
 
@@ -174,23 +178,14 @@ class GetCollectionPathsResult:
 
 
 def get_collection_paths(user_data: UserData, collection_alias: str, storage_device_name: str, storage_path_cache: dict[str, str], find_data_path: bool=True) -> GetCollectionPathsResult:
-    collection_dict: CollectionDict = user_data[COLLECTION_DICT_KEY]
-    storage_devices: StorageDevices = user_data[STORAGE_DEVICES_KEY]
-    data_path: str = user_data[DATA_PATH_KEY]
-
-    collection_data = collection_dict[collection_alias]
-    collection_storage_devices: CollectionStorageDevices = collection_data[STORAGE_DEVICES_KEY]
-    collection_storage_device_data = collection_storage_devices[storage_device_name]
-    storage_device = storage_devices[storage_device_name]
-
     if find_data_path:
-        abs_data_path = collection_storage_device_data
-        if storage_device[IS_REMOVABLE_KEY]:
+        abs_data_path = user_data.collection_dict[collection_alias].storage_devices[storage_device_name]
+        if user_data.storage_devices[storage_device_name].is_removable:
             abs_data_path = get_storage_path(storage_device_name, storage_path_cache) + abs_data_path
     else:
         abs_data_path = None
 
-    abs_def_path = os.path.join(data_path, collection_alias, storage_device_name)
+    abs_def_path = os.path.join(user_data.data_path, collection_alias, storage_device_name)
 
     return GetCollectionPathsResult(abs_def_path, abs_data_path)
 
@@ -200,19 +195,18 @@ def get_bundle_file_name(bundle_alias: str, collection_alias: str, bundle_slice_
 
 
 def get_bundle_file_path(user_data: UserData, bundle_alias: str, collection_alias: str, bundle_slice_alias: str) -> str:
-    return os.path.join(user_data[BUNDLES_PATH_KEY], get_bundle_file_name(bundle_alias, collection_alias, bundle_slice_alias))
+    return os.path.join(user_data.bundles_path, get_bundle_file_name(bundle_alias, collection_alias, bundle_slice_alias))
 
 
 def get_bundle_snap_path(user_data: UserData, bundle_alias: str, collection_alias: str, bundle_slice_alias: str) -> str:
-    return os.path.join(user_data[BUNDLE_SNAPS_PATH_KEY], get_bundle_file_name(bundle_alias, collection_alias, bundle_slice_alias) + '.txt')
+    return os.path.join(user_data.bundle_snaps_path, get_bundle_file_name(bundle_alias, collection_alias, bundle_slice_alias) + '.txt')
 
 
 def get_all_aliases_for_storage_device(user_data: UserData, storage_device_name: str, find_data_path: bool=True) -> Iterator[tuple[str, GetCollectionPathsResult]]:
-    collection_dict: CollectionDict = user_data[COLLECTION_DICT_KEY]
     storage_path_cache: dict[str, str] = {}
 
-    for collection_alias, collection_data in collection_dict.items():
-        if storage_device_name in collection_data[STORAGE_DEVICES_KEY]:
+    for collection_alias, collection_data in user_data.collection_dict.items():
+        if storage_device_name in collection_data.storage_devices:
             collection_paths = get_collection_paths(user_data, collection_alias, storage_device_name, storage_path_cache, find_data_path)
             yield (collection_alias, collection_paths)
 

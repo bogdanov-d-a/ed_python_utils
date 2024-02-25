@@ -1,5 +1,5 @@
-from .constants import *
 from . import utils
+from .user_data import UserData
 from .walkers import walk_def
 from edpu import datetime_utils
 import os.path
@@ -11,7 +11,7 @@ def create_bundle(user_data: UserData, storage_device: str, bundle_alias: str, c
     collection_paths = utils.get_collection_paths(user_data, collection_alias, storage_device, storage_path_cache)
 
     def_walk = walk_def(collection_paths.def_)
-    bundle_slice = user_data[COLLECTION_DICT_KEY][collection_alias][BUNDLE_SLICES_KEY][bundle_slice_alias]
+    bundle_slice = user_data.collection_dict[collection_alias].bundle_slices[bundle_slice_alias]
 
     bundle_snap_path = utils.get_bundle_snap_path(user_data, bundle_alias, collection_alias, bundle_slice_alias)
     bundle_snap = utils.load_hashset_data(bundle_snap_path)
