@@ -13,7 +13,7 @@ from . import compare_definitions
 from . import create_bundle
 from . import update_data
 from . import update_definition
-from .user_data import UserData
+from .utils.user_data import UserData
 from . import walkers
 
 

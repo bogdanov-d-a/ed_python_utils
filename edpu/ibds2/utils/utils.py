@@ -4,7 +4,7 @@ import shutil
 from typing import Callable, Iterator, Optional
 from .mappers.type_prefix import type_to_prefix, prefix_to_type
 from .mappers.path_key import key_to_path
-from ..user_data import UserData, StorageDevices, CollectionDict
+from .user_data import UserData, StorageDevices, CollectionDict
 from edpu import file_hashing
 from edpu import user_interaction
 from edpu import storage_finder
