@@ -3,7 +3,7 @@ from typing import Callable
 from edpu.file_tree_walker import walk, TYPE_DIR, TYPE_FILE
 from .utils import utils
 from .def_file import DefFileData, load_def_file
-from .mappers.path_key import path_to_key
+from .utils.mappers.path_key import path_to_key
 
 
 def make_file_progress_printer(period: float, annotation: str, path_: str) -> Callable[[int], None]:
