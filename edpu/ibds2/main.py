@@ -8,11 +8,11 @@ from edpu import guided_directory_use
 from edpu import pause_at_end
 from edpu import user_interaction
 from .utils import utils
-from . import apply_bundle
-from . import compare_definitions
-from . import create_bundle
-from . import update_data
-from . import update_definition
+from .impl.bundle.apply import apply_bundle
+from .impl import compare_definitions
+from .impl.bundle.create import create_bundle
+from .impl.update.data import update_data
+from .impl.update.definition import update_definition
 from .utils.user_data import UserData
 from .utils import walkers
 
@@ -36,7 +36,7 @@ def run(user_data_raw: dict[str, Any]) -> None:
             with ProcessPoolExecutor(min(len(aliases), user_data.collection_processing_workers)) as executor:
                 futures = list(map(
                     lambda alias: executor.submit(
-                        update_definition.update_definition,
+                        update_definition,
                         alias[1].get_data(),
                         alias[1].def_,
                         user_data.skip_mtime,
@@ -74,7 +74,7 @@ def run(user_data_raw: dict[str, Any]) -> None:
             with ProcessPoolExecutor(min(len(aliases), user_data.collection_processing_workers)) as executor:
                 futures = list(map(
                     lambda alias: executor.submit(
-                        update_data.update_data,
+                        update_data,
                         alias[1].def_,
                         alias[1].get_data(),
                         alias[1].get_data() + 'Recycle',
@@ -142,7 +142,7 @@ def run(user_data_raw: dict[str, Any]) -> None:
                         continue
 
                     for bundle_slice_alias in collection_data.bundle_aliases[bundle_alias]:
-                        create_bundle.create_bundle(user_data, storage_device, bundle_alias, collection_alias, bundle_slice_alias)
+                        create_bundle(user_data, storage_device, bundle_alias, collection_alias, bundle_slice_alias)
                         print(collection_alias + ' - ' + bundle_slice_alias)
                         input()
 
@@ -155,7 +155,7 @@ def run(user_data_raw: dict[str, Any]) -> None:
             collection_alias = utils.pick_collection_alias(collection_dict)
             bundle_slice_alias = utils.pick_bundle_slice_alias(collection_dict[collection_alias].bundle_slices)
 
-            apply_bundle.apply_bundle(user_data, storage_device, collection_alias, bundle_slice_alias, user_data.apply_bundles)
+            apply_bundle(user_data, storage_device, collection_alias, bundle_slice_alias, user_data.apply_bundles)
 
         actions: list[tuple[str, str, Callable[[], None]]] = [
             ('s', 'Update definition', action_update_definition),

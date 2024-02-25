@@ -1,8 +1,8 @@
-from .utils import hashset
-from .utils import utils
-from .utils.copying_archiver import Packer
-from .utils.user_data import UserData
-from .utils.walkers import walk_def
+from ...utils import hashset
+from ...utils import utils
+from ...utils.copying_archiver import Packer
+from ...utils.user_data import UserData
+from ...utils.walkers import walk_def
 from edpu import datetime_utils
 import os.path
 import re

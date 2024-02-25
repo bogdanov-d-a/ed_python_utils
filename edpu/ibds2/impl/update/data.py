@@ -4,9 +4,9 @@ import shutil
 from threading import Lock
 from typing import Optional
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
-from .utils.mappers.path_key import path_to_key
-from .utils.walkers import walk_def, walk_data
-from .utils import utils
+from ...utils.mappers.path_key import path_to_key
+from ...utils.walkers import walk_def, walk_data
+from ...utils import utils
 from concurrent.futures import ProcessPoolExecutor
 
 

@@ -1,4 +1,4 @@
-from .utils.walkers import walk_def
+from ..utils.walkers import walk_def
 from concurrent.futures import ProcessPoolExecutor
 
 
