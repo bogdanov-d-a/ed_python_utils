@@ -1,8 +1,11 @@
-from typing import Any, Callable, Optional
+from typing import Callable, Optional, TypeVar
 
 
-def list_to_dict(list_: list[tuple[str, Any]]) -> dict[str, Any]:
-    result: dict[str, Any] = {}
+T = TypeVar('T')
+
+
+def list_to_dict(list_: list[tuple[str, T]]) -> dict[str, T]:
+    result: dict[str, T] = {}
 
     for key, value in list_:
         if key in result:
@@ -12,7 +15,7 @@ def list_to_dict(list_: list[tuple[str, Any]]) -> dict[str, Any]:
     return result
 
 
-def generate_cmds(list_: list[Any]) -> list[tuple[str, Any]]:
+def generate_cmds(list_: list[T]) -> list[tuple[str, T]]:
     cmds = '1234567890qwertyuiopasdfghjklzxcvbnm'
 
     if len(list_) > len(cmds):
@@ -99,8 +102,8 @@ def pick_str_option(prompt: str, options: dict[str, str]) -> str:
         return result
 
 
-def pick_str_option_ex(prompt: str, options: list[tuple[str, str, Any]]) -> Any:
-    pick: dict[str, str] = list_to_dict(list(map(lambda e: (e[0], e[1]), options)))
+def pick_str_option_ex(prompt: str, options: list[tuple[str, str, T]]) -> T:
+    pick = list_to_dict(list(map(lambda e: (e[0], e[1]), options)))
     result = list_to_dict(list(map(lambda e: (e[0], e[2]), options)))
     return result[pick_str_option(prompt, pick)]
 
