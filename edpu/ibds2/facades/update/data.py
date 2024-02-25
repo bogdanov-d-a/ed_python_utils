@@ -3,12 +3,13 @@ from ...utils.user_data import UserData
 
 def update_data(user_data: UserData) -> None:
     from ...impl.update.data import update_data as impl
+    from ...utils import user_interaction
     from ...utils import utils
     from concurrent.futures import ProcessPoolExecutor
     from multiprocessing import Manager
 
-    storage_device = utils.pick_storage_device(user_data.storage_devices)
-    source_storage_devices = utils.pick_storage_device_multi(user_data.storage_devices)
+    storage_device = user_interaction.pick_storage_device(user_data.storage_devices)
+    source_storage_devices = user_interaction.pick_storage_device_multi(user_data.storage_devices)
 
     aliases = list(utils.get_all_aliases_for_storage_device(user_data, storage_device))
 

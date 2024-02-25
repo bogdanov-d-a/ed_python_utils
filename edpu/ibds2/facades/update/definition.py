@@ -3,12 +3,13 @@ from ...utils.user_data import UserData
 
 def update_definition(user_data: UserData) -> None:
     from ...impl.update.definition import update_definition as impl
-    from ...utils import utils
+    from ...utils.user_interaction import pick_storage_device
+    from ...utils.utils import get_all_aliases_for_storage_device
     from concurrent.futures import ProcessPoolExecutor
     from multiprocessing import Manager
 
-    storage_device = utils.pick_storage_device(user_data.storage_devices)
-    aliases = list(utils.get_all_aliases_for_storage_device(user_data, storage_device))
+    storage_device = pick_storage_device(user_data.storage_devices)
+    aliases = list(get_all_aliases_for_storage_device(user_data, storage_device))
 
     manager = Manager()
     data_mutex = manager.Lock()
