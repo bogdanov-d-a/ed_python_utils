@@ -1,13 +1,14 @@
 from .walkers import walk_def
 from .user_data import UserData
-from . import utils
+from .utils import get_collection_paths
+from .copying_archiver import Unpacker
 import os.path
 import re
 
 
 def apply_bundle(user_data: UserData, storage_device: str, collection_alias: str, bundle_slice_alias: str, in_data_items: list[str]) -> None:
     storage_path_cache: dict[str, str] = {}
-    collection_paths = utils.get_collection_paths(user_data, collection_alias, storage_device, storage_path_cache)
+    collection_paths = get_collection_paths(user_data, collection_alias, storage_device, storage_path_cache)
 
     def_walk = walk_def(collection_paths.def_)
     bundle_slice = user_data.collection_dict[collection_alias].bundle_slices[bundle_slice_alias]
@@ -33,4 +34,4 @@ def apply_bundle(user_data: UserData, storage_device: str, collection_alias: str
         d = hash_to_data_map.get(key)
         return [] if d is None else d
 
-    utils.Unpacker(in_data, name_provider, unused_hashes_path).run()
+    Unpacker(in_data, name_provider, unused_hashes_path).run()

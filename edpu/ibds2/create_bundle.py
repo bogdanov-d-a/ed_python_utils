@@ -1,4 +1,5 @@
 from . import utils
+from .copying_archiver import Packer
 from .user_data import UserData
 from .walkers import walk_def
 from edpu import datetime_utils
@@ -33,6 +34,6 @@ def create_bundle(user_data: UserData, storage_device: str, bundle_alias: str, c
             hash_to_data_map[def_file_hash] = os.path.join(collection_paths.get_data(), def_file_path)
 
     bundle_file_path = utils.get_bundle_file_path(user_data, bundle_alias, collection_alias, bundle_slice_alias) + '-' + datetime_utils.get_now_datetime_str()
-    utils.Packer(list(hash_to_data_map.items()), bundle_file_path + '.txt', bundle_file_path + '.bin').run()
+    Packer(list(hash_to_data_map.items()), bundle_file_path + '.txt', bundle_file_path + '.bin').run()
 
     utils.save_hashset_data(bundle_snap, bundle_snap_path)
