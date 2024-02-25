@@ -1,16 +1,14 @@
 from __future__ import annotations
-import os
-import shutil
-from typing import Callable, Iterator, Optional
-from .mappers.path_key import key_to_path
 from .user_data import UserData, StorageDevices
-from edpu import file_hashing
-from edpu import storage_finder
+from typing import Callable, Iterator, Optional
+import os
 
 
 def hash_file(path: str) -> str:
+    from edpu.file_hashing import sha512_file
+
     print('Calculating hash for ' + path)
-    return file_hashing.sha512_file(path)
+    return sha512_file(path)
 
 
 def path_to_root(path: list[str], root: str) -> str:
@@ -27,6 +25,8 @@ def makedirs_helper(path: list[str], root: str, is_file: bool) -> None:
 
 
 def intersection_handler(main_list: set[str], aux_list: set[str], use_intersection: bool, action: Callable[[list[str]], None]) -> None:
+    from .mappers.path_key import key_to_path
+
     for main_content in main_list:
         if (main_content in aux_list) == use_intersection:
             action(key_to_path(main_content))
@@ -52,12 +52,14 @@ def get_bundle_aliases(user_data: UserData) -> list[str]:
 
 
 def get_storage_path(storage_device_name: str, storage_path_cache: dict[str, str]) -> str:
+    from edpu.storage_finder import keep_getting_storage_path
+
     storage_path = storage_path_cache.get(storage_device_name)
 
     if storage_path is not None:
         return storage_path
 
-    storage_path = storage_finder.keep_getting_storage_path(storage_device_name)
+    storage_path = keep_getting_storage_path(storage_device_name)
     storage_path_cache[storage_device_name] = storage_path
     return storage_path
 
@@ -108,7 +110,9 @@ def get_all_aliases_for_storage_device(user_data: UserData, storage_device_name:
 
 
 def copy_no_overwrite(src: str, dst: str) -> None:
+    from shutil import copy
+
     if os.path.exists(dst):
         raise Exception('copy_no_overwrite')
 
-    shutil.copy(src, dst)
+    copy(src, dst)
