@@ -2,7 +2,6 @@ from __future__ import annotations
 import os
 import shutil
 from typing import Callable, Iterator, Optional
-from edpu.string_utils import strip_crlf
 from .mappers.type_prefix import type_to_prefix, prefix_to_type
 from .mappers.path_key import key_to_path
 from .user_data import UserData, StorageDevices, CollectionDict
@@ -177,23 +176,6 @@ def get_all_aliases_for_storage_device(user_data: UserData, storage_device_name:
         if storage_device_name in collection_data.storage_devices:
             collection_paths = get_collection_paths(user_data, collection_alias, storage_device_name, storage_path_cache, find_data_path)
             yield (collection_alias, collection_paths)
-
-
-def save_hashset_data(hashset_data: set[str], file_path: str) -> None:
-    with open(file_path, 'w') as output:
-        for hash_ in sorted(list(hashset_data)):
-            output.write(hash_ + '\n')
-
-
-def load_hashset_data(file_path: str) -> set[str]:
-    hashset_data: set[str] = set()
-
-    if os.path.isfile(file_path):
-        with open(file_path) as input:
-            for line in input.readlines():
-                hashset_data.add(strip_crlf(line))
-
-    return hashset_data
 
 
 def copy_no_overwrite(src: str, dst: str) -> None:
