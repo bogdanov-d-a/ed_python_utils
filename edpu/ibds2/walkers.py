@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Callable
 from edpu.file_tree_walker import walk, TYPE_DIR, TYPE_FILE
-from . import utils
+from .utils import utils
 from .def_file import DefFileData, load_def_file
 from .mappers.path_key import path_to_key
 

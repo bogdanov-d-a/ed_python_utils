@@ -1,5 +1,5 @@
 from . import hashset_data
-from . import utils
+from .utils import utils
 from .copying_archiver import Packer
 from .user_data import UserData
 from .walkers import walk_def

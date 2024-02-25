@@ -7,14 +7,13 @@ from edpu.file_tree_walker import TYPE_FILE
 from edpu import guided_directory_use
 from edpu import pause_at_end
 from edpu import user_interaction
-from . import utils
+from .utils import utils
 from . import apply_bundle
 from . import compare_definitions
 from . import create_bundle
 from . import update_data
 from . import update_definition
 from .user_data import UserData
-from . import utils
 from . import walkers
 
 

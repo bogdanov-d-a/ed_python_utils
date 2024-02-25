@@ -6,7 +6,7 @@ from typing import Optional
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 from .mappers.path_key import path_to_key
 from .walkers import walk_def, walk_data
-from . import utils
+from .utils import utils
 from concurrent.futures import ProcessPoolExecutor
 
 

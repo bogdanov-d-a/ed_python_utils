@@ -1,6 +1,6 @@
 from .walkers import walk_def
 from .user_data import UserData
-from .utils import get_collection_paths
+from .utils.utils import get_collection_paths
 from .copying_archiver import Unpacker
 import os.path
 import re
