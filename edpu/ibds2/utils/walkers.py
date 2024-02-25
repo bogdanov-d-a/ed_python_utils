@@ -3,6 +3,7 @@ from typing import Callable
 from edpu.file_tree_walker import walk, TYPE_DIR, TYPE_FILE
 from . import utils
 from .def_file import DefFile
+from .mappers.def_data_path import def_path_to_data_path
 from .mappers.path_key import path_to_key
 
 
@@ -47,7 +48,7 @@ def walk_def(def_path: str) -> WalkDefResult:
     result_files: WalkDefFiles = {}
 
     for def_file_path in def_walk:
-        type_, data_path = utils.def_path_to_data_path(def_file_path)
+        type_, data_path = def_path_to_data_path(def_file_path)
         data_path_key = path_to_key(data_path)
 
         if type_ == TYPE_FILE:

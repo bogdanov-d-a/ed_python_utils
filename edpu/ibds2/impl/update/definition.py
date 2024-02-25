@@ -2,6 +2,7 @@ from threading import Lock
 from typing import Callable
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 from ...utils.def_file import DefFile
+from ...utils.mappers.def_data_path import data_path_to_def_path
 from ...utils.mappers.path_key import path_to_key
 from ...utils.walkers import walk_def, walk_data
 from ...utils import mtime
@@ -64,7 +65,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
             DefFile(utils.hash_file(data_path_abs), actual_mtime).save(path_to_def_root(def_path))
 
     def intersection_handler_with_def_path(content_type: str, main_list: set[str], aux_list: set[str], use_intersection: bool, action: Callable[[list[str], list[str]], None]):
-        utils.intersection_handler(main_list, aux_list, use_intersection, lambda data_path: action(data_path, utils.data_path_to_def_path(data_path, content_type)))
+        utils.intersection_handler(main_list, aux_list, use_intersection, lambda data_path: action(data_path, data_path_to_def_path(data_path, content_type)))
 
     with data_mutex:
         intersection_handler_with_def_path(TYPE_DIR, def_walk.dirs, data_walk[TYPE_DIR], False, action_remove)
