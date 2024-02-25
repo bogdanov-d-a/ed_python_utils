@@ -6,6 +6,7 @@ from typing import Optional
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 from ...utils.mappers.path_key import path_to_key
 from ...utils.walkers import walk_def, walk_data
+from ...utils import mtime
 from ...utils import utils
 from concurrent.futures import ProcessPoolExecutor
 
@@ -45,8 +46,8 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
     recycle_file_lists: dict[str, list[list[str]]] = {}
     empty_dirs: set[tuple] = set()
 
-    getmtime_progress_printer = utils.make_getmtime_progress_printer(root_data_path)
-    setmtime_progress_printer = utils.make_setmtime_progress_printer(root_data_path)
+    getmtime_progress_printer = mtime.make_getmtime_progress_printer(root_data_path)
+    setmtime_progress_printer = mtime.make_setmtime_progress_printer(root_data_path)
 
     def path_to_data_root(path: list[str]) -> str:
         return utils.path_to_root(path, root_data_path)
@@ -117,13 +118,13 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
 
         data_path_abs = path_to_data_root(data_path)
         copy_or_move_file(find_file_by_hash_result.path_, data_path_abs, find_file_by_hash_result.can_move)
-        utils.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer)
+        mtime.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer)
 
     def action_update_file(data_path: list[str]) -> None:
         data_path_abs = path_to_data_root(data_path)
         def_walk_data = def_walk.files[path_to_key(data_path)]
 
-        if def_walk_data.mtime != utils.getmtime(data_path_abs, getmtime_progress_printer):
+        if def_walk_data.mtime != mtime.getmtime(data_path_abs, getmtime_progress_printer):
             if utils.hash_file(data_path_abs) != def_walk_data.hash_:
                 find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
 
@@ -134,7 +135,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
                 move_for_recycling(data_path)
                 copy_or_move_file(find_file_by_hash_result.path_, data_path_abs, find_file_by_hash_result.can_move)
 
-            utils.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer)
+            mtime.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer)
 
     def action_remove_empty_dir(data_path: list[str]) -> None:
         empty_dirs.add(tuple(data_path))

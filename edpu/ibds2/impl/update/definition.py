@@ -4,6 +4,7 @@ from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 from ...utils.def_file import DefFile
 from ...utils.mappers.path_key import path_to_key
 from ...utils.walkers import walk_def, walk_data
+from ...utils import mtime
 from ...utils import utils
 from concurrent.futures import ProcessPoolExecutor
 import os
@@ -22,7 +23,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
         data_walk = data_walk_future.result()
         def_walk = def_walk_future.result()
 
-    getmtime_progress_printer = utils.make_getmtime_progress_printer(root_data_path)
+    getmtime_progress_printer = mtime.make_getmtime_progress_printer(root_data_path)
 
     def path_to_def_root(path: list[str]) -> str:
         return utils.path_to_root(path, root_def_path)
@@ -49,7 +50,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
     def action_create_file(data_path: list[str], def_path: list[str]) -> None:
         data_path_abs = path_to_data_root(data_path)
         def_makedirs_helper(def_path)
-        DefFile(utils.hash_file(data_path_abs), utils.getmtime(data_path_abs, getmtime_progress_printer)).save(path_to_def_root(def_path))
+        DefFile(utils.hash_file(data_path_abs), mtime.getmtime(data_path_abs, getmtime_progress_printer)).save(path_to_def_root(def_path))
 
     def action_update_file(data_path: list[str], def_path: list[str]) -> None:
         if skip_mtime:
@@ -57,7 +58,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
 
         def_data = def_walk.files[path_to_key(data_path)]
         data_path_abs = path_to_data_root(data_path)
-        actual_mtime = utils.getmtime(data_path_abs, getmtime_progress_printer)
+        actual_mtime = mtime.getmtime(data_path_abs, getmtime_progress_printer)
 
         if def_data.mtime != actual_mtime:
             DefFile(utils.hash_file(data_path_abs), actual_mtime).save(path_to_def_root(def_path))
