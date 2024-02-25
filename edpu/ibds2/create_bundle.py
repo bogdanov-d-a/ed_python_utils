@@ -1,4 +1,4 @@
-from . import hashset_data
+from .utils import hashset
 from .utils import utils
 from .copying_archiver import Packer
 from .utils.user_data import UserData
@@ -16,7 +16,7 @@ def create_bundle(user_data: UserData, storage_device: str, bundle_alias: str, c
     bundle_slice = user_data.collection_dict[collection_alias].bundle_slices[bundle_slice_alias]
 
     bundle_snap_path = utils.get_bundle_snap_path(user_data, bundle_alias, collection_alias, bundle_slice_alias)
-    bundle_snap = hashset_data.load(bundle_snap_path)
+    bundle_snap = hashset.load(bundle_snap_path)
 
     hash_to_data_map: dict[str, str] = {}
 
@@ -37,4 +37,4 @@ def create_bundle(user_data: UserData, storage_device: str, bundle_alias: str, c
     bundle_file_path = utils.get_bundle_file_path(user_data, bundle_alias, collection_alias, bundle_slice_alias) + '-' + datetime_utils.get_now_datetime_str()
     Packer(list(hash_to_data_map.items()), bundle_file_path + '.txt', bundle_file_path + '.bin').run()
 
-    hashset_data.save(bundle_snap, bundle_snap_path)
+    hashset.save(bundle_snap, bundle_snap_path)
