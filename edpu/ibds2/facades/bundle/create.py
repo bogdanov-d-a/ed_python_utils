@@ -4,9 +4,9 @@ from ...utils.user_data import UserData
 def create_bundle(user_data: UserData) -> None:
     from ...impl.bundle.create import create_bundle as impl
     from ...utils import utils
-    from edpu import guided_directory_use
+    from edpu.guided_directory_use import PathKeeper
 
-    def bundles_path_callback(_) -> None:
+    with PathKeeper(user_data.bundles_path):
         storage_device = utils.pick_storage_device(user_data.storage_devices)
         bundle_alias = utils.pick_bundle_alias(utils.get_bundle_aliases(user_data))
 
@@ -18,5 +18,3 @@ def create_bundle(user_data: UserData) -> None:
                 impl(user_data, storage_device, bundle_alias, collection_alias, bundle_slice_alias)
                 print(collection_alias + ' - ' + bundle_slice_alias)
                 input()
-
-    guided_directory_use.run_with_path(user_data.bundles_path, bundles_path_callback)
