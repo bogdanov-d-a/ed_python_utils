@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Callable
 from edpu.file_tree_walker import walk, TYPE_DIR, TYPE_FILE
 from .utils import utils
-from .def_file import DefFileData, load_def_file
+from .utils.def_file import DefFile
 from .utils.mappers.path_key import path_to_key
 
 
@@ -27,7 +27,7 @@ def walk_data(data_path: str) -> dict[str, set[str]]:
 
 
 WalkDefDirs = set[str]
-WalkDefFiles = dict[str, DefFileData]
+WalkDefFiles = dict[str, DefFile]
 
 class WalkDefResult:
     def __init__(self: WalkDefResult, dirs: WalkDefDirs, files: WalkDefFiles) -> None:
@@ -52,7 +52,7 @@ def walk_def(def_path: str) -> WalkDefResult:
 
         if type_ == TYPE_FILE:
             abs_def_file_path = utils.path_to_root(def_file_path, def_path)
-            result_files[data_path_key] = load_def_file(abs_def_file_path)
+            result_files[data_path_key] = DefFile.load(abs_def_file_path)
         else:
             result_dirs.add(data_path_key)
 

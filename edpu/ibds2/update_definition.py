@@ -1,7 +1,7 @@
 from threading import Lock
 from typing import Callable
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
-from .def_file import DefFileData, save_def_file
+from .utils.def_file import DefFile
 from .utils.mappers.path_key import path_to_key
 from .walkers import walk_def, walk_data
 from .utils import utils
@@ -49,7 +49,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
     def action_create_file(data_path: list[str], def_path: list[str]) -> None:
         data_path_abs = path_to_data_root(data_path)
         def_makedirs_helper(def_path)
-        save_def_file(path_to_def_root(def_path), DefFileData(utils.hash_file(data_path_abs), utils.getmtime(data_path_abs, getmtime_progress_printer)))
+        DefFile(utils.hash_file(data_path_abs), utils.getmtime(data_path_abs, getmtime_progress_printer)).save(path_to_def_root(def_path))
 
     def action_update_file(data_path: list[str], def_path: list[str]) -> None:
         if skip_mtime:
@@ -60,7 +60,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
         actual_mtime = utils.getmtime(data_path_abs, getmtime_progress_printer)
 
         if def_data.mtime != actual_mtime:
-            save_def_file(path_to_def_root(def_path), DefFileData(utils.hash_file(data_path_abs), actual_mtime))
+            DefFile(utils.hash_file(data_path_abs), actual_mtime).save(path_to_def_root(def_path))
 
     def intersection_handler_with_def_path(content_type: str, main_list: set[str], aux_list: set[str], use_intersection: bool, action: Callable[[list[str], list[str]], None]):
         utils.intersection_handler(main_list, aux_list, use_intersection, lambda data_path: action(data_path, utils.data_path_to_def_path(data_path, content_type)))
