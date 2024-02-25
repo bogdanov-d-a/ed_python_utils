@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import os.path
 from typing import Callable
@@ -33,3 +34,14 @@ def run_with_path(path_: str, fn: Callable[[str], None]) -> None:
         fn(path_)
     finally:
         remove(path_)
+
+
+class PathKeeper:
+    def __init__(self: PathKeeper, path: str) -> None:
+        self._path = path
+
+    def __enter__(self: PathKeeper):
+        mkdir(self._path)
+
+    def __exit__(self: PathKeeper, exc_type, exc_value, exc_tb):
+        remove(self._path)
