@@ -1,9 +1,9 @@
 from __future__ import annotations
 from typing import Callable
 from edpu.file_tree_walker import walk, TYPE_DIR, TYPE_FILE
-from .utils import utils
-from .utils.def_file import DefFile
-from .utils.mappers.path_key import path_to_key
+from . import utils
+from .def_file import DefFile
+from .mappers.path_key import path_to_key
 
 
 def make_file_progress_printer(period: float, annotation: str, path_: str) -> Callable[[int], None]:

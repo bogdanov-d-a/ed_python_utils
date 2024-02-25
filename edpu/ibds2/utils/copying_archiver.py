@@ -1,7 +1,7 @@
 from __future__ import annotations
 from io import BufferedReader, BufferedWriter, TextIOWrapper
 from typing import Callable, Iterator, Optional
-from .utils.utils import copy_no_overwrite
+from .utils import copy_no_overwrite
 from edpu.string_utils import strip_crlf
 from os import makedirs
 from os.path import exists, dirname

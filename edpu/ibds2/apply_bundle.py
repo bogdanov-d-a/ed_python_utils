@@ -1,7 +1,7 @@
-from .walkers import walk_def
+from .utils.walkers import walk_def
 from .utils.user_data import UserData
 from .utils.utils import get_collection_paths
-from .copying_archiver import Unpacker
+from .utils.copying_archiver import Unpacker
 import os.path
 import re
 

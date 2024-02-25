@@ -14,7 +14,7 @@ from . import create_bundle
 from . import update_data
 from . import update_definition
 from .utils.user_data import UserData
-from . import walkers
+from .utils import walkers
 
 
 def same_defs_helper(args: tuple[str, str]) -> bool:
