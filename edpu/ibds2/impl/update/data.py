@@ -4,7 +4,7 @@ import shutil
 from threading import Lock
 from typing import Optional
 from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
-from ...utils.mappers.path_key import path_to_key
+from ...utils.mappers.path_key import path_to_key, key_to_path
 from ...utils.walkers import walk_def, walk_data
 from ...utils import mtime
 from ...utils import utils
@@ -38,7 +38,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
                 hash_ = data.hash_
 
                 if hash_ not in data_source_hash_to_location:
-                    data_source_hash_to_location[hash_] = (utils.key_to_path(path_), data_source_data_path)
+                    data_source_hash_to_location[hash_] = (key_to_path(path_), data_source_data_path)
 
         def_walk = def_walk_future.result()
         data_walk = data_walk_future.result()
