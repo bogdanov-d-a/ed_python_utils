@@ -2,16 +2,15 @@ from ...utils.user_data import UserData
 
 
 def update_data(user_data: UserData) -> None:
-    from ...impl.update.data import update_data as impl
     from ...utils import user_interaction
-    from ...utils import utils
+    from ...utils.utils import get_all_aliases_for_storage_device
     from concurrent.futures import ProcessPoolExecutor
     from multiprocessing import Manager
 
     storage_device = user_interaction.pick_storage_device(user_data.storage_devices)
     source_storage_devices = user_interaction.pick_storage_device_multi(user_data.storage_devices)
 
-    aliases = list(utils.get_all_aliases_for_storage_device(user_data, storage_device))
+    aliases = list(get_all_aliases_for_storage_device(user_data, storage_device))
 
     storage_path_cache: dict[str, str] = {}
 
@@ -21,7 +20,9 @@ def update_data(user_data: UserData) -> None:
 
         for source_storage_device in source_storage_devices:
             if source_storage_device in collection_data.storage_devices:
-                collection_paths = utils.get_collection_paths(user_data, collection_alias, source_storage_device, storage_path_cache)
+                from ...utils.path import get_collection_paths
+
+                collection_paths = get_collection_paths(user_data, collection_alias, source_storage_device, storage_path_cache)
                 data_sources.append((collection_paths.def_, collection_paths.get_data()))
 
         return data_sources
@@ -30,6 +31,8 @@ def update_data(user_data: UserData) -> None:
     data_mutex = manager.Lock()
 
     with ProcessPoolExecutor(min(len(aliases), user_data.collection_processing_workers)) as executor:
+        from ...impl.update.data import update_data as impl
+
         futures = list(map(
             lambda alias: executor.submit(
                 impl,

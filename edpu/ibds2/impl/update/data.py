@@ -1,23 +1,22 @@
 from __future__ import annotations
-import os
-import shutil
 from threading import Lock
-from typing import Optional
-from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
-from ...utils.mappers.path_key import path_to_key, key_to_path
-from ...utils.walkers import walk_def, walk_data
-from ...utils import mtime
-from ...utils import utils
-from concurrent.futures import ProcessPoolExecutor
 
 
 def walk_data_with_mutex(path: str, mutex: Lock) -> dict[str, set[str]]:
+    from ...utils.walkers import walk_data
+
     with mutex:
         return walk_data(path)
 
 
 def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]], data_mutex: Lock) -> None:
+    from ...utils import mtime
+    from concurrent.futures import ProcessPoolExecutor
+    from typing import Optional
+
     with ProcessPoolExecutor(min(2 + len(data_sources), 4)) as executor:
+        from ...utils.walkers import walk_def
+
         def_walk_future = executor.submit(walk_def, root_def_path)
         data_walk_future = executor.submit(walk_data_with_mutex, root_data_path, data_mutex)
 
@@ -38,6 +37,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
                 hash_ = data.hash_
 
                 if hash_ not in data_source_hash_to_location:
+                    from ...utils.mappers.path_key import key_to_path
                     data_source_hash_to_location[hash_] = (key_to_path(path_), data_source_data_path)
 
         def_walk = def_walk_future.result()
@@ -50,13 +50,16 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
     setmtime_progress_printer = mtime.make_setmtime_progress_printer(root_data_path)
 
     def path_to_data_root(path: list[str]) -> str:
-        return utils.path_to_root(path, root_data_path)
+        from ...utils.path import path_to_root
+        return path_to_root(path, root_data_path)
 
     def path_to_data_recycle_root(path: list[str]) -> str:
-        return utils.path_to_root(path, root_data_path_recycle)
+        from ...utils.path import path_to_root
+        return path_to_root(path, root_data_path_recycle)
 
     def data_recycle_makedirs_helper(data_path: list[str]) -> None:
-        utils.makedirs_helper(data_path, root_data_path_recycle, True)
+        from ...utils.file import makedirs_helper
+        makedirs_helper(data_path, root_data_path_recycle, True)
 
     class FindFileByHashResult:
         def __init__(self: FindFileByHashResult, path_: str, can_move: bool) -> None:
@@ -74,34 +77,44 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         data_source_location = data_source_hash_to_location.get(hash_)
 
         if data_source_location is not None:
-            return FindFileByHashResult(utils.path_to_root(data_source_location[0], data_source_location[1]), False)
+            from ...utils.path import path_to_root
+            return FindFileByHashResult(path_to_root(data_source_location[0], data_source_location[1]), False)
 
         return None
 
     def copy_no_overwrite(src: str, dst: str) -> None:
-        if os.path.exists(dst):
+        from os.path import exists
+        from shutil import copy
+
+        if exists(dst):
             raise Exception()
 
         print('Copying ' + src + ' to ' + dst)
-        shutil.copy(src, dst)
+        copy(src, dst)
 
     def copy_or_move_file(src: str, dst: str, move: bool) -> None:
         if not move:
             copy_no_overwrite(src, dst)
         else:
-            os.rename(src, dst)
+            from os import rename
+            rename(src, dst)
 
     def move_for_recycling(path_: list[str]) -> None:
-        os.makedirs(root_data_path_recycle, exist_ok=True)
+        from os import makedirs, rename
+
+        makedirs(root_data_path_recycle, exist_ok=True)
         data_recycle_makedirs_helper(path_)
-        os.rename(path_to_data_root(path_), path_to_data_recycle_root(path_))
+        rename(path_to_data_root(path_), path_to_data_recycle_root(path_))
 
     def action_create_dir(data_path: list[str]) -> None:
-        utils.makedirs_helper(data_path, root_data_path, False)
+        from ...utils.file import makedirs_helper
+        makedirs_helper(data_path, root_data_path, False)
 
     def action_recycle_file(data_path: list[str]) -> None:
+        from ...utils.file import hash_file
+
         data_path_abs = path_to_data_root(data_path)
-        hash_ = utils.hash_file(data_path_abs)
+        hash_ = hash_file(data_path_abs)
 
         if hash_ not in recycle_file_lists:
             recycle_file_lists[hash_] = []
@@ -109,6 +122,8 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         recycle_file_lists[hash_].append(data_path)
 
     def action_create_file(data_path: list[str]) -> None:
+        from ...utils.mappers.path_key import path_to_key
+
         def_walk_data = def_walk.files[path_to_key(data_path)]
         find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
 
@@ -121,11 +136,15 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         mtime.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer)
 
     def action_update_file(data_path: list[str]) -> None:
+        from ...utils.mappers.path_key import path_to_key
+
         data_path_abs = path_to_data_root(data_path)
         def_walk_data = def_walk.files[path_to_key(data_path)]
 
         if def_walk_data.mtime != mtime.getmtime(data_path_abs, getmtime_progress_printer):
-            if utils.hash_file(data_path_abs) != def_walk_data.hash_:
+            from ...utils.file import hash_file
+
+            if hash_file(data_path_abs) != def_walk_data.hash_:
                 find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
 
                 if find_file_by_hash_result is None:
@@ -143,8 +162,11 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
     def remove_empty_dir() -> bool:
         for empty_dir in list(empty_dirs):
             try:
-                os.rmdir(path_to_data_root(list(empty_dir)))
+                from os import rmdir
+
+                rmdir(path_to_data_root(list(empty_dir)))
                 empty_dirs.remove(empty_dir)
+
                 return True
             except:
                 pass
@@ -152,19 +174,22 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         return False
 
     with data_mutex:
-        utils.intersection_handler(def_walk.dirs, data_walk[TYPE_DIR], False, action_create_dir)
+        from ...utils.utils import intersection_handler
+        from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
+
+        intersection_handler(def_walk.dirs, data_walk[TYPE_DIR], False, action_create_dir)
 
         def_walk_file_keys = set(def_walk.files.keys())
 
-        utils.intersection_handler(data_walk[TYPE_FILE], def_walk_file_keys, False, action_recycle_file)
-        utils.intersection_handler(def_walk_file_keys, data_walk[TYPE_FILE], False, action_create_file)
-        utils.intersection_handler(def_walk_file_keys, data_walk[TYPE_FILE], True, action_update_file)
+        intersection_handler(data_walk[TYPE_FILE], def_walk_file_keys, False, action_recycle_file)
+        intersection_handler(def_walk_file_keys, data_walk[TYPE_FILE], False, action_create_file)
+        intersection_handler(def_walk_file_keys, data_walk[TYPE_FILE], True, action_update_file)
 
         for recycle_files in recycle_file_lists.values():
             for recycle_file in recycle_files:
                 move_for_recycling(recycle_file)
 
-        utils.intersection_handler(data_walk[TYPE_DIR], def_walk.dirs, False, action_remove_empty_dir)
+        intersection_handler(data_walk[TYPE_DIR], def_walk.dirs, False, action_remove_empty_dir)
 
         while len(empty_dirs) > 0:
             if not remove_empty_dir():

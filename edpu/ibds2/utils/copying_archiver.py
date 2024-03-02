@@ -1,13 +1,9 @@
 from __future__ import annotations
 from io import BufferedReader, BufferedWriter, TextIOWrapper
 from typing import Callable, Iterator, Optional
-from .utils import copy_no_overwrite
-from edpu.string_utils import strip_crlf
-from os import makedirs
-from os.path import exists, dirname
 
 
-def read_in_chunks(file_object: BufferedReader, size: Optional[int]=None, chunk_size: int=1024*1024) -> Iterator[bytes]:
+def _read_in_chunks(file_object: BufferedReader, size: Optional[int]=None, chunk_size: int=1024*1024) -> Iterator[bytes]:
     """Lazy function (generator) to read a file piece by piece.
     Default chunk size: 1M."""
 
@@ -32,17 +28,17 @@ def read_in_chunks(file_object: BufferedReader, size: Optional[int]=None, chunk_
         yield data
 
 
-def copy_in_chunks(in_: BufferedReader, out_: BufferedWriter, size: Optional[int]=None, chunk_size: int=1024*1024) -> int:
+def _copy_in_chunks(in_: BufferedReader, out_: BufferedWriter, size: Optional[int]=None, chunk_size: int=1024*1024) -> int:
     processed = 0
 
-    for in_chunk in read_in_chunks(in_, size, chunk_size):
+    for in_chunk in _read_in_chunks(in_, size, chunk_size):
         out_.write(in_chunk)
         processed += len(in_chunk)
 
     return processed
 
 
-def parse_ref_line(line: str) -> tuple[str, str]:
+def _parse_ref_line(line: str) -> tuple[str, str]:
     si = line.find(' ')
 
     if si == -1:
@@ -66,7 +62,7 @@ class Packer:
         for in_data_key, in_data_path in self._in_data:
             with open(in_data_path, 'rb') as in_data_file:
                 print('Packing ' + in_data_path)
-                copy_size = copy_in_chunks(in_data_file, out_bin)
+                copy_size = _copy_in_chunks(in_data_file, out_bin)
                 out_ref.write(str(copy_size) + ' ' + in_data_key + '\n')
 
 
@@ -89,8 +85,12 @@ class Unpacker:
 
     def _unpack(self: Unpacker, ref: TextIOWrapper, bin: BufferedReader) -> None:
         for ref_line in ref.readlines():
+            from edpu.string_utils import strip_crlf
+            from os import makedirs
+            from os.path import exists, dirname
+
             ref_line = strip_crlf(ref_line)
-            ref_line = parse_ref_line(ref_line)
+            ref_line = _parse_ref_line(ref_line)
 
             out_size = int(ref_line[0])
             out_key = ref_line[1]
@@ -111,10 +111,12 @@ class Unpacker:
             makedirs(dirname(out_name), exist_ok=True)
 
             with open(out_name, 'wb') as out:
-                if copy_in_chunks(bin, out, out_size) != out_size:
+                if _copy_in_chunks(bin, out, out_size) != out_size:
                     raise Exception('copy_in_chunks(bin, out, out_size) != out_size')
 
             for out_name in out_names[1:]:
+                from .file import copy_no_overwrite
+
                 print('Copying ' + out_name)
                 makedirs(dirname(out_name), exist_ok=True)
                 copy_no_overwrite(out_names[0], out_name)

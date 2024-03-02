@@ -9,15 +9,16 @@ def same_defs_helper(args: tuple[str, str]) -> bool:
 
 
 def compare_definitions(user_data: UserData) -> None:
-    from ..utils import utils
     from ..utils.user_interaction import pick_storage_device
     from concurrent.futures import ProcessPoolExecutor
 
     def get_def_paths(storage_device: str) -> dict[str, str]:
+        from ..utils.utils import get_all_aliases_for_storage_device
+
         return {
             collection_alias: collection_paths.def_
             for collection_alias, collection_paths
-            in utils.get_all_aliases_for_storage_device(user_data, storage_device, find_data_path=False)
+            in get_all_aliases_for_storage_device(user_data, storage_device, find_data_path=False)
         }
 
     def_paths_a = get_def_paths(pick_storage_device(user_data.storage_devices))

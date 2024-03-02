@@ -12,19 +12,20 @@ class DefFile:
         return False
 
     def save(self: DefFile, path: str) -> None:
-        import codecs
+        from codecs import open
 
-        with codecs.open(path, 'w', 'utf-8-sig') as file:
+        with open(path, 'w', 'utf-8-sig') as file:
             for str_ in [self.hash_, str(self.mtime)]:
                 file.write(str_)
                 file.write('\n')
 
     @staticmethod
     def load(path: str) -> DefFile:
-        from edpu.string_utils import strip_crlf
-        import codecs
+        from codecs import open
 
-        with codecs.open(path, 'r', 'utf-8-sig') as file:
+        with open(path, 'r', 'utf-8-sig') as file:
+            from edpu.string_utils import strip_crlf
+
             def non_empty(str_: str) -> str:
                 str_ = strip_crlf(str_)
                 if len(str_) == 0:

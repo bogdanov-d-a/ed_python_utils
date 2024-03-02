@@ -1,9 +1,10 @@
 from .user_data import CollectionDict, StorageDevices
-from .utils import get_storage_device_list
 from edpu import user_interaction
 
 
 def pick_storage_device(storage_devices: StorageDevices) -> str:
+    from .utils import get_storage_device_list
+
     storage_device_list = get_storage_device_list(storage_devices)
     storage_device_list_cmds = user_interaction.generate_cmds(storage_device_list)
     storage_device_list_cmds_dict = user_interaction.list_to_dict(storage_device_list_cmds)
@@ -13,6 +14,8 @@ def pick_storage_device(storage_devices: StorageDevices) -> str:
 
 
 def pick_storage_device_multi(storage_devices: StorageDevices) -> list[str]:
+    from .utils import get_storage_device_list
+
     storage_device_list = get_storage_device_list(storage_devices)
     storage_device_list_cmds = user_interaction.generate_cmds(storage_device_list)
     storage_device_list_cmds_dict = user_interaction.list_to_dict(storage_device_list_cmds)

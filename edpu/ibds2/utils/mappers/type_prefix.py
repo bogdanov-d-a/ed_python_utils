@@ -1,11 +1,16 @@
-from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 from edpu.mapper import Mapper
 
 
-_mapper = Mapper([
-    (TYPE_DIR, 'd'),
-    (TYPE_FILE, 'f'),
-])
+def _get_mapper() -> Mapper:
+    from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
+
+    return Mapper([
+        (TYPE_DIR, 'd'),
+        (TYPE_FILE, 'f'),
+    ])
+
+
+_mapper = _get_mapper()
 
 
 type_to_prefix = _mapper.fwd
