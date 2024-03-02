@@ -44,7 +44,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         data_walk = data_walk_future.result()
 
     recycle_file_lists: dict[str, list[list[str]]] = {}
-    empty_dirs: set[tuple] = set()
+    empty_dirs: set[str] = set()
 
     getmtime_progress_printer = mtime.make_getmtime_progress_printer(root_data_path)
     setmtime_progress_printer = mtime.make_setmtime_progress_printer(root_data_path)
@@ -107,11 +107,12 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         rename(path_to_data_root(path_), path_to_data_recycle_root(path_))
 
     def remove_empty_dir() -> bool:
-        for empty_dir in list(empty_dirs):
+        for empty_dir in empty_dirs:
             try:
+                from ...utils.mappers.path_key import key_to_path
                 from os import rmdir
 
-                rmdir(path_to_data_root(list(empty_dir)))
+                rmdir(path_to_data_root(key_to_path(empty_dir)))
                 empty_dirs.remove(empty_dir)
 
                 return True
@@ -181,7 +182,8 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
                 move_for_recycling(recycle_file)
 
         for data_path in intersection(data_walk[TYPE_DIR], def_walk.dirs, IntersectionType.DIFFERENT):
-            empty_dirs.add(tuple(data_path))
+            from ...utils.mappers.path_key import path_to_key
+            empty_dirs.add(path_to_key(data_path))
 
         while len(empty_dirs) > 0:
             if not remove_empty_dir():
