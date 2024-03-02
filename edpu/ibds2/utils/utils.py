@@ -1,14 +1,20 @@
 from .path import GetCollectionPathsResult
 from .user_data import UserData, StorageDevices
-from typing import Callable, Iterator
+from enum import Enum
+from typing import Iterator
 
 
-def intersection_handler(main_list: set[str], aux_list: set[str], use_intersection: bool, action: Callable[[list[str]], None]) -> None:
+class IntersectionType(Enum):
+    MATCHING = 0
+    DIFFERENT = 1
+
+
+def intersection(main_list: set[str], aux_list: set[str], type: IntersectionType) -> Iterator[list[str]]:
     from .mappers.path_key import key_to_path
 
     for main_content in main_list:
-        if (main_content in aux_list) == use_intersection:
-            action(key_to_path(main_content))
+        if (main_content in aux_list) == (type == IntersectionType.MATCHING):
+            yield key_to_path(main_content)
 
 
 def get_storage_device_list(storage_devices: StorageDevices) -> list[str]:
