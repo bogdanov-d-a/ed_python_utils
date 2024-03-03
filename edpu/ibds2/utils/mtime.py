@@ -1,22 +1,25 @@
+from . import time
 from typing import Callable
 
 
-def getmtime(path: str, progress_fn: Callable[[], None]) -> float:
-    from os.path import getmtime
-
+def getmtime(path: str, progress_fn: Callable[[], None], collector: time.Collector) -> float:
     progress_fn()
-    return getmtime(path)
+
+    with time.get_perf_counter_measure(collector, time.Key.WORKER1_GETMTIME):
+        from os.path import getmtime
+        return getmtime(path)
 
 
 def make_getmtime_progress_printer(path_: str) -> Callable[[], None]:
     return _make_count_printer('getmtime', path_)
 
 
-def setmtime(path: str, time: float, progress_fn: Callable[[], None]) -> None:
-    from os import utime
-
+def setmtime(path: str, time_: float, progress_fn: Callable[[], None], collector: time.Collector) -> None:
     progress_fn()
-    utime(path, (time, time))
+
+    with time.get_perf_counter_measure(collector, time.Key.WORKER1_SETMTIME):
+        from os import utime
+        utime(path, (time_, time_))
 
 
 def make_setmtime_progress_printer(path_: str) -> Callable[[], None]:

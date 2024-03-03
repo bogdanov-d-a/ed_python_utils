@@ -1,27 +1,23 @@
+from ...utils import time
 from threading import Lock
 
 
-def walk_data_with_mutex(path: str, mutex: Lock) -> dict[str, set[str]]:
-    from ...utils.walkers import walk_data
-
-    with mutex:
-        return walk_data(path)
-
-
-def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool, debug: bool, data_mutex: Lock) -> None:
+def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool, debug: bool, data_mutex: Lock, collector: time.Collector) -> None:
     from ...utils import mtime
     from ...utils.utils import IntersectionType
     from concurrent.futures import ProcessPoolExecutor
     from typing import Iterator
 
     with ProcessPoolExecutor(2) as executor:
-        from ...utils.walkers import walk_def
+        from ...utils.walk_helpers import walk_def, walk_data
 
-        data_walk_future = executor.submit(walk_data_with_mutex, root_data_path, data_mutex)
+        data_walk_future = executor.submit(walk_data, root_data_path, data_mutex)
         def_walk_future = executor.submit(walk_def, root_def_path)
 
-        data_walk = data_walk_future.result()
-        def_walk = def_walk_future.result()
+        data_walk, data_collector = data_walk_future.result()
+        def_walk, def_collector = def_walk_future.result()
+
+        collector.merge(data_collector).merge(def_collector)
 
     getmtime_progress_printer = mtime.make_getmtime_progress_printer(root_data_path)
 
@@ -72,7 +68,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
 
             data_path_abs = path_to_data_root(data_path)
             def_makedirs_helper(def_path)
-            DefFile(hash_file(data_path_abs), mtime.getmtime(data_path_abs, getmtime_progress_printer)).save(path_to_def_root(def_path))
+            DefFile(hash_file(data_path_abs), mtime.getmtime(data_path_abs, getmtime_progress_printer, collector)).save(path_to_def_root(def_path))
 
         for data_path, def_path in intersection_with_def_path(TYPE_FILE, data_walk[TYPE_FILE], def_walk_file_keys, IntersectionType.MATCHING):
             from ...utils.mappers.path_key import path_to_key
@@ -82,7 +78,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
 
             def_data = def_walk.files[path_to_key(data_path)]
             data_path_abs = path_to_data_root(data_path)
-            actual_mtime = mtime.getmtime(data_path_abs, getmtime_progress_printer)
+            actual_mtime = mtime.getmtime(data_path_abs, getmtime_progress_printer, collector)
 
             if def_data.mtime != actual_mtime:
                 from ...utils.def_file import DefFile

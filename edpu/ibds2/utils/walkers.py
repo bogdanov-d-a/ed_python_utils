@@ -1,6 +1,6 @@
 from __future__ import annotations
-from typing import Callable
 from .def_file import DefFile
+from typing import Callable
 
 
 def make_file_progress_printer(period: float, annotation: str, path_: str) -> Callable[[int], None]:

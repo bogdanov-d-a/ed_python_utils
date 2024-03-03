@@ -1,32 +1,32 @@
 from __future__ import annotations
+from ...utils import time
 from threading import Lock
 
 
-def walk_data_with_mutex(path: str, mutex: Lock) -> dict[str, set[str]]:
-    from ...utils.walkers import walk_data
-
-    with mutex:
-        return walk_data(path)
-
-
-def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]], data_mutex: Lock) -> None:
+def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]], data_mutex: Lock, collector: time.Collector) -> None:
     from ...utils import mtime
     from concurrent.futures import ProcessPoolExecutor
+    from operator import itemgetter
     from typing import Optional
 
     with ProcessPoolExecutor(min(2 + len(data_sources), 4)) as executor:
-        from ...utils.walkers import walk_def
+        from ...utils.walk_helpers import walk_def, walk_data
 
         def_walk_future = executor.submit(walk_def, root_def_path)
-        data_walk_future = executor.submit(walk_data_with_mutex, root_data_path, data_mutex)
+        data_walk_future = executor.submit(walk_data, root_data_path, data_mutex)
 
-        data_source_defs = list(executor.map(
+        data_source_def_tuples = list(executor.map(
             walk_def,
             list(map(
                 lambda data_source: data_source[0],
                 data_sources
             ))
         ))
+
+        data_source_defs = list(map(itemgetter(0), data_source_def_tuples))
+
+        for data_source_collector in map(itemgetter(1), data_source_def_tuples):
+            collector.merge(data_source_collector)
 
         data_source_hash_to_location: dict[str, tuple[list[str], str]] = {}
 
@@ -40,8 +40,10 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
                     from ...utils.mappers.path_key import key_to_path
                     data_source_hash_to_location[hash_] = (key_to_path(path_), data_source_data_path)
 
-        def_walk = def_walk_future.result()
-        data_walk = data_walk_future.result()
+        def_walk, def_collector = def_walk_future.result()
+        data_walk, data_collector = data_walk_future.result()
+
+        collector.merge(def_collector).merge(data_collector)
 
     recycle_file_lists: dict[str, list[list[str]]] = {}
     empty_dirs: set[str] = set()
@@ -154,7 +156,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
 
             data_path_abs = path_to_data_root(data_path)
             copy_or_move_file(find_file_by_hash_result.path_, data_path_abs, find_file_by_hash_result.can_move)
-            mtime.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer)
+            mtime.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer, collector)
 
         for data_path in intersection(def_walk_file_keys, data_walk[TYPE_FILE], IntersectionType.MATCHING):
             from ...utils.mappers.path_key import path_to_key
@@ -162,7 +164,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
             data_path_abs = path_to_data_root(data_path)
             def_walk_data = def_walk.files[path_to_key(data_path)]
 
-            if def_walk_data.mtime != mtime.getmtime(data_path_abs, getmtime_progress_printer):
+            if def_walk_data.mtime != mtime.getmtime(data_path_abs, getmtime_progress_printer, collector):
                 from ...utils.file import hash_file
 
                 if hash_file(data_path_abs) != def_walk_data.hash_:
@@ -175,7 +177,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
                     move_for_recycling(data_path)
                     copy_or_move_file(find_file_by_hash_result.path_, data_path_abs, find_file_by_hash_result.can_move)
 
-                mtime.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer)
+                mtime.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer, collector)
 
         for recycle_files in recycle_file_lists.values():
             for recycle_file in recycle_files:
