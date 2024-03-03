@@ -4,52 +4,57 @@ from threading import Lock
 
 
 def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]], data_mutex: Lock, collector: time.Collector) -> None:
-    from ...utils import mtime
+    from ...utils.walkers import WalkDefResult
     from concurrent.futures import ProcessPoolExecutor
-    from operator import itemgetter
-    from typing import Optional
+    from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 
-    with ProcessPoolExecutor(min(2 + len(data_sources), 4)) as executor:
-        from ...utils.walk_helpers import walk_def, walk_data
-
-        def_walk_future = executor.submit(walk_def, root_def_path)
-        data_walk_future = executor.submit(walk_data, root_data_path, data_mutex)
+    def get_data_source_defs(executor: ProcessPoolExecutor) -> list[WalkDefResult]:
+        from ...utils.walk_helpers import walk_def
+        from operator import itemgetter
 
         data_source_def_tuples = list(executor.map(
             walk_def,
             list(map(
-                lambda data_source: data_source[0],
+                itemgetter(0),
                 data_sources
             ))
         ))
 
-        data_source_defs = list(map(itemgetter(0), data_source_def_tuples))
-
         for data_source_collector in map(itemgetter(1), data_source_def_tuples):
             collector.merge(data_source_collector)
 
-        data_source_hash_to_location: dict[str, tuple[list[str], str]] = {}
+        return list(map(itemgetter(0), data_source_def_tuples))
 
-        for data_source, data_source_def in zip(data_sources, data_source_defs):
+    def get_data_source_hash_to_location(executor: ProcessPoolExecutor) -> dict[str, tuple[list[str], str]]:
+        result: dict[str, tuple[list[str], str]] = {}
+
+        for data_source, data_source_def in zip(data_sources, get_data_source_defs(executor)):
             _, data_source_data_path = data_source
 
             for path_, data in data_source_def.files.items():
                 hash_ = data.hash_
 
-                if hash_ not in data_source_hash_to_location:
+                if hash_ not in result:
                     from ...utils.mappers.path_key import key_to_path
-                    data_source_hash_to_location[hash_] = (key_to_path(path_), data_source_data_path)
+                    result[hash_] = (key_to_path(path_), data_source_data_path)
 
-        def_walk, def_collector = def_walk_future.result()
-        data_walk, data_collector = data_walk_future.result()
+        return result
 
-        collector.merge(def_collector).merge(data_collector)
+    def load_data():
+        with ProcessPoolExecutor(min(2 + len(data_sources), 4)) as executor:
+            from ...utils.walk_helpers import walk_def, walk_data
 
-    recycle_file_lists: dict[str, list[list[str]]] = {}
-    empty_dirs: set[str] = set()
+            def_walk_future = executor.submit(walk_def, root_def_path)
+            data_walk_future = executor.submit(walk_data, root_data_path, data_mutex)
 
-    getmtime_progress_printer = mtime.make_getmtime_progress_printer(root_data_path)
-    setmtime_progress_printer = mtime.make_setmtime_progress_printer(root_data_path)
+            data_source_hash_to_location = get_data_source_hash_to_location(executor)
+
+            def_walk, def_collector = def_walk_future.result()
+            data_walk, data_collector = data_walk_future.result()
+
+            collector.merge(def_collector).merge(data_collector)
+
+        return (def_walk, data_walk, data_source_hash_to_location)
 
     def path_to_data_root(path: list[str]) -> str:
         from ...utils.path import path_to_root
@@ -62,27 +67,6 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
     def data_recycle_makedirs_helper(data_path: list[str]) -> None:
         from ...utils.file import makedirs_helper
         makedirs_helper(data_path, root_data_path_recycle, TYPE_FILE)
-
-    class FindFileByHashResult:
-        def __init__(self: FindFileByHashResult, path_: str, can_move: bool) -> None:
-            self.path_ = path_
-            self.can_move = can_move
-
-    def find_file_by_hash(hash_: str) -> Optional[FindFileByHashResult]:
-        recycle_files = recycle_file_lists.get(hash_)
-
-        if recycle_files is not None and len(recycle_files) > 0:
-            recycle_file = recycle_files[0]
-            recycle_file_lists[hash_] = recycle_files[1:]
-            return FindFileByHashResult(path_to_data_root(recycle_file), True)
-
-        data_source_location = data_source_hash_to_location.get(hash_)
-
-        if data_source_location is not None:
-            from ...utils.path import path_to_root
-            return FindFileByHashResult(path_to_root(data_source_location[0], data_source_location[1]), False)
-
-        return None
 
     def copy_no_overwrite(src: str, dst: str) -> None:
         from os.path import exists
@@ -101,92 +85,142 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
             from os import rename
             rename(src, dst)
 
-    def move_for_recycling(path_: list[str]) -> None:
-        from os import makedirs, rename
+    def move_to_recycle(path_: list[str]) -> None:
+        from os import rename
 
-        makedirs(root_data_path_recycle, exist_ok=True)
         data_recycle_makedirs_helper(path_)
         rename(path_to_data_root(path_), path_to_data_recycle_root(path_))
 
-    def remove_empty_dir() -> bool:
-        for empty_dir in empty_dirs:
-            try:
-                from ...utils.mappers.path_key import key_to_path
-                from os import rmdir
-
-                rmdir(path_to_data_root(key_to_path(empty_dir)))
-                empty_dirs.remove(empty_dir)
-
-                return True
-            except:
-                pass
-
-        return False
-
-    with data_mutex:
+    def main() -> None:
+        from ...utils import mtime
         from ...utils.utils import intersection, IntersectionType
-        from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
+        from typing import Optional
 
-        for data_path in intersection(def_walk.dirs, data_walk[TYPE_DIR], IntersectionType.DIFFERENT):
-            from ...utils.file import makedirs_helper
-            makedirs_helper(data_path, root_data_path, TYPE_DIR)
-
+        def_walk, data_walk, data_source_hash_to_location = load_data()
         def_walk_file_keys = set(def_walk.files.keys())
 
-        for data_path in intersection(data_walk[TYPE_FILE], def_walk_file_keys, IntersectionType.DIFFERENT):
-            from ...utils.file import hash_file
+        recycle_file_lists: dict[str, list[list[str]]] = {}
 
-            data_path_abs = path_to_data_root(data_path)
-            hash_ = hash_file(data_path_abs)
+        getmtime_progress_printer = mtime.make_getmtime_progress_printer(root_data_path)
+        setmtime_progress_printer = mtime.make_setmtime_progress_printer(root_data_path)
 
-            if hash_ not in recycle_file_lists:
-                recycle_file_lists[hash_] = []
+        class FindFileByHashResult:
+            def __init__(self: FindFileByHashResult, path_: str, can_move: bool) -> None:
+                self.path_ = path_
+                self.can_move = can_move
 
-            recycle_file_lists[hash_].append(data_path)
+        def find_file_by_hash(hash_: str) -> Optional[FindFileByHashResult]:
+            recycle_files = recycle_file_lists.get(hash_)
 
-        for data_path in intersection(def_walk_file_keys, data_walk[TYPE_FILE], IntersectionType.DIFFERENT):
-            from ...utils.mappers.path_key import path_to_key
+            if recycle_files is not None and len(recycle_files) > 0:
+                recycle_file = recycle_files[0]
+                recycle_file_lists[hash_] = recycle_files[1:]
+                return FindFileByHashResult(path_to_data_root(recycle_file), True)
 
-            def_walk_data = def_walk.files[path_to_key(data_path)]
-            find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
+            data_source_location = data_source_hash_to_location.get(hash_)
 
-            if find_file_by_hash_result is None:
-                print('File not found, hash ' + def_walk_data.hash_)
-                continue
+            if data_source_location is not None:
+                from ...utils.path import path_to_root
+                return FindFileByHashResult(path_to_root(data_source_location[0], data_source_location[1]), False)
 
-            data_path_abs = path_to_data_root(data_path)
-            copy_or_move_file(find_file_by_hash_result.path_, data_path_abs, find_file_by_hash_result.can_move)
-            mtime.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer, collector)
+            return None
 
-        for data_path in intersection(def_walk_file_keys, data_walk[TYPE_FILE], IntersectionType.MATCHING):
-            from ...utils.mappers.path_key import path_to_key
+        def create_missing_dirs() -> None:
+            for data_path in intersection(def_walk.dirs, data_walk[TYPE_DIR], IntersectionType.DIFFERENT):
+                from ...utils.file import makedirs_helper
+                makedirs_helper(data_path, root_data_path, TYPE_DIR)
 
-            data_path_abs = path_to_data_root(data_path)
-            def_walk_data = def_walk.files[path_to_key(data_path)]
-
-            if def_walk_data.mtime != mtime.getmtime(data_path_abs, getmtime_progress_printer, collector):
+        def mark_odd_files_for_recycling() -> None:
+            for data_path in intersection(data_walk[TYPE_FILE], def_walk_file_keys, IntersectionType.DIFFERENT):
                 from ...utils.file import hash_file
 
-                if hash_file(data_path_abs) != def_walk_data.hash_:
-                    find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
+                data_path_abs = path_to_data_root(data_path)
+                hash_ = hash_file(data_path_abs)
 
-                    if find_file_by_hash_result is None:
-                        print('File not found, hash ' + def_walk_data.hash_)
-                        continue
+                if hash_ not in recycle_file_lists:
+                    recycle_file_lists[hash_] = []
 
-                    move_for_recycling(data_path)
-                    copy_or_move_file(find_file_by_hash_result.path_, data_path_abs, find_file_by_hash_result.can_move)
+                recycle_file_lists[hash_].append(data_path)
 
+        def create_missing_files() -> None:
+            for data_path in intersection(def_walk_file_keys, data_walk[TYPE_FILE], IntersectionType.DIFFERENT):
+                from ...utils.mappers.path_key import path_to_key
+
+                def_walk_data = def_walk.files[path_to_key(data_path)]
+                find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
+
+                if find_file_by_hash_result is None:
+                    print('File not found, hash ' + def_walk_data.hash_)
+                    continue
+
+                data_path_abs = path_to_data_root(data_path)
+                copy_or_move_file(find_file_by_hash_result.path_, data_path_abs, find_file_by_hash_result.can_move)
                 mtime.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer, collector)
 
-        for recycle_files in recycle_file_lists.values():
-            for recycle_file in recycle_files:
-                move_for_recycling(recycle_file)
+        def update_files() -> None:
+            for data_path in intersection(def_walk_file_keys, data_walk[TYPE_FILE], IntersectionType.MATCHING):
+                from ...utils.mappers.path_key import path_to_key
 
-        for data_path in intersection(data_walk[TYPE_DIR], def_walk.dirs, IntersectionType.DIFFERENT):
-            from ...utils.mappers.path_key import path_to_key
-            empty_dirs.add(path_to_key(data_path))
+                data_path_abs = path_to_data_root(data_path)
+                def_walk_data = def_walk.files[path_to_key(data_path)]
 
-        while len(empty_dirs) > 0:
-            if not remove_empty_dir():
-                raise Exception()
+                if def_walk_data.mtime != mtime.getmtime(data_path_abs, getmtime_progress_printer, collector):
+                    from ...utils.file import hash_file
+
+                    if hash_file(data_path_abs) != def_walk_data.hash_:
+                        find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
+
+                        if find_file_by_hash_result is None:
+                            print('File not found, hash ' + def_walk_data.hash_)
+                            continue
+
+                        move_to_recycle(data_path)
+                        copy_or_move_file(find_file_by_hash_result.path_, data_path_abs, find_file_by_hash_result.can_move)
+
+                    mtime.setmtime(data_path_abs, def_walk_data.mtime, setmtime_progress_printer, collector)
+
+        def move_marked_files_to_recycle() -> None:
+            for recycle_files in recycle_file_lists.values():
+                for recycle_file in recycle_files:
+                    move_to_recycle(recycle_file)
+
+        def remove_odd_dirs() -> None:
+            set_: set[str] = set()
+
+            def fill_set() -> None:
+                for data_path in intersection(data_walk[TYPE_DIR], def_walk.dirs, IntersectionType.DIFFERENT):
+                    from ...utils.mappers.path_key import path_to_key
+                    set_.add(path_to_key(data_path))
+
+            def remove() -> None:
+                def remove_one() -> bool:
+                    for empty_dir in set_:
+                        try:
+                            from ...utils.mappers.path_key import key_to_path
+                            from os import rmdir
+
+                            rmdir(path_to_data_root(key_to_path(empty_dir)))
+                            set_.remove(empty_dir)
+
+                            return True
+                        except:
+                            pass
+
+                    return False
+
+                while len(set_) > 0:
+                    if not remove_one():
+                        raise Exception()
+
+            fill_set()
+            remove()
+
+        with data_mutex:
+            create_missing_dirs()
+            mark_odd_files_for_recycling()
+            create_missing_files()
+            update_files()
+            move_marked_files_to_recycle()
+            remove_odd_dirs()
+
+    main()
