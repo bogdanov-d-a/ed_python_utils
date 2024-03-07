@@ -10,15 +10,15 @@ def find_recycle_dirs(user_data: UserData) -> None:
         print(storage_device)
 
         for _, collection_paths in get_all_aliases_for_storage_device(user_data, storage_device):
+            from ..utils.path import RECYCLE_SUFFIX
             from os.path import isdir
 
-            recycle_path = collection_paths.get_data() + 'Recycle'
+            recycle_path = collection_paths.get_data() + RECYCLE_SUFFIX
 
             if isdir(recycle_path):
                 from ..utils.walkers import walk_data
                 from edpu.file_tree_walker import TYPE_FILE
                 from edpu.user_interaction import yes_no_prompt
-                from shutil import rmtree
 
                 print(recycle_path + ' exists')
 
@@ -26,4 +26,5 @@ def find_recycle_dirs(user_data: UserData) -> None:
                     print(recycle_file)
 
                 if yes_no_prompt('Delete ' + recycle_path):
+                    from shutil import rmtree
                     rmtree(recycle_path)

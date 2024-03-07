@@ -3,6 +3,9 @@ from .user_data import UserData
 from typing import Optional
 
 
+RECYCLE_SUFFIX = 'Recycle'
+
+
 def path_to_root(path: list[str], root: str) -> str:
     from os import sep
     from os.path import join

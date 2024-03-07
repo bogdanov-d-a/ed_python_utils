@@ -39,12 +39,14 @@ def update_data(user_data: UserData) -> None:
             return data_sources
 
         with make_process_pool_executor(min(len(aliases), user_data.collection_processing_workers)) as executor:
+            from ...utils.path import RECYCLE_SUFFIX
+
             futures = list(map(
                 lambda alias: executor.submit(
                     update_data_helper,
                     alias[1].def_,
                     alias[1].get_data(),
-                    alias[1].get_data() + 'Recycle',
+                    alias[1].get_data() + RECYCLE_SUFFIX,
                     data_sources_provider(alias[0])
                 ),
                 aliases
