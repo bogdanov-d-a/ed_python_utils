@@ -1,4 +1,5 @@
-from typing import Callable, Optional, TypeVar
+from .context_manager import DummyContextManager
+from typing import Any, Callable, Optional, TypeVar
 
 
 T = TypeVar('T')
@@ -88,12 +89,14 @@ def pick_option_multi(prompt: str, options: list[str]) -> set[int]:
                 selection.add(user_data - 1)
 
 
-def pick_str_option(prompt: str, options: dict[str, str]) -> str:
+def pick_str_option(prompt: str, options: dict[str, str], print_lock: Any=DummyContextManager()) -> str:
     while True:
-        for option_cmd, option_text in sorted(options.items()):
-            print(option_cmd + ': ' + option_text)
+        with print_lock:
+            for option_cmd, option_text in sorted(options.items()):
+                print(option_cmd + ': ' + option_text)
 
-        print(prompt)
+            print(prompt)
+
         result = input()
 
         if result not in options:
@@ -102,10 +105,10 @@ def pick_str_option(prompt: str, options: dict[str, str]) -> str:
         return result
 
 
-def pick_str_option_ex(prompt: str, options: list[tuple[str, str, T]]) -> T:
+def pick_str_option_ex(prompt: str, options: list[tuple[str, str, T]], print_lock: Any=DummyContextManager()) -> T:
     pick = list_to_dict(list(map(lambda e: (e[0], e[1]), options)))
     result = list_to_dict(list(map(lambda e: (e[0], e[2]), options)))
-    return result[pick_str_option(prompt, pick)]
+    return result[pick_str_option(prompt, pick, print_lock)]
 
 
 def pick_str_option_multi(prompt: str, options: list[tuple[str, str]], validator: Callable[[set[str]], Optional[str]]=lambda _: None) -> list[str]:
