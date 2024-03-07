@@ -2,7 +2,10 @@ from . import time
 
 
 def hash_file(path: str, collector: time.Collector) -> str:
-    print('Calculating hash for ' + path)
+    from .mp_global import print_lock
+
+    with print_lock():
+        print('Calculating hash for ' + path)
 
     with time.get_perf_counter_measure(collector, time.Key.WORKER1_HASH_FILE):
         from edpu.file_hashing import sha512_file

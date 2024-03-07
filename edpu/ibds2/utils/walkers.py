@@ -4,8 +4,10 @@ from typing import Callable
 
 
 def make_file_progress_printer(period: float, annotation: str, path_: str) -> Callable[[int], None]:
+    from .mp_global import print_lock
     from edpu.throttling import TimeBasedAggregator
-    return TimeBasedAggregator.make_number_sum_printer(period, f'walkers.{annotation} {path_}')
+
+    return TimeBasedAggregator.make_number_sum_printer(period, f'walkers.{annotation} {path_}', print_lock=print_lock())
 
 
 def walk_data(data_path: str) -> dict[str, set[str]]:

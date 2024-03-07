@@ -37,7 +37,10 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
 
     def debug_remove(path: str) -> None:
         if debug:
-            print('debug_remove ' + path)
+            from ...utils.mp_global import print_lock
+
+            with print_lock():
+                print('debug_remove ' + path)
         else:
             from os import remove
             remove(path)

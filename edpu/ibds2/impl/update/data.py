@@ -70,12 +70,14 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         makedirs_helper(data_path, root_data_path_recycle, TYPE_FILE)
 
     def copy_no_overwrite(src: str, dst: str) -> None:
+        from ...utils.mp_global import print_lock
         from os.path import exists
 
         if exists(dst):
             raise Exception()
 
-        print('Copying ' + src + ' to ' + dst)
+        with print_lock():
+            print('Copying ' + src + ' to ' + dst)
 
         with time.get_perf_counter_measure(collector, time.Key.WORKER1_COPY_FILE):
             from shutil import copy
@@ -93,6 +95,12 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
 
         data_recycle_makedirs_helper(path_)
         rename(path_to_data_root(path_), path_to_data_recycle_root(path_))
+
+    def print_file_not_found(hash: str) -> None:
+        from ...utils.mp_global import print_lock
+
+        with print_lock():
+            print(f'File not found, hash {hash}')
 
     def main() -> None:
         from ...utils import mtime
@@ -154,7 +162,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
                 find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
 
                 if find_file_by_hash_result is None:
-                    print('File not found, hash ' + def_walk_data.hash_)
+                    print_file_not_found(def_walk_data.hash_)
                     continue
 
                 data_path_abs = path_to_data_root(data_path)
@@ -175,7 +183,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
                         find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
 
                         if find_file_by_hash_result is None:
-                            print('File not found, hash ' + def_walk_data.hash_)
+                            print_file_not_found(def_walk_data.hash_)
                             continue
 
                         move_to_recycle(data_path)
