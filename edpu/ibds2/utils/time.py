@@ -8,6 +8,8 @@ class Key(Enum):
     WORKER1 = auto()
     WORKER1_GETMTIME = auto()
     WORKER1_SETMTIME = auto()
+    WORKER1_HASH_FILE = auto()
+    WORKER1_COPY_FILE = auto()
     WORKER2 = auto()
     WORKER2_WALK_DEF = auto()
     WORKER2_WALK_DATA = auto()

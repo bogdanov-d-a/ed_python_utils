@@ -1,8 +1,12 @@
-def hash_file(path: str) -> str:
-    from edpu.file_hashing import sha512_file
+from . import time
 
+
+def hash_file(path: str, collector: time.Collector) -> str:
     print('Calculating hash for ' + path)
-    return sha512_file(path)
+
+    with time.get_perf_counter_measure(collector, time.Key.WORKER1_HASH_FILE):
+        from edpu.file_hashing import sha512_file
+        return sha512_file(path)
 
 
 def makedirs_helper(path: list[str], root: str, type: str) -> None:

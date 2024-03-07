@@ -77,7 +77,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
 
                 data_path_abs = path_to_data_root(data_path)
                 def_makedirs_helper(def_path)
-                DefFile(hash_file(data_path_abs), mtime.getmtime(data_path_abs, getmtime_progress_printer, collector)).save(path_to_def_root(def_path))
+                DefFile(hash_file(data_path_abs, collector), mtime.getmtime(data_path_abs, getmtime_progress_printer, collector)).save(path_to_def_root(def_path))
 
         def update_files() -> None:
             for data_path, def_path in intersection_with_def_path(TYPE_FILE, data_walk[TYPE_FILE], def_walk_file_keys, IntersectionType.MATCHING):
@@ -94,7 +94,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
                     from ...utils.def_file import DefFile
                     from ...utils.file import hash_file
 
-                    DefFile(hash_file(data_path_abs), actual_mtime).save(path_to_def_root(def_path))
+                    DefFile(hash_file(data_path_abs, collector), actual_mtime).save(path_to_def_root(def_path))
 
         with data_lock():
             remove_odd_dirs()

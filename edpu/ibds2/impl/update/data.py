@@ -71,13 +71,15 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
 
     def copy_no_overwrite(src: str, dst: str) -> None:
         from os.path import exists
-        from shutil import copy
 
         if exists(dst):
             raise Exception()
 
         print('Copying ' + src + ' to ' + dst)
-        copy(src, dst)
+
+        with time.get_perf_counter_measure(collector, time.Key.WORKER1_COPY_FILE):
+            from shutil import copy
+            copy(src, dst)
 
     def copy_or_move_file(src: str, dst: str, move: bool) -> None:
         if not move:
@@ -137,7 +139,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
                 from ...utils.file import hash_file
 
                 data_path_abs = path_to_data_root(data_path)
-                hash_ = hash_file(data_path_abs)
+                hash_ = hash_file(data_path_abs, collector)
 
                 if hash_ not in recycle_file_lists:
                     recycle_file_lists[hash_] = []
@@ -169,7 +171,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
                 if def_walk_data.mtime != mtime.getmtime(data_path_abs, getmtime_progress_printer, collector):
                     from ...utils.file import hash_file
 
-                    if hash_file(data_path_abs) != def_walk_data.hash_:
+                    if hash_file(data_path_abs, collector) != def_walk_data.hash_:
                         find_file_by_hash_result = find_file_by_hash(def_walk_data.hash_)
 
                         if find_file_by_hash_result is None:
