@@ -10,9 +10,12 @@ def run(user_data: dict[str, Any]) -> None:
         from .facades.find_recycle_dirs import find_recycle_dirs
         from .facades.update.data import update_data
         from .facades.update.definition import update_definition
+        from .utils.mp_global import init
         from .utils.user_data import UserData
         from edpu.user_interaction import pick_str_option_ex
         from typing import Callable
+
+        init()
 
         actions: list[tuple[str, str, Callable[[UserData], None]]] = [
             ('ba', 'Apply bundle', apply_bundle),

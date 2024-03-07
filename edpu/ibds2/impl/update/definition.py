@@ -1,20 +1,19 @@
 from ...utils import time
-from threading import Lock
 
 
-def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool, debug: bool, data_mutex: Lock, collector: time.Collector) -> None:
+def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool, debug: bool, collector: time.Collector) -> None:
     from ...utils.utils import IntersectionType
     from ...utils.walkers import WalkDefResult
     from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
     from typing import Iterator
 
     def walk_data_and_def() -> tuple[dict[str, set[str]], WalkDefResult]:
-        from concurrent.futures import ProcessPoolExecutor
+        from ...utils.mp_global import make_process_pool_executor
 
-        with ProcessPoolExecutor(2) as executor:
+        with make_process_pool_executor(2) as executor:
             from ...utils.walk_helpers import walk_def, walk_data
 
-            data_walk_future = executor.submit(walk_data, root_data_path, data_mutex)
+            data_walk_future = executor.submit(walk_data, root_data_path)
             def_walk_future = executor.submit(walk_def, root_def_path)
 
             data_walk, data_collector = data_walk_future.result()
@@ -52,6 +51,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
 
     def main() -> None:
         from ...utils import mtime
+        from ...utils.mp_global import data_lock
 
         data_walk, def_walk = walk_data_and_def()
         def_walk_file_keys = set(def_walk.files.keys())
@@ -96,7 +96,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
 
                     DefFile(hash_file(data_path_abs), actual_mtime).save(path_to_def_root(def_path))
 
-        with data_mutex:
+        with data_lock():
             remove_odd_dirs()
             add_missing_dirs()
             remove_odd_files()

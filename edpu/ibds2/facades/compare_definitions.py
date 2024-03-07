@@ -19,7 +19,7 @@ def compare_definitions(user_data: UserData) -> None:
     storage_device_b = pick_storage_device(user_data.storage_devices)
 
     def impl() -> Iterator[tuple[str, str]]:
-        from concurrent.futures import ProcessPoolExecutor
+        from ..utils.mp_global import make_process_pool_executor
 
         def get_def_paths(storage_device: str) -> dict[str, str]:
             from ..utils.utils import get_all_aliases_for_storage_device
@@ -38,7 +38,7 @@ def compare_definitions(user_data: UserData) -> None:
             sorted(set(def_paths_a.keys()).intersection(set(def_paths_b.keys())))
         ))
 
-        with ProcessPoolExecutor(min(len(def_paths_list), user_data.collection_processing_workers)) as executor:
+        with make_process_pool_executor(min(len(def_paths_list), user_data.collection_processing_workers)) as executor:
             same_defs_list = list(executor.map(
                 same_defs_helper,
                 def_paths_list

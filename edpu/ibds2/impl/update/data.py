@@ -1,9 +1,8 @@
 from __future__ import annotations
 from ...utils import time
-from threading import Lock
 
 
-def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]], data_mutex: Lock, collector: time.Collector) -> None:
+def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]], collector: time.Collector) -> None:
     from ...utils.walkers import WalkDefResult
     from concurrent.futures import ProcessPoolExecutor
     from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
@@ -41,11 +40,13 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         return result
 
     def load_data():
-        with ProcessPoolExecutor(min(2 + len(data_sources), 4)) as executor:
+        from ...utils.mp_global import make_process_pool_executor
+
+        with make_process_pool_executor(min(2 + len(data_sources), 4)) as executor:
             from ...utils.walk_helpers import walk_def, walk_data
 
             def_walk_future = executor.submit(walk_def, root_def_path)
-            data_walk_future = executor.submit(walk_data, root_data_path, data_mutex)
+            data_walk_future = executor.submit(walk_data, root_data_path)
 
             data_source_hash_to_location = get_data_source_hash_to_location(executor)
 
@@ -93,6 +94,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
 
     def main() -> None:
         from ...utils import mtime
+        from ...utils.mp_global import data_lock
         from ...utils.utils import intersection, IntersectionType
         from typing import Optional
 
@@ -215,7 +217,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
             fill_set()
             remove()
 
-        with data_mutex:
+        with data_lock():
             create_missing_dirs()
             mark_odd_files_for_recycling()
             create_missing_files()

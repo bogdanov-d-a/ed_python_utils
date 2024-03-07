@@ -11,7 +11,7 @@ class Key(Enum):
     WORKER2 = auto()
     WORKER2_WALK_DEF = auto()
     WORKER2_WALK_DATA = auto()
-    WORKER2_WALK_DATA_WITH_MUTEX = auto()
+    WORKER2_WALK_DATA_WITH_LOCK = auto()
 
 
 class Collector:

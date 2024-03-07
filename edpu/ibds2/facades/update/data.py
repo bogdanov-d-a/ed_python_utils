@@ -1,14 +1,13 @@
 from ...utils import time
 from ...utils.user_data import UserData
-from threading import Lock
 
 
-def update_data_helper(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]], data_mutex: Lock) -> time.Collector:
+def update_data_helper(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]]) -> time.Collector:
     collector = time.Collector()
 
     with time.get_perf_counter_measure(collector, time.Key.WORKER1):
         from ...impl.update.data import update_data as impl
-        impl(root_def_path, root_data_path, root_data_path_recycle, data_sources, data_mutex, collector)
+        impl(root_def_path, root_data_path, root_data_path_recycle, data_sources, collector)
         return collector
 
 
@@ -19,9 +18,8 @@ def update_data(user_data: UserData) -> None:
     source_storage_devices = user_interaction.pick_storage_device_multi(user_data.storage_devices)
 
     def impl() -> None:
+        from ...utils.mp_global import make_process_pool_executor
         from ...utils.utils import get_all_aliases_for_storage_device
-        from concurrent.futures import ProcessPoolExecutor
-        from multiprocessing import Manager
 
         aliases = list(get_all_aliases_for_storage_device(user_data, storage_device))
 
@@ -40,18 +38,14 @@ def update_data(user_data: UserData) -> None:
 
             return data_sources
 
-        manager = Manager()
-        data_mutex = manager.Lock()
-
-        with ProcessPoolExecutor(min(len(aliases), user_data.collection_processing_workers)) as executor:
+        with make_process_pool_executor(min(len(aliases), user_data.collection_processing_workers)) as executor:
             futures = list(map(
                 lambda alias: executor.submit(
                     update_data_helper,
                     alias[1].def_,
                     alias[1].get_data(),
                     alias[1].get_data() + 'Recycle',
-                    data_sources_provider(alias[0]),
-                    data_mutex
+                    data_sources_provider(alias[0])
                 ),
                 aliases
             ))
