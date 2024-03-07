@@ -70,18 +70,8 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
         makedirs_helper(data_path, root_data_path_recycle, TYPE_FILE)
 
     def copy_no_overwrite(src: str, dst: str) -> None:
-        from ...utils.mp_global import print_lock
-        from os.path import exists
-
-        if exists(dst):
-            raise Exception()
-
-        with print_lock():
-            print('Copying ' + src + ' to ' + dst)
-
-        with time.get_perf_counter_measure(collector, time.Key.WORKER1_COPY_FILE):
-            from shutil import copy
-            copy(src, dst)
+        from ...utils.file import copy_no_overwrite as impl
+        impl(src, dst, True, time.get_perf_counter_measure(collector, time.Key.WORKER1_COPY_FILE))
 
     def copy_or_move_file(src: str, dst: str, move: bool) -> None:
         if not move:

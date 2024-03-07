@@ -1,4 +1,6 @@
+from ...context_manager import DummyContextManager
 from . import time
+from typing import Any
 
 
 def hash_file(path: str, collector: time.Collector) -> str:
@@ -25,11 +27,18 @@ def makedirs_helper(path: list[str], root: str, type: str) -> None:
     makedirs(path_to_root(path, root), exist_ok=True)
 
 
-def copy_no_overwrite(src: str, dst: str) -> None:
+def copy_no_overwrite(src: str, dst: str, need_print: bool=False, context_manager: Any=DummyContextManager()) -> None:
     from os.path import exists
-    from shutil import copy
 
     if exists(dst):
         raise Exception('copy_no_overwrite')
 
-    copy(src, dst)
+    if need_print:
+        from .mp_global import print_lock
+
+        with print_lock():
+            print('Copying ' + src + ' to ' + dst)
+
+    with context_manager:
+        from shutil import copy
+        copy(src, dst)
