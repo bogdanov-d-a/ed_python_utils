@@ -1,4 +1,5 @@
 from __future__ import annotations
+from .context_manager import DummyContextManager
 from typing import Any, Callable
 import time
 
@@ -35,10 +36,11 @@ class TimeBasedAggregator:
     def get_value(self: TimeBasedAggregator) -> Any:
         return self._value
 
-    def get_printer(self: TimeBasedAggregator, annotation: str) -> Callable[[Any], None]:
+    def get_printer(self: TimeBasedAggregator, annotation: str, print_lock: Any=DummyContextManager()) -> Callable[[Any], None]:
         def fn(value: Any) -> None:
             if self.need_alert(value):
-                print(f'{annotation} - {self.get_value()}')
+                with print_lock:
+                    print(f'{annotation} - {self.get_value()}')
 
         return fn
 
@@ -51,9 +53,9 @@ class TimeBasedAggregator:
         return lambda: fn(1)
 
     @staticmethod
-    def make_number_sum_printer(period: float, annotation: str, start_value: Any=0) -> Callable[[Any], None]:
-        return TimeBasedAggregator.make_number_sum(period, start_value).get_printer(annotation)
+    def make_number_sum_printer(period: float, annotation: str, start_value: Any=0, print_lock: Any=DummyContextManager()) -> Callable[[Any], None]:
+        return TimeBasedAggregator.make_number_sum(period, start_value).get_printer(annotation, print_lock)
 
     @staticmethod
-    def make_count_printer(period: float, annotation: str) -> Callable[[], None]:
-        return TimeBasedAggregator.wrap_fn_for_count(TimeBasedAggregator.make_number_sum_printer(period, annotation))
+    def make_count_printer(period: float, annotation: str, print_lock: Any=DummyContextManager()) -> Callable[[], None]:
+        return TimeBasedAggregator.wrap_fn_for_count(TimeBasedAggregator.make_number_sum_printer(period, annotation, print_lock=print_lock))
