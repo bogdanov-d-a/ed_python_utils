@@ -1,6 +1,6 @@
+from .. import file_hashing
+from .. import user_interaction
 from .fsck import *
-from edpu import file_hashing
-from edpu import user_interaction
 
 
 def fsck_reachable(bundles_path, split_to_dirs, file_index_paths):

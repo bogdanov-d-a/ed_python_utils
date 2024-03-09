@@ -1,6 +1,5 @@
-import hashlib
 from io import BufferedReader
-from typing import Iterator
+from typing import Any, Iterator
 
 
 def read_in_chunks(file_object: BufferedReader, chunk_size: int=1024*1024) -> Iterator[bytes]:
@@ -13,7 +12,7 @@ def read_in_chunks(file_object: BufferedReader, chunk_size: int=1024*1024) -> It
         yield data
 
 
-def hash_file(file_name: str, hasher) -> str:
+def hash_file(file_name: str, hasher: Any) -> str:
     with open(file_name, 'rb') as file:
         for chunk in read_in_chunks(file):
             hasher.update(chunk)
@@ -21,8 +20,10 @@ def hash_file(file_name: str, hasher) -> str:
 
 
 def sha1_file(file_name: str) -> str:
-    return hash_file(file_name, hashlib.sha1())
+    from hashlib import sha1
+    return hash_file(file_name, sha1())
 
 
 def sha512_file(file_name: str) -> str:
-    return hash_file(file_name, hashlib.sha512())
+    from hashlib import sha512
+    return hash_file(file_name, sha512())

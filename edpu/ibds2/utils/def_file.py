@@ -24,7 +24,7 @@ class DefFile:
         from codecs import open
 
         with open(path, 'r', 'utf-8-sig') as file:
-            from edpu.string_utils import strip_crlf
+            from ...string_utils import strip_crlf
 
             def non_empty(str_: str) -> str:
                 str_ = strip_crlf(str_)

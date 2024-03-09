@@ -1,6 +1,6 @@
-from . import task_deferrer
-
 def get_data(item_keys_all, item_data):
+    from . import task_deferrer
+
     item_data_keys = set()
     for key, _, _ in item_data:
         item_data_keys.add(key)

@@ -2,7 +2,7 @@ from ...utils.user_data import UserData
 
 
 def create_bundle(user_data: UserData) -> None:
-    from edpu.guided_directory_use import PathKeeper
+    from ....guided_directory_use import PathKeeper
 
     with PathKeeper(user_data.bundles_path):
         from ...utils import user_interaction

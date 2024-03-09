@@ -2,9 +2,9 @@ from ...utils import time
 
 
 def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool, debug: bool, collector: time.Collector) -> None:
+    from ....file_tree_walker import TYPE_DIR, TYPE_FILE
     from ...utils.utils import IntersectionType
     from ...utils.walkers import WalkDefResult
-    from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
     from typing import Iterator
 
     def walk_data_and_def() -> tuple[dict[str, set[str]], WalkDefResult]:

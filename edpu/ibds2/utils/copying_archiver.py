@@ -85,7 +85,7 @@ class Unpacker:
 
     def _unpack(self: Unpacker, ref: TextIOWrapper, bin: BufferedReader) -> None:
         for ref_line in ref.readlines():
-            from edpu.string_utils import strip_crlf
+            from ...string_utils import strip_crlf
             from os import makedirs
             from os.path import exists, dirname
 

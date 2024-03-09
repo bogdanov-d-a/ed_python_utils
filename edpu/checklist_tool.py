@@ -1,8 +1,6 @@
 from __future__ import annotations
-import tkinter
 from typing import Callable
-from . import tkinter_utils
-from . import button_window
+import tkinter
 
 
 Command = Callable[[], bool]
@@ -23,6 +21,8 @@ class CbPack:
 
 
 def show_checklist(items: list[str], title: str) -> None:
+    from . import tkinter_utils
+
     master = tkinter.Tk()
     master.title(title)
 
@@ -30,8 +30,8 @@ def show_checklist(items: list[str], title: str) -> None:
     info = tkinter.Label(master, textvariable=info_text)
     info.grid(row=0)
 
-    total_count: int = len(items)
-    checked_count: int = 0
+    total_count = len(items)
+    checked_count = 0
 
     def update_info_text() -> None:
         info_text.set('{0} stats: {1} / {2} ({3})'.format(
@@ -47,16 +47,16 @@ def show_checklist(items: list[str], title: str) -> None:
             checked_count += 1
         update_info_text()
 
-    row: int = 1
-    for item in items:
-        CbPack(master, item, row, cb_command_handler)
-        row += 1
+    for item, row in zip(items, range(len(items))):
+        CbPack(master, item, row + 1, cb_command_handler)
 
     tkinter_utils.center_window(master)
     tkinter.mainloop()
 
 
 def show_picker(checklists: list[tuple[str, list[str]]]) -> None:
+    from . import button_window
+
     buttons: list[tuple[str, Command]] = []
 
     def get_command(index: int) -> Command:
@@ -66,9 +66,7 @@ def show_picker(checklists: list[tuple[str, list[str]]]) -> None:
 
         return command
 
-    index: int = 0
-    for text, _ in checklists:
+    for text, index in zip(list(map(lambda checklist: checklist[0], checklists)), range(len(checklists))):
         buttons.append((text, get_command(index)))
-        index += 1
 
     button_window.run(buttons)

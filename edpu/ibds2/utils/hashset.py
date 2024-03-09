@@ -11,5 +11,5 @@ def load(path: str) -> set[str]:
         return set()
 
     with open(path) as file:
-        from edpu.string_utils import strip_crlf
+        from ...string_utils import strip_crlf
         return set(map(strip_crlf, file.readlines()))

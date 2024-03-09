@@ -1,7 +1,6 @@
 from __future__ import annotations
 from .context_manager import DummyContextManager
 from typing import Any, Callable
-import time
 
 
 class TimeBased:
@@ -10,7 +9,9 @@ class TimeBased:
         self._last = None
 
     def need_alert(self: TimeBased) -> bool:
-        now = time.time()
+        from time import time
+
+        now = time()
 
         if self._last is None:
             self._last = now

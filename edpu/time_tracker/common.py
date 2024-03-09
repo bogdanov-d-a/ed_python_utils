@@ -1,4 +1,4 @@
-from edpu import calc_time_utils as CTU
+from .. import calc_time_utils as CTU
 
 def fail(msg='fail'):
     raise Exception(msg)

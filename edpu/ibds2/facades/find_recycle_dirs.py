@@ -16,9 +16,9 @@ def find_recycle_dirs(user_data: UserData) -> None:
             recycle_path = collection_paths.get_data() + RECYCLE_SUFFIX
 
             if isdir(recycle_path):
+                from ...file_tree_walker import TYPE_FILE
+                from ...user_interaction import yes_no_prompt
                 from ..utils.walkers import walk_data
-                from edpu.file_tree_walker import TYPE_FILE
-                from edpu.user_interaction import yes_no_prompt
 
                 print(recycle_path + ' exists')
 

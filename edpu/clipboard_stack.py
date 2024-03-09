@@ -1,9 +1,7 @@
-import tkinter
-from edpu import tkinter_utils
-import pyperclip
+def _main() -> None:
+    from . import tkinter_utils
+    import tkinter
 
-
-def main() -> None:
     root = tkinter.Tk()
     root.title('Clipboard stack')
 
@@ -14,12 +12,14 @@ def main() -> None:
         out_text.insert(tkinter.END, '\n----------\n'.join(stack))
 
     def push() -> None:
-        stack.append(pyperclip.paste())
+        from pyperclip import paste
+        stack.append(paste())
         update_out_text()
 
     def pop() -> None:
         if len(stack) > 0:
-            pyperclip.copy(stack.pop())
+            from pyperclip import copy
+            copy(stack.pop())
             update_out_text()
 
     push_button = tkinter.Button(root, text='Push (F6)', command=push)
@@ -43,5 +43,6 @@ def main() -> None:
     tkinter.mainloop()
 
 
-if __name__ == '__main__':
-    main()
+def main() -> None:
+    from .tkinter_utils import handle_errors
+    handle_errors(_main)

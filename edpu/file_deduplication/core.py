@@ -1,5 +1,5 @@
+from ..ibds import file_tree_scanner
 from .utils import *
-from ed_ibds import file_tree_scanner
 import codecs
 import os
 import shutil

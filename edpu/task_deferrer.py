@@ -1,7 +1,6 @@
-import datetime
-import operator
-from . import file_utils
-from . import query_window
+def get_now_date():
+    from datetime import datetime
+    return datetime.now().date()
 
 
 def none_min(a, b):
@@ -12,13 +11,13 @@ def get_info(state, now_date=None, hide_hint=False, show_future=False):
     result = ''
 
     if now_date is None:
-        now_date_ = datetime.datetime.now().date()
+        now_date_ = get_now_date()
         now_date = (now_date_.year, now_date_.month, now_date_.day)
 
     earliest_date = None
     future = ''
 
-    for name, date_ in sorted(state, key=operator.itemgetter(1)):
+    for name, date_ in sorted(state, key=lambda e: e[1]):
         output_str = name + ' ' + str(date_) + '\n'
         if date_ <= now_date:
             result += output_str
@@ -35,18 +34,20 @@ def get_info(state, now_date=None, hide_hint=False, show_future=False):
 
 
 def get_info_from_file(state_filename, now_date=None, hide_hint=False):
-    return get_info(file_utils.eval_file(state_filename), now_date, hide_hint)
+    from .file_utils import eval_file
+    return get_info(eval_file(state_filename), now_date, hide_hint)
 
 
 def info_viewer(state_filename, now_date=None, window_title='info_viewer'):
-    query_window.run_with_exception_wrapper(lambda: get_info_from_file(state_filename, now_date), window_title)
+    from .query_window import run_with_exception_wrapper
+    run_with_exception_wrapper(lambda: get_info_from_file(state_filename, now_date), window_title)
 
 
 def get_info_2d(columns, state, now_date=None):
     result = ''
 
     if now_date is None:
-        now_date_ = datetime.datetime.now().date()
+        now_date_ = get_now_date()
         now_date = (now_date_.year, now_date_.month, now_date_.day)
 
     earliest_date = None
@@ -67,9 +68,12 @@ def get_info_2d(columns, state, now_date=None):
 
 
 def get_info_2d_from_file(data_filename, now_date=None):
-    data = file_utils.eval_file(data_filename)
+    from .file_utils import eval_file
+
+    data = eval_file(data_filename)
     return get_info_2d(data[0], data[1], now_date)
 
 
 def info_2d_viewer(data_filename, now_date=None, window_title='info_2d_viewer'):
-    query_window.run_with_exception_wrapper(lambda: get_info_2d_from_file(data_filename, now_date), window_title)
+    from .query_window import run_with_exception_wrapper
+    run_with_exception_wrapper(lambda: get_info_2d_from_file(data_filename, now_date), window_title)

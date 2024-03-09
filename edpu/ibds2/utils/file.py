@@ -10,7 +10,7 @@ def hash_file(path: str, collector: time.Collector) -> str:
         print('Calculating hash for ' + path)
 
     with time.get_perf_counter_measure(collector, time.Key.WORKER1_HASH_FILE):
-        from edpu.file_hashing import sha512_file
+        from ...file_hashing import sha512_file
         return sha512_file(path)
 
 

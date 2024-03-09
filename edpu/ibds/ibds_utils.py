@@ -1,6 +1,6 @@
 import re
 from typing import Any, Optional
-from edpu import user_interaction
+from .. import user_interaction
 from . import location
 from . import storage_device
 

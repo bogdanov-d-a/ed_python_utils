@@ -1,6 +1,6 @@
+from .. import file_hashing
+from .. import file_tree_walker
 from .core import *
-from edpu import file_hashing
-from edpu import file_tree_walker
 import os
 
 

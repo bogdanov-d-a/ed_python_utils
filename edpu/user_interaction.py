@@ -37,10 +37,8 @@ def yes_no_prompt(msg: str) -> bool:
 
 
 def pick_option(prompt: str, options: list[str]) -> int:
-    index: int = 1
-    for option in options:
-        print(str(index) + '. ' + option)
-        index += 1
+    for option, index in zip(options, range(len(options))):
+        print(str(index + 1) + '. ' + option)
 
     print(prompt)
     result = int(input())
@@ -54,10 +52,8 @@ def pick_option(prompt: str, options: list[str]) -> int:
 
 
 def pick_option_multi(prompt: str, options: list[str]) -> set[int]:
-    index: int = 1
-    for option in options:
-        print(str(index) + '. ' + option)
-        index += 1
+    for option, index in zip(options, range(len(options))):
+        print(str(index + 1) + '. ' + option)
 
     print(prompt)
     selection: set[int] = set()

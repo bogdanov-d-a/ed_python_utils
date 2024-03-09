@@ -1,8 +1,8 @@
-from edpu.mapper import Mapper
+from ....mapper import Mapper
 
 
 def _get_mapper() -> Mapper[str, str]:
-    from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
+    from ....file_tree_walker import TYPE_DIR, TYPE_FILE
 
     return Mapper([
         (TYPE_DIR, 'd'),

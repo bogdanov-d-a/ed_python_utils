@@ -1,8 +1,8 @@
 import math
 from .common import *
-from edpu import query_window
-from edpu import file_utils
-from edpu import calc_time_utils as CTU
+from .. import query_window
+from .. import file_utils
+from .. import calc_time_utils as CTU
 
 def sorted_dict_keys(dict_):
     return sorted(dict_.keys())

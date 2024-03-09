@@ -1,6 +1,6 @@
-from peak_bench import peak_bench
-
 if __name__ == '__main__':
+    from .peak_bench import peak_bench
+
     # HVY-WAP9
     process_count = 6
 

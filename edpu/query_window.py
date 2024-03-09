@@ -1,19 +1,25 @@
-import tkinter
-import traceback
 from typing import Callable
-from . import tkinter_utils
+
+
+DEFAULT_TITLE = 'Default title'
 
 
 def make_exception_wrapper(callback: Callable[[], str]) -> Callable[[], str]:
     def wrapper():
         try:
             return callback()
+
         except:
-            return traceback.format_exc()
+            from traceback import format_exc
+            return format_exc()
+
     return wrapper
 
 
-def run(data_provider: Callable[[], str], title: str='Default title') -> None:
+def run(data_provider: Callable[[], str], title: str=DEFAULT_TITLE) -> None:
+    from . import tkinter_utils
+    import tkinter
+
     root = tkinter.Tk()
     root.title(title)
 
@@ -39,5 +45,5 @@ def run(data_provider: Callable[[], str], title: str='Default title') -> None:
     tkinter.mainloop()
 
 
-def run_with_exception_wrapper(data_provider: Callable[[], str], title: str='Default title') -> None:
+def run_with_exception_wrapper(data_provider: Callable[[], str], title: str=DEFAULT_TITLE) -> None:
     run(make_exception_wrapper(data_provider), title)

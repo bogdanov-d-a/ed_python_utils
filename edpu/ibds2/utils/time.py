@@ -1,5 +1,5 @@
 from __future__ import annotations
-from edpu.perf_counter_measure import PerfCounterMeasure
+from ...perf_counter_measure import PerfCounterMeasure
 from enum import Enum, auto
 
 

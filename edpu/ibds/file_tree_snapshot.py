@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 import codecs
-from edpu import file_hashing
+from .. import file_hashing
 from . import file_tree_scanner
 from . import ibds_utils
 

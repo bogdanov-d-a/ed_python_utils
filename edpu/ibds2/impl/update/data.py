@@ -3,9 +3,9 @@ from ...utils import time
 
 
 def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]], collector: time.Collector) -> None:
+    from ....file_tree_walker import TYPE_DIR, TYPE_FILE
     from ...utils.walkers import WalkDefResult
     from concurrent.futures import ProcessPoolExecutor
-    from edpu.file_tree_walker import TYPE_DIR, TYPE_FILE
 
     def get_data_source_defs(executor: ProcessPoolExecutor) -> list[WalkDefResult]:
         from ...utils.walk_helpers import walk_def

@@ -1,4 +1,4 @@
-from edpu import file_tree_walker
+from .. import file_tree_walker
 from . import ibds_utils
 
 

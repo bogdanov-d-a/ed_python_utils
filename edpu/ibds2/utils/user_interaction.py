@@ -1,5 +1,5 @@
+from ... import user_interaction
 from .user_data import CollectionDict, StorageDevices
-from edpu import user_interaction
 
 
 def pick_storage_device(storage_devices: StorageDevices) -> str:

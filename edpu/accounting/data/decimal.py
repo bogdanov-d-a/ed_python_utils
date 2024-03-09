@@ -1,23 +1,28 @@
-from decimal import *
+from .data import Data
+from decimal import Decimal
 
 
-class DecimalData:
+class DecimalData(Data[Decimal]):
     @classmethod
-    def zero(cls):
+    def zero(cls) -> Decimal:
         return Decimal(0)
 
+
     @classmethod
-    def negate(cls, value):
+    def negate(cls, value: Decimal) -> Decimal:
         return -value
 
+
     @classmethod
-    def sum(cls, value1, value2):
+    def sum(cls, value1: Decimal, value2: Decimal) -> Decimal:
         return value1 + value2
 
-    @classmethod
-    def parse(cls, str_):
-        return Decimal(str_)
 
     @classmethod
-    def to_string(cls, value):
+    def parse(cls, str_: str) -> Decimal:
+        return Decimal(str_)
+
+
+    @classmethod
+    def to_string(cls, value: Decimal) -> str:
         return str(value)

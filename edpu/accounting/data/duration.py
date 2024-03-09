@@ -1,23 +1,29 @@
-from ... import calc_time_utils
+from .data import Data
 
 
-class DurationData:
+class DurationData(Data[int]):
     @classmethod
-    def zero(cls):
+    def zero(cls) -> int:
         return 0
 
+
     @classmethod
-    def negate(cls, value):
+    def negate(cls, value: int) -> int:
         return -value
 
+
     @classmethod
-    def sum(cls, value1, value2):
+    def sum(cls, value1: int, value2: int) -> int:
         return value1 + value2
 
-    @classmethod
-    def parse(cls, str_):
-        return calc_time_utils.parse_duration(str_)
 
     @classmethod
-    def to_string(cls, value):
-        return calc_time_utils.duration_string_with_negative(value)
+    def parse(cls, str_: str) -> int:
+        from ...calc_time_utils import parse_duration
+        return parse_duration(str_)
+
+
+    @classmethod
+    def to_string(cls, value: int) -> str:
+        from ...calc_time_utils import duration_string_with_negative
+        return duration_string_with_negative(value)

@@ -1,5 +1,4 @@
 from __future__ import annotations
-from operator import itemgetter
 from typing import Generic, TypeVar, Union
 
 
@@ -10,6 +9,7 @@ MapperB = TypeVar('MapperB')
 class Mapper(Generic[MapperA, MapperB]):
     def __init__(self: Mapper[MapperA, MapperB], data: list[tuple[MapperA, MapperB]]) -> None:
         for item in range(2):
+            from operator import itemgetter
             Mapper._dup_check(list(map(itemgetter(item), data)))
 
         self._data = data

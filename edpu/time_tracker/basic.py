@@ -1,6 +1,6 @@
 from .common import *
-from edpu import query_window
-from edpu import file_utils
+from .. import query_window
+from .. import file_utils
 
 def get_stats(actions):
     result = ''

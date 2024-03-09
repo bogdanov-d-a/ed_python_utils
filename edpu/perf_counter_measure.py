@@ -7,8 +7,8 @@ class PerfCounterMeasure:
     def __init__(self: PerfCounterMeasure, handler: Callable[[float], None]) -> None:
         self._handler = handler
 
-    def __enter__(self: PerfCounterMeasure):
+    def __enter__(self: PerfCounterMeasure) -> None:
         self._start = perf_counter()
 
-    def __exit__(self: PerfCounterMeasure, exc_type, exc_value, exc_tb):
+    def __exit__(self: PerfCounterMeasure, exc_type, exc_value, exc_tb) -> None:
         self._handler(perf_counter() - self._start)

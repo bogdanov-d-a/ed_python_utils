@@ -4,15 +4,15 @@ from typing import Callable
 
 
 def make_file_progress_printer(period: float, annotation: str, path_: str) -> Callable[[int], None]:
+    from ...throttling import TimeBasedAggregator
     from .mp_global import print_lock
-    from edpu.throttling import TimeBasedAggregator
 
     return TimeBasedAggregator.make_number_sum_printer(period, f'walkers.{annotation} {path_}', print_lock=print_lock())
 
 
 def walk_data(data_path: str) -> dict[str, set[str]]:
+    from ...file_tree_walker import walk, TYPE_DIR, TYPE_FILE
     from .mappers.path_key import path_to_key
-    from edpu.file_tree_walker import walk, TYPE_DIR, TYPE_FILE
 
     data_walk = walk(data_path, file_progress=make_file_progress_printer(0.5, 'walk_data', data_path))
     result: dict[str, set[str]] = { TYPE_DIR: set(), TYPE_FILE: set() }
@@ -43,7 +43,7 @@ class WalkDefResult:
 
 
 def walk_def(def_path: str) -> WalkDefResult:
-    from edpu.file_tree_walker import walk, TYPE_DIR, TYPE_FILE
+    from ...file_tree_walker import walk, TYPE_DIR, TYPE_FILE
 
     def_walk = walk(def_path, lambda type_, _: type_ == TYPE_DIR, make_file_progress_printer(0.1, 'walk_def', def_path))[TYPE_FILE]
 

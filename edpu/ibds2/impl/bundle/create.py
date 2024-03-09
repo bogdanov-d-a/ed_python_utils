@@ -2,10 +2,10 @@ from ...utils.user_data import UserData
 
 
 def create_bundle(user_data: UserData, storage_device: str, bundle_alias: str, collection_alias: str, bundle_slice_alias: str) -> None:
+    from ....datetime_utils import get_now_datetime_str
     from ...utils import hashset, path
     from ...utils.copying_archiver import Packer
     from ...utils.walkers import walk_def
-    from edpu.datetime_utils import get_now_datetime_str
 
     storage_path_cache: dict[str, str] = {}
     collection_paths = path.get_collection_paths(user_data, collection_alias, storage_device, storage_path_cache)

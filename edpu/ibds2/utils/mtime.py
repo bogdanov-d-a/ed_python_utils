@@ -27,7 +27,7 @@ def make_setmtime_progress_printer(path_: str) -> Callable[[], None]:
 
 
 def _make_count_printer(annotation: str, path_: str) -> Callable[[], None]:
+    from ...throttling import TimeBasedAggregator
     from .mp_global import print_lock
-    from edpu.throttling import TimeBasedAggregator
 
     return TimeBasedAggregator.make_count_printer(0.5, f'{annotation} {path_}', print_lock())

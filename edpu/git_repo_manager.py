@@ -1,17 +1,17 @@
 import argparse
 import codecs
 import os
-from edpu import host_alias
-from edpu import git_tools
-from edpu import user_interaction
-from edpu import pause_at_end
-from edpu import git_repo_data
+from . import host_alias
+from . import git_tools
+from . import user_interaction
+from . import pause_at_end
+from . import git_repo_data
 import edpu_user.python_launcher
 import edpu_user.password_provider
-from edpu import file_encryptor
-from edpu import datetime_utils
-from edpu import guided_directory_use
-from edpu.storage_finder import find_all_storage
+from . import file_encryptor
+from . import datetime_utils
+from . import guided_directory_use
+from .storage_finder import find_all_storage
 
 
 class Data:

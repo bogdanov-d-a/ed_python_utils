@@ -1,5 +1,5 @@
 from .user_data import CollectionDict, CollectionList, COLLECTION_VALUE_LOCATIONS, COLLECTION_VALUE_SCAN_SKIP_PATHS
-from edpu import storage_finder
+from .. import storage_finder
 from . import path_generator
 from . import ibds_utils
 from . import file_tree_snapshot

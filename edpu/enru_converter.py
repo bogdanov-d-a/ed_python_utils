@@ -1,8 +1,7 @@
-import tkinter
-from edpu import tkinter_utils
+def _main() -> None:
+    from . import tkinter_utils
+    import tkinter
 
-
-def main() -> None:
     root = tkinter.Tk()
     root.title('EnRu converter')
 
@@ -130,5 +129,6 @@ def main() -> None:
     tkinter.mainloop()
 
 
-if __name__ == '__main__':
-    main()
+def main() -> None:
+    from .tkinter_utils import handle_errors
+    handle_errors(_main)

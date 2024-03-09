@@ -28,7 +28,7 @@ def get_bundle_snap_path(user_data: UserData, bundle_alias: str, collection_alia
 
 
 def get_storage_path(storage_device_name: str, storage_path_cache: dict[str, str]) -> str:
-    from edpu.storage_finder import keep_getting_storage_path
+    from ...storage_finder import keep_getting_storage_path
 
     storage_path = storage_path_cache.get(storage_device_name)
 

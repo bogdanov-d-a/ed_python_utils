@@ -1,21 +1,23 @@
-from collections import deque
-from random import getrandbits
-from time import sleep
+def main(sleep_time: float) -> None:
+    from collections import deque
 
+    storage = deque()
 
-storage = deque()
+    while True:
+        try:
+            print('start')
 
+            while True:
+                from random import getrandbits
+                from time import sleep
 
-while True:
+                for _ in range(128*1024):
+                    storage.append(getrandbits(8*1024))
 
-    try:
-        print('start')
-        while True:
-            for _ in range(128*1024):
-                storage.append(getrandbits(8*1024))
-            #sleep(1)
+                sleep(sleep_time)
 
-    except:
-        print('stop')
-        storage = deque()
-        input()
+        except:
+            print('stop')
+
+            storage = deque()
+            input()
