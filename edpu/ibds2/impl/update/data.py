@@ -67,6 +67,9 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
 
     def data_recycle_makedirs_helper(data_path: list[str]) -> None:
         from ...utils.file import makedirs_helper
+        from os import makedirs
+
+        makedirs(root_data_path_recycle, exist_ok=True)
         makedirs_helper(data_path, root_data_path_recycle, TYPE_FILE)
 
     def copy_no_overwrite(src: str, dst: str) -> None:
