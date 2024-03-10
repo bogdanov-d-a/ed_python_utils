@@ -1,79 +1,112 @@
-import os
-import subprocess
+from typing import Optional
+
 
 mock = False
 
-def run_command(path, command):
+
+def run_command(path: str, command: list[str]) -> None:
     if mock:
         print('run_command ' + path + ' ' + str(command))
         return
 
-    with subprocess.Popen(command, cwd=path) as process:
+    from subprocess import Popen
+
+    with Popen(command, cwd=path) as process:
         process.communicate()
 
-def run_command_for_result(path, command):
+
+def run_command_for_result(path: str, command: list[str]) -> bytes:
+    from subprocess import Popen, PIPE
+
     result = b''
-    with subprocess.Popen(command, cwd=path, stdout=subprocess.PIPE) as process:
+
+    with Popen(command, cwd=path, stdout=PIPE) as process:
+        if process.stdout is None:
+            raise Exception()
+
         for line in process.stdout.readlines():
             result += line
+
     return result
 
-def put_blank_line():
+
+def put_blank_line() -> None:
     if mock:
         print('put_blank_line')
         return
 
     print()
 
-def run_git_command(path, args):
-    if not os.path.isdir(path):
+
+def run_git_command(path: str, args: list[str]) -> None:
+    from os.path import isdir
+
+    if not isdir(path):
         raise Exception(path + ' doesn\'t exist')
+
     run_command(path, ['git', '--no-pager'] + args)
 
-def run_git_command_for_result(path, args):
-    if not os.path.isdir(path):
+
+def run_git_command_for_result(path: str, args: list[str]) -> str:
+    from os.path import isdir
+
+    if not isdir(path):
         raise Exception(path + ' doesn\'t exist')
+
     return run_command_for_result(path, ['git', '--no-pager'] + args).decode('utf-8').rstrip('\n')
 
-def status(path):
+
+def status(path: str) -> None:
     run_git_command(path, ['status'])
 
-def remotes(path):
+
+def remotes(path: str) -> None:
     run_git_command(path, ['remote', '-vv'])
 
-def fetch(path):
+
+def fetch(path: str) -> None:
     run_git_command(path, ['fetch', '--all'])
 
-def fsck(path):
+
+def fsck(path: str) -> None:
     run_git_command(path, ['fsck'])
 
-def gc(path):
+
+def gc(path: str) -> None:
     run_git_command(path, ['gc'])
 
-def all_refs(path):
+
+def all_refs(path: str) -> None:
     run_git_command(path, ['branch', '-av'])
     put_blank_line()
     run_git_command(path, ['tag', '--format=%(refname:strip=2) %(objectname:short)'])
 
-def all_stash(path):
+
+def all_stash(path: str) -> None:
     run_git_command(path, ['stash', 'list'])
 
-def fetch_remote(path, remote_path):
+
+def fetch_remote(path: str, remote_path: str) -> None:
     run_git_command(path, ['fetch', remote_path])
 
-def pull_remote(path, remote_path):
+
+def pull_remote(path: str, remote_path: str) -> None:
     run_git_command(path, ['pull', remote_path])
 
-def checkout(path, branch):
+
+def checkout(path: str, branch: str) -> None:
     run_git_command(path, ['checkout', branch])
 
-def create_bundle(path, file_name, refs):
+
+def create_bundle(path: str, file_name: str, refs: str) -> None:
     run_git_command(path, ['bundle', 'create', file_name, refs])
 
-def rev_parse(path, ref):
+
+def rev_parse(path: str, ref: str) -> str:
     return run_git_command_for_result(path, ['rev-parse', ref])
 
-def pull_with_checkout(path, remote_path, local_branch, remote_branch=None):
+
+def pull_with_checkout(path: str, remote_path: str, local_branch: str, remote_branch: Optional[str]=None) -> None:
     if remote_branch is None:
         remote_branch = local_branch
 
@@ -81,25 +114,32 @@ def pull_with_checkout(path, remote_path, local_branch, remote_branch=None):
     put_blank_line()
     run_git_command(path, ['pull', remote_path, remote_branch])
 
-def pull_with_checkout_multi(path, remote_path, branches):
+
+def pull_with_checkout_multi(path: str, remote_path: str, branches: list[str]) -> None:
     for branch in branches:
         pull_with_checkout(path, remote_path, branch)
+
     checkout(path, branches[0])
 
-def push(path, remote_path, branch):
+
+def push(path: str, remote_path: str, branch: str) -> None:
     run_git_command(path, ['push', remote_path, branch])
 
-def push_multi(path, remote_path, branches):
+
+def push_multi(path: str, remote_path: str, branches: list[str]) -> None:
     for branch in branches:
         push(path, remote_path, branch)
 
-def push_all(path, remote_path):
+
+def push_all(path: str, remote_path: str) -> None:
     run_git_command(path, ['push', '--all', remote_path])
 
-def init_bare(path):
+
+def init_bare(path: str) -> None:
     run_git_command(path, ['init', '--bare'])
 
-def merge_with_checkout(path, remote_path, local_branch, remote_branch=None):
+
+def merge_with_checkout(path: str, remote_path: str, local_branch: str, remote_branch: Optional[str]=None) -> None:
     if remote_branch is None:
         remote_branch = local_branch
 
@@ -107,8 +147,11 @@ def merge_with_checkout(path, remote_path, local_branch, remote_branch=None):
     put_blank_line()
     run_git_command(path, ['merge', remote_path + '/' + remote_branch])
 
-def fetch_merge_with_checkout_multi(path, remote_path, branches):
+
+def fetch_merge_with_checkout_multi(path: str, remote_path: str, branches: list[str]) -> None:
     fetch_remote(path, remote_path)
+
     for branch in branches:
         merge_with_checkout(path, remote_path, branch)
+
     checkout(path, branches[0])
