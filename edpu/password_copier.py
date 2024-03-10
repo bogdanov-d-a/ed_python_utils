@@ -1,12 +1,17 @@
 def run(data: dict[str, str]) -> None:
-    aliases = sorted(data.keys())
+    from . import pause_at_end
 
-    while True:
-        from .user_interaction import pick_option
-        from pyperclip import copy
+    def impl() -> None:
+        aliases = sorted(data.keys())
 
-        index = pick_option('Pick alias', aliases)
-        alias = aliases[index]
-        copy(data[alias])
-        print('Copied ' + alias)
-        print()
+        while True:
+            from .user_interaction import pick_option
+            from pyperclip import copy
+
+            index = pick_option('Pick alias', aliases)
+            alias = aliases[index]
+            copy(data[alias])
+            print('Copied ' + alias)
+            print()
+
+    pause_at_end.run(impl, pause_at_end.DEFAULT_MESSAGE)
