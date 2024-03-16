@@ -15,10 +15,11 @@ Actions = list[Action]
 
 
 class State:
-    def __init__(self: State, data_provider: DataProvider, bootstrap: Optional[bool], flip_bootstrap_mode: Optional[Callable[[], None]]) -> None:
+    def __init__(self: State, data_provider: DataProvider, bootstrap: Optional[bool], flip_bootstrap_mode: Optional[Callable[[], None]], quit: Optional[Callable[[], None]]) -> None:
         self.data_provider = data_provider
         self.bootstrap = bootstrap
         self.flip_bootstrap_mode = flip_bootstrap_mode
+        self.quit = quit
 
     def get_bootstrap(self: State) -> bool:
         if self.bootstrap is None:
@@ -30,10 +31,15 @@ class State:
             raise Exception()
         return self.flip_bootstrap_mode
 
+    def get_quit(self: State) -> Callable[[], None]:
+        if self.quit is None:
+            raise Exception()
+        return self.quit
 
-def init_state(data_provider: DataProvider, bootstrap: Optional[bool], flip_bootstrap_mode: Optional[Callable[[], None]]) -> None:
+
+def init_state(data_provider: DataProvider, bootstrap: Optional[bool], flip_bootstrap_mode: Optional[Callable[[], None]], quit: Optional[Callable[[], None]]) -> None:
     global state
-    state = State(data_provider, bootstrap, flip_bootstrap_mode)
+    state = State(data_provider, bootstrap, flip_bootstrap_mode, quit)
 
 
 def get_state() -> State:
@@ -189,6 +195,12 @@ def all() -> Actions:
             'fbm',
             'Flip bootstrap_mode',
             lambda: get_state().get_flip_bootstrap_mode()(),
+            True
+        ),
+        Action(
+            'q',
+            'Quit',
+            lambda: get_state().get_quit()(),
             True
         ),
     ]

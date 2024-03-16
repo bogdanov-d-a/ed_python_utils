@@ -1,8 +1,8 @@
 from typing import Callable
 
 
-def pick(get_bootstrap_mode: Callable[[], bool], filename: str, debug: bool) -> None:
-    while True:
+def pick(get_stop: Callable[[], bool], get_bootstrap_mode: Callable[[], bool], filename: str, debug: bool) -> None:
+    while not get_stop():
         from ... import user_interaction
         from ..utils import actions
 
