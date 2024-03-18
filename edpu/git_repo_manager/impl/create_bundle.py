@@ -46,6 +46,7 @@ def create_bundle(bundle_hash_path_provider: Callable[[str, str], str], bundle_p
                     else:
                         from ...datetime_utils import get_now_datetime_str
                         from ...file_encryptor import encrypt
+                        from ...pack_7z import S_7Z_EXT
                         from ..utils.bundle import save_line
                         from ..utils.git import create_bundle as impl
                         from os.path import sep
@@ -60,7 +61,7 @@ def create_bundle(bundle_hash_path_provider: Callable[[str, str], str], bundle_p
                         bundle_file_path = bundle_path + sep + target_alias + '-' + repo_alias + '-' + get_now_datetime_str() + '.bundle'
 
                         impl(repo.path, bundle_file_path, refs)
-                        encrypt(bundle_file_path, password, bundle_file_path + '.7z')
+                        encrypt(bundle_file_path, password, bundle_file_path + S_7Z_EXT)
                         save_line(now_hash, hash_file_path)
 
                 else:

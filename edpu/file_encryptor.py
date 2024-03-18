@@ -4,6 +4,7 @@ def validate_or_throw(var: str, var_name: str) -> None:
 
 def encrypt(file_name: str, password: str, archive_name: str) -> None:
     from .string_utils import merge_with_space, quotation_mark_wrap
+    from edpu_user.m7z import f7z_path
     from subprocess import check_call
 
     validate_or_throw(file_name, 'file name')
@@ -11,7 +12,7 @@ def encrypt(file_name: str, password: str, archive_name: str) -> None:
     validate_or_throw(archive_name, 'archive name')
 
     check_call(merge_with_space([
-        '7z',
+        quotation_mark_wrap(f7z_path()),
         'a',
         '-mx0',
         '-sdel',
