@@ -36,6 +36,11 @@ def yes_no_prompt(msg: str) -> bool:
             return False
 
 
+def yes_no_prompt_wait(msg: str='stop') -> None:
+    while not yes_no_prompt(msg):
+        pass
+
+
 def pick_option(prompt: str, options: list[str]) -> int:
     for option, index in zip(options, range(len(options))):
         print(str(index + 1) + '. ' + option)
