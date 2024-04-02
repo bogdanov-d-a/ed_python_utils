@@ -2,7 +2,7 @@ from typing import Callable
 
 
 def walk(src_dir: str, dst_dir: str, processor: Callable[[str], None]) -> None:
-    from edpu.guided_directory_use import PathKeeper
+    from ..guided_directory_use import PathKeeper
     from os.path import exists
 
     if not exists(src_dir):

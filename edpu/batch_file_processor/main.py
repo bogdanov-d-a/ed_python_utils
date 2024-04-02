@@ -37,5 +37,5 @@ def _main() -> None:
 
 
 def run() -> None:
-    from edpu import pause_at_end
+    from .. import pause_at_end
     pause_at_end.run(_main, pause_at_end.DEFAULT_MESSAGE)

@@ -5,8 +5,8 @@ def exec_(src_dir: str, dst_dir: str, name_length: Optional[int]=None, keep_name
     from .walker import walk
 
     def processor(src_name: str) -> None:
+        from ..file_hashing import sha1_file
         from . import utils
-        from edpu.file_hashing import sha1_file
         from os import rename
 
         src_path = utils.path_join(src_dir, src_name)
