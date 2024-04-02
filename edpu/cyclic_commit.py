@@ -21,6 +21,7 @@ def cyclic_commit(path: str) -> None:
                 ('s', 'status', lambda: status(path)),
                 ('a', 'add', lambda: run_git_command(path, ['add', '.'])),
                 ('c', 'commit', lambda: run_git_command(path, ['commit', '-m', '1'])),
+                ('l', 'clean', lambda: run_git_command(path, ['clean', '-idx'])),
             ])()
 
     pause_at_end.run(main, pause_at_end.DEFAULT_MESSAGE)
