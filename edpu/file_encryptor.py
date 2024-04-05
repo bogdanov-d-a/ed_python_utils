@@ -17,6 +17,7 @@ def encrypt(file_name: str, password: str, archive_name: str) -> None:
         '-mx0',
         '-sdel',
         '-p' + quotation_mark_wrap(password),
+        '-mhe=on',
         quotation_mark_wrap(archive_name),
         quotation_mark_wrap(file_name),
     ]))
