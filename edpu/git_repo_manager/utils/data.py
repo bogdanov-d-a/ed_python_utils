@@ -38,6 +38,10 @@ class DataProvider(ABC):
         pass
 
     @abstractmethod
+    def get_storage_block_reasons(self: DataProvider) -> dict[str, str]:
+        pass
+
+    @abstractmethod
     def get_bundle_block_reasons(self: DataProvider) -> dict[str, str]:
         pass
 

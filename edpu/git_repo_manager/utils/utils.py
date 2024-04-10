@@ -65,8 +65,11 @@ def host_repos_run_with_path(command: Callable[[str], None], repos: dict[str, Da
     host_repos_run(lambda _, repo: command(repo.path), repos, filter_repos)
 
 
-def handle_all_storage(repo: Data_, handler: Callable[[str], None]) -> None:
+def handle_all_storage(repo: Data_, block_reasons: dict[str, str], handler: Callable[[str], None]) -> None:
     for alias, storage_path in repo.remotes.storage.items():
+        if alias in block_reasons:
+            raise Exception(alias + ' blocked, reason ' + block_reasons[alias])
+
         print('Processing ' + alias)
         handler(storage_path)
 

@@ -30,14 +30,14 @@ def host_repos_all_refs(repos: dict[str, Data], filter_repos: Optional[set[str]]
     host_repos_run_with_path(all_refs, repos, filter_repos)
 
 
-def host_repos_all_storage_refs(repos: dict[str, Data], filter_repos: Optional[set[str]]) -> None:
+def host_repos_all_storage_refs(repos: dict[str, Data], storage_block_reasons: dict[str, str], filter_repos: Optional[set[str]]) -> None:
     from ..utils.utils import Data_, host_repos_run
 
     def ref_all_storage(_, repo: Data_) -> None:
         from ..utils.git import all_refs
         from ..utils.utils import handle_all_storage
 
-        handle_all_storage(repo, all_refs)
+        handle_all_storage(repo, storage_block_reasons, all_refs)
 
     host_repos_run(ref_all_storage, repos, filter_repos)
 
@@ -63,31 +63,31 @@ def host_repos_gc(repos: dict[str, Data], filter_repos: Optional[set[str]]) -> N
     host_repos_run_with_path(gc, repos, filter_repos)
 
 
-def host_repos_fetch_storage(repos: dict[str, Data], filter_repos: Optional[set[str]]) -> None:
+def host_repos_fetch_storage(repos: dict[str, Data], storage_block_reasons: dict[str, str], filter_repos: Optional[set[str]]) -> None:
     from ..utils.utils import Data_, host_repos_run
 
     def fetch_all_storage(_, repo: Data_) -> None:
         from ..utils.git import fetch_remote
         from ..utils.utils import handle_all_storage
 
-        handle_all_storage(repo, lambda path: fetch_remote(repo.path, path))
+        handle_all_storage(repo, storage_block_reasons, lambda path: fetch_remote(repo.path, path))
 
     host_repos_run(fetch_all_storage, repos, filter_repos)
 
 
-def host_repos_pull_storage(repos: dict[str, Data], filter_repos: Optional[set[str]]) -> None:
+def host_repos_pull_storage(repos: dict[str, Data], storage_block_reasons: dict[str, str], filter_repos: Optional[set[str]]) -> None:
     from ..utils.utils import Data_, host_repos_run
 
     def pull_all_storage(_, repo: Data_) -> None:
         from ..utils.git import pull_with_checkout_multi
         from ..utils.utils import handle_all_storage
 
-        handle_all_storage(repo, lambda path: pull_with_checkout_multi(repo.path, path, repo.branches))
+        handle_all_storage(repo, storage_block_reasons, lambda path: pull_with_checkout_multi(repo.path, path, repo.branches))
 
     host_repos_run(pull_all_storage, repos, filter_repos)
 
 
-def host_repos_push_storage(repos: dict[str, Data], filter_repos: Optional[set[str]]) -> None:
+def host_repos_push_storage(repos: dict[str, Data], storage_block_reasons: dict[str, str], filter_repos: Optional[set[str]]) -> None:
     from ..utils.utils import Data_, host_repos_run
 
     def push_all_storage(_, repo: Data_) -> None:
@@ -100,19 +100,19 @@ def host_repos_push_storage(repos: dict[str, Data], filter_repos: Optional[set[s
             init_bare_if_not_exists(path)
             push_all(repo.path, path)
 
-        handle_all_storage(repo, push_storage)
+        handle_all_storage(repo, storage_block_reasons, push_storage)
 
     host_repos_run(push_all_storage, repos, filter_repos)
 
 
-def host_repos_fsck_storage(repos: dict[str, Data], filter_repos: Optional[set[str]]) -> None:
+def host_repos_fsck_storage(repos: dict[str, Data], storage_block_reasons: dict[str, str], filter_repos: Optional[set[str]]) -> None:
     from ..utils.utils import Data_, host_repos_run
 
     def fsck_all_storage(_, repo: Data_) -> None:
         from ..utils.git import fsck
         from ..utils.utils import handle_all_storage
 
-        handle_all_storage(repo, fsck)
+        handle_all_storage(repo, storage_block_reasons, fsck)
 
     host_repos_run(fsck_all_storage, repos, filter_repos)
 

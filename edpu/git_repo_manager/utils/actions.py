@@ -79,7 +79,11 @@ def all() -> Actions:
         Action(
             'lrefs',
             'List storage refs',
-            lambda: impl.host_repos_all_storage_refs(get_state().data_provider.get_repos(), bootstrap_mode_filter()),
+            lambda: impl.host_repos_all_storage_refs(
+                get_state().data_provider.get_repos(),
+                get_state().data_provider.get_storage_block_reasons(),
+                bootstrap_mode_filter()
+            ),
             False
         ),
         Action(
@@ -103,7 +107,11 @@ def all() -> Actions:
         Action(
             'fes',
             'Fetch storage',
-            lambda: impl.host_repos_fetch_storage(get_state().data_provider.get_repos(), bootstrap_mode_filter()),
+            lambda: impl.host_repos_fetch_storage(
+                get_state().data_provider.get_repos(),
+                get_state().data_provider.get_storage_block_reasons(),
+                bootstrap_mode_filter()
+            ),
             False
         ),
         Action(
@@ -115,7 +123,11 @@ def all() -> Actions:
         Action(
             'pls',
             'Pull storage',
-            lambda: impl.host_repos_pull_storage(get_state().data_provider.get_repos(), bootstrap_mode_filter()),
+            lambda: impl.host_repos_pull_storage(
+                get_state().data_provider.get_repos(),
+                get_state().data_provider.get_storage_block_reasons(),
+                bootstrap_mode_filter()
+            ),
             False
         ),
         Action(
@@ -127,7 +139,11 @@ def all() -> Actions:
         Action(
             'pss',
             'Push storage',
-            lambda: impl.host_repos_push_storage(get_state().data_provider.get_repos(), bootstrap_mode_filter()),
+            lambda: impl.host_repos_push_storage(
+                get_state().data_provider.get_repos(),
+                get_state().data_provider.get_storage_block_reasons(),
+                bootstrap_mode_filter()
+            ),
             False
         ),
         Action(
@@ -139,7 +155,11 @@ def all() -> Actions:
         Action(
             'fscks',
             'Run fsck storage',
-            lambda: impl.host_repos_fsck_storage(get_state().data_provider.get_repos(), bootstrap_mode_filter()),
+            lambda: impl.host_repos_fsck_storage(
+                get_state().data_provider.get_repos(),
+                get_state().data_provider.get_storage_block_reasons(),
+                bootstrap_mode_filter()
+            ),
             False
         ),
         Action(
