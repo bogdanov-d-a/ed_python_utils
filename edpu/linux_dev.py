@@ -5,6 +5,7 @@ from typing import Optional
 class Type(Enum):
     SD = auto()
     NVME = auto()
+    MMCBLK = auto()
 
 
 def _dev(type: Type, index: str, nvme_index: Optional[str]) -> str:
@@ -17,6 +18,9 @@ def _dev(type: Type, index: str, nvme_index: Optional[str]) -> str:
 
         return f'nvme{index}n{nvme_index}'
 
+    elif type == Type.MMCBLK:
+        return f'mmcblk{index}'
+
     else:
         raise Exception()
 
@@ -25,7 +29,7 @@ def _part(type: Type, index: str) -> str:
     if type == Type.SD:
         return index
 
-    elif type == Type.NVME:
+    elif type in [Type.NVME, Type.MMCBLK]:
         return f'p{index}'
 
     else:
