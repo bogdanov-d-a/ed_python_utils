@@ -154,3 +154,8 @@ def pick_str_option_multi(prompt: str, options: list[tuple[str, str]], validator
             continue
 
         return list(result)
+
+
+def user_wait(prompt: str) -> None:
+    print(prompt)
+    input()
