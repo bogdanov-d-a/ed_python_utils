@@ -51,3 +51,18 @@ def refresh_drive(drive_block: DriveBlockData, stop_file_name: str='refresh_driv
             print('total_duration - ' + str(total_duration))
 
         impl()
+
+
+def refresh_drive_tail(drive_block: DriveBlockData) -> None:
+    from .utils.io import open_drive_rw
+
+    if drive_block.tail <= 0:
+        raise Exception('drive_block.tail <= 0')
+
+    with open_drive_rw(drive_block.drive.path) as drive_file:
+        from .utils.io import read_helper, write_helper
+
+        offset = drive_block.drive.size - drive_block.tail
+
+        data = read_helper(drive_file, offset, drive_block.tail)
+        write_helper(drive_file, offset, data)
