@@ -7,18 +7,21 @@ APP_NAME = 'batch_file_processor'
 def _pick_action() -> Callable[[str, str], None]:
     from ..user_interaction import pick_str_option_ex
     from . import order_renamer
+    from . import png_crop
     from . import png_to_jpg
     from . import sha1_renamer
+    from edpu_user.batch_file_processor import get_crop_box
 
     return pick_str_option_ex(f'{APP_NAME} action', [
         ('o', 'order_renamer', order_renamer.exec_),
         ('o2', 'order_renamer name_length=2', lambda a, b: order_renamer.exec_(a, b, name_length=2)),
         ('p', 'png_to_jpg', png_to_jpg.exec_),
         ('p50', 'png_to_jpg quality=50', lambda a, b: png_to_jpg.exec_(a, b, 50)),
+        ('pc', 'png_crop', lambda a, b: png_crop.exec_(a, b, get_crop_box())),
         ('s', 'sha1_renamer', sha1_renamer.exec_),
-        ('sk', 'sha1_renamer keep_name', lambda a, b: sha1_renamer.exec_(a, b, keep_name=True)),
         ('s8', 'sha1_renamer name_length=8', lambda a, b: sha1_renamer.exec_(a, b, 8)),
         ('s8k', 'sha1_renamer name_length=8 keep_name', lambda a, b: sha1_renamer.exec_(a, b, 8, True)),
+        ('sk', 'sha1_renamer keep_name', lambda a, b: sha1_renamer.exec_(a, b, keep_name=True)),
     ])
 
 
