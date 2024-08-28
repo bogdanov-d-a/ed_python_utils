@@ -33,8 +33,16 @@ def backtick_wrap(str_: str) -> str:
     return char_wrap(str_, '`')
 
 
+def percent_wrap(str_: str) -> str:
+    return char_wrap(str_, '%')
+
+
 def merge_with_space(list_: list[str]) -> str:
     return ' '.join(list_)
+
+
+def merge_with_newline(list_: list[str]) -> str:
+    return '\n'.join(list_)
 
 
 def round_brackets_wrap(str_: str) -> str:
