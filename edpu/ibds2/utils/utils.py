@@ -17,11 +17,11 @@ def intersection(main_list: set[str], aux_list: set[str], type: IntersectionType
             yield key_to_path(main_content)
 
 
-def get_storage_device_list(storage_devices: StorageDevices) -> list[str]:
+def get_storage_device_list(storage_devices: StorageDevices, all: bool=False) -> list[str]:
     storage_device_list: list[str] = []
 
     for device_name, device_data in storage_devices.items():
-        if device_data.is_scan_available:
+        if all or device_data.is_scan_available:
             storage_device_list.append(device_name)
 
     return storage_device_list

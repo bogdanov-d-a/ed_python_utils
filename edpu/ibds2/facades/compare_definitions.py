@@ -15,8 +15,8 @@ def compare_definitions(user_data: UserData) -> None:
     from ..utils.user_interaction import pick_storage_device
     from typing import Iterator
 
-    storage_device_a = pick_storage_device(user_data.storage_devices)
-    storage_device_b = pick_storage_device(user_data.storage_devices)
+    storage_device_a = pick_storage_device(user_data.storage_devices, True)
+    storage_device_b = pick_storage_device(user_data.storage_devices, True)
 
     def impl() -> Iterator[tuple[str, str]]:
         from ..utils.mp_global import make_process_pool_executor

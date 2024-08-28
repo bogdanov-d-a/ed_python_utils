@@ -44,7 +44,9 @@ class WalkDefResult:
 
 def walk_def(def_path: str) -> WalkDefResult:
     from ...file_tree_walker import walk, TYPE_DIR, TYPE_FILE
+    from os import makedirs
 
+    makedirs(def_path, exist_ok=True)
     def_walk = walk(def_path, lambda type_, _: type_ == TYPE_DIR, make_file_progress_printer(0.1, 'walk_def', def_path))[TYPE_FILE]
 
     result_dirs: WalkDefDirs = set()
