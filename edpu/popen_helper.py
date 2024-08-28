@@ -8,3 +8,7 @@ def popen_communicate(popen: Popen) -> None:
 
 def popen_communicate_command(command: str) -> None:
     popen_communicate(Popen(command))
+
+
+def popen_communicate_command_cwd(command: str, cwd: str) -> None:
+    popen_communicate(Popen(command, cwd=cwd))
