@@ -135,6 +135,10 @@ def push_all(path: str, remote_path: str) -> None:
     run_git_command(path, ['push', '--all', remote_path])
 
 
+def init(path: str) -> None:
+    run_git_command(path, ['init'])
+
+
 def init_bare(path: str) -> None:
     run_git_command(path, ['init', '--bare'])
 

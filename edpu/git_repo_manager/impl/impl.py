@@ -79,10 +79,16 @@ def host_repos_pull_storage(repos: dict[str, Data], storage_block_reasons: dict[
     from ..utils.utils import Data_, host_repos_run
 
     def pull_all_storage(_, repo: Data_) -> None:
-        from ..utils.git import pull_with_checkout_multi
         from ..utils.utils import handle_all_storage
 
-        handle_all_storage(repo, storage_block_reasons, lambda path: pull_with_checkout_multi(repo.path, path, repo.branches))
+        def pull_storage(path: str) -> None:
+            from ..utils.git import pull_with_checkout_multi
+            from ..utils.utils import init_if_not_exists
+
+            init_if_not_exists(repo.path)
+            pull_with_checkout_multi(repo.path, path, repo.branches)
+
+        handle_all_storage(repo, storage_block_reasons, pull_storage)
 
     host_repos_run(pull_all_storage, repos, filter_repos)
 
