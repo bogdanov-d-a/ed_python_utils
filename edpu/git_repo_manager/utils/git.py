@@ -102,6 +102,10 @@ def create_bundle(path: str, file_name: str, refs: str) -> None:
     run_git_command(path, ['bundle', 'create', file_name, refs])
 
 
+def rename(path: str, name: str) -> None:
+    run_git_command(path, ['branch', '-M', name])
+
+
 def rev_parse(path: str, ref: str) -> str:
     return run_git_command_for_result(path, ['rev-parse', ref])
 
