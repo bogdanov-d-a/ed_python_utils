@@ -85,13 +85,16 @@ def host_repos_pull_storage(repos: dict[str, Data], storage_block_reasons: dict[
             from ..utils.git import pull_with_checkout_multi
             from ..utils.utils import init_if_not_exists
 
-            init_if_not_exists(repo.path)
+            orphan = False
 
-            if repo.branches[0] != 'master':
-                from ..utils.git import rename
-                rename(repo.path, repo.branches[0])
+            if init_if_not_exists(repo.path):
+                orphan = True
 
-            pull_with_checkout_multi(repo.path, path, repo.branches)
+                if repo.branches[0] != 'master':
+                    from ..utils.git import rename
+                    rename(repo.path, repo.branches[0])
+
+            pull_with_checkout_multi(repo.path, path, repo.branches, orphan)
 
         handle_all_storage(repo, storage_block_reasons, pull_storage)
 

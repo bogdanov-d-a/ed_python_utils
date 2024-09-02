@@ -108,11 +108,11 @@ class Args:
         return Args(args.action, args.bootstrap)
 
 
-def init_if_not_exists(path: str) -> None:
+def init_if_not_exists(path: str) -> bool:
     from os.path import isdir
 
     if isdir(path):
-        return
+        return False
 
     print(path + ' is missing, creating')
 
@@ -121,6 +121,8 @@ def init_if_not_exists(path: str) -> None:
 
     from .git import init
     init(path)
+
+    return True
 
 
 def init_bare_if_not_exists(path: str) -> None:

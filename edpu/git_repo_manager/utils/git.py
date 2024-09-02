@@ -94,8 +94,8 @@ def pull_remote(path: str, remote_path: str) -> None:
     run_git_command(path, ['pull', remote_path])
 
 
-def checkout(path: str, branch: str) -> None:
-    run_git_command(path, ['checkout', branch])
+def checkout(path: str, branch: str, orphan: bool=False) -> None:
+    run_git_command(path, ['checkout'] + (['--orphan'] if orphan else []) + [branch])
 
 
 def create_bundle(path: str, file_name: str, refs: str) -> None:
@@ -106,22 +106,38 @@ def rename(path: str, name: str) -> None:
     run_git_command(path, ['branch', '-M', name])
 
 
+def reset_hard(path: str) -> None:
+    run_git_command(path, ['reset', '--hard'])
+
+
+def clean_ffdx(path: str) -> None:
+    run_git_command(path, ['clean', '-ffdx'])
+
+
+def worktree_add_detach(path: str, worktree_path: str, revision: str) -> None:
+    run_git_command(path, ['worktree', 'add', '--detach', worktree_path, revision])
+
+
 def rev_parse(path: str, ref: str) -> str:
     return run_git_command_for_result(path, ['rev-parse', ref])
 
 
-def pull_with_checkout(path: str, remote_path: str, local_branch: str, remote_branch: Optional[str]=None) -> None:
+def pull_with_checkout(path: str, remote_path: str, local_branch: str, remote_branch: Optional[str]=None, orphan: bool=False) -> None:
     if remote_branch is None:
         remote_branch = local_branch
 
-    checkout(path, local_branch)
+    checkout(path, local_branch, orphan)
+
+    if orphan:
+        reset_hard(path)
+
     put_blank_line()
     run_git_command(path, ['pull', remote_path, remote_branch])
 
 
-def pull_with_checkout_multi(path: str, remote_path: str, branches: list[str]) -> None:
+def pull_with_checkout_multi(path: str, remote_path: str, branches: list[str], orphan: bool=False) -> None:
     for branch in branches:
-        pull_with_checkout(path, remote_path, branch)
+        pull_with_checkout(path, remote_path, branch, orphan=(orphan and branch != branches[0]))
 
     checkout(path, branches[0])
 
