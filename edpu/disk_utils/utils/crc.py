@@ -1,6 +1,9 @@
 from io import BufferedWriter
 
 
+CRC_SIZE = 20
+
+
 def load_crc_file(crc_path: str) -> bytes:
     from .io import open_file_rb
 
@@ -8,9 +11,18 @@ def load_crc_file(crc_path: str) -> bytes:
         return crc_file.read()
 
 
+def get_crc_block_count(data: bytes) -> int:
+    data_len = len(data)
+
+    if data_len % CRC_SIZE != 0:
+        raise Exception(r'data_len % CRC_SIZE != 0')
+
+    return data_len // CRC_SIZE
+
+
 def get_crc_block(data: bytes, skip_blocks: int) -> bytes:
     from .utils import get_block
-    return get_block(data, 20, skip_blocks)
+    return get_block(data, CRC_SIZE, skip_blocks)
 
 
 def push_crc_to_file(drive_data: bytes, block_size: int, batch_blocks: int, crc_file: BufferedWriter) -> None:
@@ -31,3 +43,19 @@ def validate_crc(drive_data: bytes, block_number: int, crc_data: bytes) -> None:
 
     if crc_drive != crc_match:
         raise Exception('crc_drive != crc_match, block_number - ' + str(block_number))
+
+
+def get_pattern_crc(pattern: bytes, size: int) -> bytes:
+    pattern_size = len(pattern)
+
+    if size % pattern_size != 0:
+        raise Exception(r'size % pattern_size != 0')
+
+    from hashlib import sha1
+
+    hasher = sha1()
+
+    for _ in range(size // pattern_size):
+        hasher.update(pattern)
+
+    return hasher.digest()
