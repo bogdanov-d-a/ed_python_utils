@@ -1,6 +1,3 @@
-from typing import Optional
-
-
 def bin_path() -> str:
     from edpu_user.ffmpeg import ffmpeg_path
     return fr'{ffmpeg_path()}\bin'
@@ -34,17 +31,57 @@ FFPROBE_KEYS = [
 ]
 
 
-def ffmpeg_gen(app_name: str, keys: list[str]=[], path: Optional[str]=None) -> str:
+def ffmpeg_key(key: str) -> str:
+    return f'-{key}'
+
+
+def ffmpeg_keys(keys: list[str]) -> list[str]:
+    return list(map(ffmpeg_key, keys))
+
+
+def ffmpeg_input(input: list[str]) -> list[str]:
+    from .string_utils import quotation_mark_wrap
+
+    result = []
+
+    for input_elem in input:
+        result += ['-i', quotation_mark_wrap(input_elem)]
+
+    return result
+
+
+def ffmpeg_copy() -> list[str]:
+    return [
+        '-c',
+        'copy',
+    ]
+
+
+def ffmpeg_gen(app_name: str, args: list[str]=[]) -> str:
     from .string_utils import merge_with_space, quotation_mark_wrap
+    return merge_with_space([quotation_mark_wrap(fr'{bin_path()}\{app_name}{EXE_EXT}')] + args)
 
-    data = [quotation_mark_wrap(fr'{bin_path()}\{app_name}{EXE_EXT}')]
 
-    data += list(map(
-        lambda key: f'-{key}',
-        keys
-    ))
+def ffmpeg_cut(ss: str, to: str, input: list[str], output: str, accurate: bool=True) -> str:
+    from .string_utils import quotation_mark_wrap
 
-    if path is not None:
-        data.append(quotation_mark_wrap(path))
+    span = [
+        '-ss',
+        ss,
+        '-to',
+        to,
+    ]
 
-    return merge_with_space(data)
+    return ffmpeg_gen(
+        FFMPEG,
+        (ffmpeg_input(input) + span if accurate else span + ffmpeg_input(input)) + ffmpeg_copy() + [quotation_mark_wrap(output)]
+    )
+
+
+def ffmpeg_merge(input: list[str], output: str) -> str:
+    from .string_utils import quotation_mark_wrap
+
+    return ffmpeg_gen(
+        FFMPEG,
+        ffmpeg_input(input) + ffmpeg_copy() + [quotation_mark_wrap(output)]
+    )
