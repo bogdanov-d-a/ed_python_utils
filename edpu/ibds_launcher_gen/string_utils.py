@@ -25,7 +25,7 @@ def get_list_lines(items: list[str]) -> list[str]:
 
 
 def get_raw_string(s: str) -> str:
-    from edpu.string_utils import apostrophe_wrap
+    from ..string_utils import apostrophe_wrap
     return 'r' + apostrophe_wrap(s)
 
 
