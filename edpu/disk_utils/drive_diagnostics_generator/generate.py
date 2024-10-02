@@ -16,11 +16,11 @@ def get_drive_data() -> DriveData:
 ''')
 
 
-def _main(file: TextIOWrapper, generate_drive_delays: bool, generate_drive_crc: bool, refresh_drive: bool) -> None:
+def _main(file: TextIOWrapper, alias: str, generate_drive_delays: bool, generate_drive_crc: bool, refresh_drive: bool) -> None:
     file.write('''if __name__ == '__main__':\n''')
 
     if generate_drive_delays:
-        file.write('    #generate_drive_delays_()\n')
+        file.write(f'    #generate_drive_delays_()  # python {alias}.py > {alias}_generate_drive_delays.txt\n')
 
     if generate_drive_crc:
         file.write('    #generate_drive_crc_()\n')
@@ -60,7 +60,7 @@ def _generate_drive_delays(file: TextIOWrapper, generate_drive_delays_config: Ge
     file.write('\n\n')
 
 
-def _generate_drive_crc(file: TextIOWrapper, generate_drive_crc_config: GenerateDriveCrcConfig) -> None:
+def _generate_drive_crc(file: TextIOWrapper, alias: str, generate_drive_crc_config: GenerateDriveCrcConfig) -> None:
     file.write('''def generate_drive_crc_() -> None:
     from edpu.disk_utils.generate_drive_crc import generate_drive_crc
     from edpu.disk_utils.utils.drive_block_data import DriveBlockData
@@ -72,7 +72,7 @@ def _generate_drive_crc(file: TextIOWrapper, generate_drive_crc_config: Generate
     file.write('\n    dbd.print()\n\n')
 
     for generate_drive_crc_data in generate_drive_crc_config.generate_drive_crc_data_list:
-        file.write(f'''    #generate_drive_crc(dbd, {generate_drive_crc_data.batch_blocks}, {generate_drive_crc_data.max_cached_batches}, {generate_drive_crc_data.echo_rate}, 'crc')\n''')
+        file.write(f'''    #generate_drive_crc(dbd, {generate_drive_crc_data.batch_blocks}, {generate_drive_crc_data.max_cached_batches}, {generate_drive_crc_data.echo_rate}, '{alias}_generate_drive_crc')\n''')
 
     file.write('\n\n')
 
@@ -102,9 +102,9 @@ def generate(file_name: str, alias: str, device_path: str, device_blocks: str, g
              _generate_drive_delays(file, generate_drive_delays_config)
 
         if generate_drive_crc_config is not None:
-            _generate_drive_crc(file, generate_drive_crc_config)
+            _generate_drive_crc(file, file_name, generate_drive_crc_config)
 
         if refresh_drive_drive_block_data_list is not None:
             _refresh_drive(file, refresh_drive_drive_block_data_list)
 
-        _main(file, generate_drive_delays_config is not None, generate_drive_crc_config is not None, refresh_drive_drive_block_data_list is not None)
+        _main(file, file_name, generate_drive_delays_config is not None, generate_drive_crc_config is not None, refresh_drive_drive_block_data_list is not None)
