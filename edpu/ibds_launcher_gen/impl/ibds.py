@@ -22,7 +22,14 @@ import os
             from ..utils import map_device_names, filter_removable_devices
 
             file.write(f'_DEVICES = set({map_device_names(devices)})\n')
-            file.write(f'_DEVICES_REMOVABLE = set({map_device_names(filter_removable_devices(devices))})\n')
+            file.write(f'_DEVICES_REMOVABLE = set({map_device_names(filter_removable_devices(devices))})\n\n')
+
+            file.write('_DEVICE_TO_LOCK_NAME = {\n')
+
+            for device in devices:
+                file.write(f'    \'{device.name}\': \'{device.lock_name}\',\n')
+
+            file.write('}\n')
 
         devices_()
 
@@ -35,7 +42,7 @@ all_storage = storage_finder.find_all_storage()
 def create_device(name):
     if name not in _DEVICES:
         raise Exception('Bad device name')
-    return StorageDevice(name, name in _DEVICES_REMOVABLE, (name in _DEVICES_REMOVABLE and name in all_storage) or name == host_alias_)
+    return StorageDevice(name, name in _DEVICES_REMOVABLE, (name in _DEVICES_REMOVABLE and name in all_storage) or name == host_alias_, _DEVICE_TO_LOCK_NAME[name])
 
 devices = []
 for name in _DEVICES:
