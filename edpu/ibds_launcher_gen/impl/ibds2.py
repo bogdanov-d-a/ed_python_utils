@@ -1,8 +1,9 @@
 from ..collection import CollectionList
 from ..device import Device
+from typing import Optional
 
 
-def ibds2(file_path: str, devices: list[Device], collections: CollectionList, bundles_path: str) -> None:
+def ibds2(file_path: str, devices: list[Device], collections: CollectionList, bundles_path: Optional[str]) -> None:
     with open(file_path, 'w') as file:
         def head() -> None:
             file.write('''if __name__ == '__main__':
@@ -79,6 +80,8 @@ def ibds2(file_path: str, devices: list[Device], collections: CollectionList, bu
         collections_()
 
         def tail() -> None:
+            bundles_path_str = f'None' if bundles_path is None else f'r\'{bundles_path}\''
+
             file.write(fr'''
     }}
 
@@ -93,7 +96,7 @@ def ibds2(file_path: str, devices: list[Device], collections: CollectionList, bu
         UD.STORAGE_DEVICES: storage_devices,
         UD.COLLECTION_DICT: collection_dict,
         UD.DATA_PATH: join(dirname(abspath(__file__)), 'data'),
-        UD.BUNDLES_PATH: r'{bundles_path}',
+        UD.BUNDLES_PATH: {bundles_path_str},
         UD.BUNDLE_SNAPS_PATH: join(dirname(abspath(__file__)), 'bundle_snaps'),
         UD.APPLY_BUNDLES: apply_bundles,
         UD.DIFF_TOOL_HANDLER: diff_tool_handler,
