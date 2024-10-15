@@ -5,13 +5,14 @@ from ..device import Device
 def ibds(file_path: str, devices: list[Device], collections: CollectionList) -> None:
     with open(file_path, 'w') as file:
         def head() -> None:
-            file.write('''from edpu import host_alias
-from edpu import storage_finder
-from edpu.ibds.storage_device import StorageDevice
-from edpu.ibds.location import Location
-from edpu.ibds.user_data import UserData, CollectionDict
-from edpu.ibds import main_app
-import os
+            file.write('''if __name__ == '__main__':
+    from edpu import host_alias
+    from edpu.ibds.main import run
+    from edpu.ibds.utils.location import Location
+    from edpu.ibds.utils.storage_device import StorageDevice
+    from edpu.ibds.utils.user_data import UserData, CollectionDict
+    from edpu.storage_finder import find_all_storage
+    from os.path import join, dirname, abspath
 
 
 ''')
@@ -21,35 +22,53 @@ import os
         def devices_() -> None:
             from ..utils import map_device_names, filter_removable_devices
 
-            file.write(f'_DEVICES = set({map_device_names(devices)})\n')
-            file.write(f'_DEVICES_REMOVABLE = set({map_device_names(filter_removable_devices(devices))})\n\n')
+            file.write('    _DEVICES = set([\n')
 
-            file.write('_DEVICE_TO_LOCK_NAME = {\n')
+            for device_name in map_device_names(devices):
+                file.write(f'        \'{device_name}\',\n')
+
+            file.write('    ])\n\n')
+
+            file.write('    _DEVICES_REMOVABLE = set([\n')
+
+            for device_name in map_device_names(filter_removable_devices(devices)):
+                file.write(f'        \'{device_name}\',\n')
+
+            file.write('    ])\n\n')
+
+            file.write('    _DEVICE_TO_LOCK_NAME = {\n')
 
             for device in devices:
-                file.write(f'    \'{device.name}\': \'{device.lock_name}\',\n')
+                file.write(f'        \'{device.name}\': \'{device.lock_name}\',\n')
 
-            file.write('}\n')
+            file.write('    }\n')
 
         devices_()
 
         def mid() -> None:
             file.write('''
 
-host_alias_ = host_alias.get()
-all_storage = storage_finder.find_all_storage()
+    host_alias_ = host_alias.get()
+    all_storage = find_all_storage()
 
-def create_device(name):
-    if name not in _DEVICES:
-        raise Exception('Bad device name')
-    return StorageDevice(name, name in _DEVICES_REMOVABLE, (name in _DEVICES_REMOVABLE and name in all_storage) or name == host_alias_, _DEVICE_TO_LOCK_NAME[name])
+    def create_device(name: str) -> StorageDevice:
+        if name not in _DEVICES:
+            raise Exception('Bad device name')
 
-devices = []
-for name in _DEVICES:
-    devices.append(create_device(name))
+        return StorageDevice(
+            name,
+            name in _DEVICES_REMOVABLE,
+            (name in _DEVICES_REMOVABLE and name in all_storage) or name == host_alias_,
+            _DEVICE_TO_LOCK_NAME[name]
+        )
+
+    devices = []
+
+    for name in _DEVICES:
+        devices.append(create_device(name))
 
 
-collection_dict: CollectionDict = {
+    collection_dict: CollectionDict = {
 ''')
 
         mid()
@@ -72,7 +91,7 @@ collection_dict: CollectionDict = {
                         get_list_lines_of_raw_strings(collection_data.duplicate_skip_paths),
                     ]
 
-                    result += [f'\'{collection_name}\': (',] + tab_string_list(aggregate_string_list_list(append_comma_at_last_except_last(nested)), 1) + ['),',]
+                    result += [f'    \'{collection_name}\': (',] + tab_string_list(aggregate_string_list_list(append_comma_at_last_except_last(nested)), 2) + ['    ),',]
 
                 return result
 
@@ -82,11 +101,16 @@ collection_dict: CollectionDict = {
 
         def tail() -> None:
             file.write('''
-}
+    }
 
 
-data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
-main_app.run(UserData(collection_dict, devices, data_path, False, True))
+    run(UserData(
+        collection_dict,
+        devices,
+        join(dirname(abspath(__file__)), 'data'),
+        False,
+        True
+    ))
 ''')
 
         tail()
