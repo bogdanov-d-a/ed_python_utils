@@ -159,3 +159,26 @@ def pick_str_option_multi(prompt: str, options: list[tuple[str, str]], validator
 def user_wait(prompt: str) -> None:
     print(prompt)
     input()
+
+
+def accent_print(lines: list[str], char: str='@') -> None:
+    if len(char) != 1:
+        raise Exception('len(char) != 1')
+
+    if len(lines) == 0:
+        raise Exception('len(lines) == 0')
+
+    max_len = max(map(
+        len,
+        lines
+    ))
+
+    def edge() -> None:
+        print(char * (max_len + 4))
+
+    edge()
+
+    for line in lines:
+        print(f'{char} {line}{' ' * (max_len - len(line))} {char}')
+
+    edge()
