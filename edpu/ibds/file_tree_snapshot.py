@@ -47,6 +47,10 @@ class Index:
         return set(self._data.keys())
 
 
+def _hash(file_name: str) -> str:
+    return file_hashing.sha512_file(file_name)
+
+
 def _create_index(tree_path: str, skip_paths: list[str]) -> Index:
     index = Index()
 
@@ -54,7 +58,7 @@ def _create_index(tree_path: str, skip_paths: list[str]) -> Index:
         rel_path_key = INDEX_PATH_SEPARATOR.join(rel_path)
         abs_path = os.path.join(tree_path, os.sep.join(rel_path))
         print('Calculating hash for ' + rel_path_key)
-        index.addData(INDEX_PATH_SEPARATOR.join(rel_path), FileInfo(os.path.getmtime(abs_path), file_hashing.sha1_file(abs_path)))
+        index.addData(INDEX_PATH_SEPARATOR.join(rel_path), FileInfo(os.path.getmtime(abs_path), _hash(abs_path)))
 
     return index
 
@@ -77,7 +81,7 @@ def _update_index(old_index: Index, tree_path: str, skip_paths: list[str], skip_
                 mdate = old_index.getData(rel_path_key).getMtime()
         else:
             print('Calculating hash for ' + rel_path_key)
-            hash_ = file_hashing.sha1_file(abs_path)
+            hash_ = _hash(abs_path)
             if skip_mtime:
                 mdate = os.path.getmtime(abs_path)
 
