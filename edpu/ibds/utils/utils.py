@@ -1,8 +1,6 @@
-import re
+from .location import Location
+from .storage_device import StorageDevice
 from typing import Any, Optional
-from .. import user_interaction
-from . import location
-from . import storage_device
 
 
 SKIP_PATHS_SEPARATOR = '/'
@@ -24,8 +22,10 @@ def print_lists(lists: list[tuple[str, list[str]]], name: Optional[str]=None) ->
             continue
 
         print(list_[0])
+
         for line in list_[1]:
             print(line)
+
         print()
 
     print()
@@ -44,19 +44,35 @@ def is_same_list(list_: list[str]) -> bool:
 
 def path_needs_skip(path: list[str], skip_paths: list[str]) -> bool:
     for skip_path in skip_paths:
-        if re.match(skip_path, SKIP_PATHS_SEPARATOR.join(path)) is not None:
+        from re import match
+
+        if match(skip_path, SKIP_PATHS_SEPARATOR.join(path)) is not None:
             return True
 
     return False
 
 
-def locations_to_storage_devices(locations: list[location.Location]) -> list[storage_device.StorageDevice]:
-    return list(map(lambda location: location.getStorageDevice(), locations))
+def locations_to_storage_devices(locations: list[Location]) -> list[StorageDevice]:
+    return list(map(
+        lambda location: location.getStorageDevice(),
+        locations
+    ))
 
 
-def pick_storage_device(device_list: list[storage_device.StorageDevice]) -> storage_device.StorageDevice:
-    scan_devices = list(filter(lambda device: device.isScanAvailable(), device_list))
-    list_ = list(sorted(map(lambda device: device.getName(), scan_devices)))
-    dict_ = { device.getName(): device for device in scan_devices }
+def pick_storage_device(device_list: list[StorageDevice]) -> StorageDevice:
+    from ...user_interaction import pick_option
 
-    return dict_[list_[user_interaction.pick_option('Choose storage device', list_)]]
+    scan_devices = list(filter(
+        lambda device: device.isScanAvailable(),
+        device_list
+    ))
+
+    list_ = sorted(map(
+        lambda device: device.getName(),
+        scan_devices
+    ))
+
+    return {
+        device.getName(): device
+        for device in scan_devices
+    }[list_[pick_option('Choose storage device', list_)]]

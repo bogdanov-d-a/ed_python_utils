@@ -1,9 +1,4 @@
 from __future__ import annotations
-import os
-import codecs
-from .. import file_hashing
-from . import file_tree_scanner
-from . import ibds_utils
 
 
 INDEX_PATH_SEPARATOR = '\\'
@@ -41,49 +36,69 @@ class Index:
         return self._data[path]
 
     def getPairList(self: Index) -> list[tuple[str, FileInfo]]:
-        return ibds_utils.key_sorted_dict_items(self._data)
+        from ..utils.utils import key_sorted_dict_items
+        return key_sorted_dict_items(self._data)
 
     def getKeySet(self: Index) -> set[str]:
         return set(self._data.keys())
 
 
 def _hash(file_name: str) -> str:
-    return file_hashing.sha512_file(file_name)
+    from ...file_hashing import sha512_file
+    return sha512_file(file_name)
 
 
 def _create_index(tree_path: str, skip_paths: list[str]) -> Index:
+    from ..utils.file_tree_scanner import scan
+
     index = Index()
 
-    for rel_path in file_tree_scanner.scan(tree_path, skip_paths):
+    for rel_path in scan(tree_path, skip_paths):
+        from os import sep
+        from os.path import join, getmtime
+
         rel_path_key = INDEX_PATH_SEPARATOR.join(rel_path)
-        abs_path = os.path.join(tree_path, os.sep.join(rel_path))
+        abs_path = join(tree_path, sep.join(rel_path))
+
         print('Calculating hash for ' + rel_path_key)
-        index.addData(INDEX_PATH_SEPARATOR.join(rel_path), FileInfo(os.path.getmtime(abs_path), _hash(abs_path)))
+
+        index.addData(INDEX_PATH_SEPARATOR.join(rel_path), FileInfo(getmtime(abs_path), _hash(abs_path)))
 
     return index
 
 
 def _update_index(old_index: Index, tree_path: str, skip_paths: list[str], skip_mtime: bool) -> Index:
+    from ..utils.file_tree_scanner import scan
+
     index = Index()
 
-    for rel_path in file_tree_scanner.scan(tree_path, skip_paths):
-        abs_path = os.path.join(tree_path, os.sep.join(rel_path))
+    for rel_path in scan(tree_path, skip_paths):
+        from os import sep
+        from os.path import join
+
+        abs_path = join(tree_path, sep.join(rel_path))
 
         mdate: float = 0
+
         if not skip_mtime:
-            mdate = os.path.getmtime(abs_path)
+            from os.path import getmtime
+            mdate = getmtime(abs_path)
 
         rel_path_key = INDEX_PATH_SEPARATOR.join(rel_path)
 
         if old_index.hasData(rel_path_key) and (skip_mtime or old_index.getData(rel_path_key).getMtime() == mdate):
             hash_ = old_index.getData(rel_path_key).getHash()
+
             if skip_mtime:
                 mdate = old_index.getData(rel_path_key).getMtime()
+
         else:
             print('Calculating hash for ' + rel_path_key)
             hash_ = _hash(abs_path)
+
             if skip_mtime:
-                mdate = os.path.getmtime(abs_path)
+                from os.path import getmtime
+                mdate = getmtime(abs_path)
 
         index.addData(rel_path_key, FileInfo(mdate, hash_))
 
@@ -91,22 +106,29 @@ def _update_index(old_index: Index, tree_path: str, skip_paths: list[str], skip_
 
 
 def load_index(file_path: str) -> Index:
-    with codecs.open(file_path, 'r', 'utf-8-sig') as input_:
+    from codecs import open
+
+    with open(file_path, 'r', 'utf-8-sig') as input_:
         data_ = Index()
 
         for line in input_.readlines():
             if line[-1] == '\n':
                 line = line[:-1]
+
             parts = line.split(' ', 2)
+
             if len(parts) != 3:
                 raise Exception('load_index bad format')
+
             data_.addData(parts[2], FileInfo(float(parts[0]), parts[1]))
 
         return data_
 
 
 def save_index(index: Index, file_path: str) -> None:
-    with codecs.open(file_path, 'w', 'utf-8-sig') as output:
+    from codecs import open
+
+    with open(file_path, 'w', 'utf-8-sig') as output:
         for path, data in index.getPairList():
             output.write(str(data.getMtime()))
             output.write(' ')
@@ -117,9 +139,12 @@ def save_index(index: Index, file_path: str) -> None:
 
 
 def update_index_file(tree_path: str, index_path: str, skip_paths: list[str], skip_mtime: bool) -> None:
-    if os.path.isfile(index_path):
+    from os.path import isfile
+
+    if isfile(index_path):
         old_index = load_index(index_path)
         new_index = _update_index(old_index, tree_path, skip_paths, skip_mtime)
     else:
         new_index = _create_index(tree_path, skip_paths)
+
     save_index(new_index, index_path)
