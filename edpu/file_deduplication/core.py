@@ -1,4 +1,4 @@
-from ..ibds import file_tree_scanner
+from ..ibds.utils import file_tree_scanner
 from .utils import *
 import codecs
 import os
