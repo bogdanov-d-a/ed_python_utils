@@ -1,4 +1,5 @@
 from __future__ import annotations
+from ..utils import time
 
 
 INDEX_PATH_SEPARATOR = '\\'
@@ -43,36 +44,42 @@ class Index:
         return set(self._data.keys())
 
 
-def _hash(file_name: str) -> str:
-    from ...file_hashing import sha512_file
-    return sha512_file(file_name)
+def _hash(file_name: str, collector: time.Collector) -> str:
+    with time.get_perf_counter_measure(collector, time.Key.HASH_FILE):
+        from ...file_hashing import sha512_file
+        return sha512_file(file_name)
 
 
-def _create_index(tree_path: str, skip_paths: list[str]) -> Index:
+def _create_index(tree_path: str, skip_paths: list[str], collector: time.Collector) -> Index:
     from ..utils.file_tree_scanner import scan
+    from ..utils.mtime import make_getmtime_progress_printer
 
     index = Index()
+    getmtime_progress_printer = make_getmtime_progress_printer(tree_path)
 
-    for rel_path in scan(tree_path, skip_paths):
+    for rel_path in scan(tree_path, skip_paths, collector):
+        from ..utils.mtime import getmtime
         from os import sep
-        from os.path import join, getmtime
+        from os.path import join
 
         rel_path_key = INDEX_PATH_SEPARATOR.join(rel_path)
         abs_path = join(tree_path, sep.join(rel_path))
 
         print('Calculating hash for ' + rel_path_key)
 
-        index.addData(INDEX_PATH_SEPARATOR.join(rel_path), FileInfo(getmtime(abs_path), _hash(abs_path)))
+        index.addData(INDEX_PATH_SEPARATOR.join(rel_path), FileInfo(getmtime(abs_path, getmtime_progress_printer, collector), _hash(abs_path, collector)))
 
     return index
 
 
-def _update_index(old_index: Index, tree_path: str, skip_paths: list[str], skip_mtime: bool) -> Index:
+def _update_index(old_index: Index, tree_path: str, skip_paths: list[str], skip_mtime: bool, collector: time.Collector) -> Index:
     from ..utils.file_tree_scanner import scan
+    from ..utils.mtime import make_getmtime_progress_printer
 
     index = Index()
+    getmtime_progress_printer = make_getmtime_progress_printer(tree_path)
 
-    for rel_path in scan(tree_path, skip_paths):
+    for rel_path in scan(tree_path, skip_paths, collector):
         from os import sep
         from os.path import join
 
@@ -81,8 +88,8 @@ def _update_index(old_index: Index, tree_path: str, skip_paths: list[str], skip_
         mdate: float = 0
 
         if not skip_mtime:
-            from os.path import getmtime
-            mdate = getmtime(abs_path)
+            from ..utils.mtime import getmtime
+            mdate = getmtime(abs_path, getmtime_progress_printer, collector)
 
         rel_path_key = INDEX_PATH_SEPARATOR.join(rel_path)
 
@@ -94,11 +101,11 @@ def _update_index(old_index: Index, tree_path: str, skip_paths: list[str], skip_
 
         else:
             print('Calculating hash for ' + rel_path_key)
-            hash_ = _hash(abs_path)
+            hash_ = _hash(abs_path, collector)
 
             if skip_mtime:
-                from os.path import getmtime
-                mdate = getmtime(abs_path)
+                from ..utils.mtime import getmtime
+                mdate = getmtime(abs_path, getmtime_progress_printer, collector)
 
         index.addData(rel_path_key, FileInfo(mdate, hash_))
 
@@ -138,13 +145,13 @@ def save_index(index: Index, file_path: str) -> None:
             output.write('\n')
 
 
-def update_index_file(tree_path: str, index_path: str, skip_paths: list[str], skip_mtime: bool) -> None:
+def update_index_file(tree_path: str, index_path: str, skip_paths: list[str], skip_mtime: bool, collector: time.Collector) -> None:
     from os.path import isfile
 
     if isfile(index_path):
         old_index = load_index(index_path)
-        new_index = _update_index(old_index, tree_path, skip_paths, skip_mtime)
+        new_index = _update_index(old_index, tree_path, skip_paths, skip_mtime, collector)
     else:
-        new_index = _create_index(tree_path, skip_paths)
+        new_index = _create_index(tree_path, skip_paths, collector)
 
     save_index(new_index, index_path)
