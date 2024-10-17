@@ -179,6 +179,6 @@ def accent_print(lines: list[str], char: str='@') -> None:
     edge()
 
     for line in lines:
-        print(f'{char} {line}{' ' * (max_len - len(line))} {char}')
+        print(f'{char} {line}{" " * (max_len - len(line))} {char}')
 
     edge()
