@@ -3,7 +3,7 @@ from ...utils.storage_device import StorageDevice
 from ...utils.user_data import CollectionDict
 
 
-def _scan_collection_storage_device(data_dir: str, collection_name: str, storage_device_: StorageDevice, data_path: str, skip_paths: list[str], skip_mtime: bool, collector: time.Collector) -> None:
+def _scan_collection_storage_device(data_dir: str, collection_name: str, storage_device_: StorageDevice, data_path: str, skip_paths: list[str], use_descript_ion: bool, skip_mtime: bool, collector: time.Collector) -> None:
     from ...impl.file_tree_snapshot import update_index_file
     from ...utils.path_generator import gen_index_file_path
 
@@ -11,6 +11,7 @@ def _scan_collection_storage_device(data_dir: str, collection_name: str, storage
         data_path,
         gen_index_file_path(collection_name, storage_device_, data_dir),
         skip_paths,
+        use_descript_ion,
         skip_mtime,
         collector
     )
@@ -36,5 +37,5 @@ def scan_storage_device(data_dir: str, collection_dict: CollectionDict, storage_
 
                         for location in data[COLLECTION_VALUE_LOCATIONS]:
                             if location.getStorageDevice().getName() == storage_device_.getName():
-                                from ...utils.user_data import COLLECTION_VALUE_SCAN_SKIP_PATHS
-                                _scan_collection_storage_device(data_dir, collection_name, storage_device_, path_prefix + location.getPath(), data[COLLECTION_VALUE_SCAN_SKIP_PATHS], skip_mtime, collector)
+                                from ...utils.user_data import COLLECTION_VALUE_SCAN_SKIP_PATHS, COLLECTION_VALUE_USE_DESCRIPT_ION
+                                _scan_collection_storage_device(data_dir, collection_name, storage_device_, path_prefix + location.getPath(), data[COLLECTION_VALUE_SCAN_SKIP_PATHS], data[COLLECTION_VALUE_USE_DESCRIPT_ION], skip_mtime, collector)

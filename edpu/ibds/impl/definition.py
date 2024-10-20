@@ -29,6 +29,14 @@ def load_common_data(file_path: str) -> list[tuple[str, str]]:
         return data_
 
 
+def load_common_data_dict(file_path: str) -> dict[str, str]:
+    return {
+        path: hash
+        for path, hash
+        in load_common_data(file_path)
+    }
+
+
 def save_hashset_data(hashset_data: set[str], file_path: str) -> None:
     from codecs import open
 

@@ -6,9 +6,10 @@ from .storage_device import StorageDevice
 COLLECTION_VALUE_LOCATIONS = 0
 COLLECTION_VALUE_SCAN_SKIP_PATHS = 1
 COLLECTION_VALUE_DUPLICATE_SKIP_PATHS = 2
+COLLECTION_VALUE_USE_DESCRIPT_ION = 3
 
 
-CollectionValue = tuple[list[Location], list[str], list[str]]
+CollectionValue = tuple[list[Location], list[str], list[str], bool]
 CollectionDict = dict[str, CollectionValue]
 CollectionList = list[tuple[str, CollectionValue]]
 

@@ -25,3 +25,7 @@ def gen_hashset_file_path(collection: str, data_dir: Optional[str], storage_devi
         def_.append(storage_device_.getName())
 
     return _gen_impl(data_dir, def_)
+
+
+def gen_descript_ion_file_path(collection: str, data_dir: Optional[str]) -> str:
+    return _gen_impl(data_dir, [collection, 'DescriptIon'])

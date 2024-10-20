@@ -14,7 +14,7 @@ def _collection_common(data_dir: str, collection_name: str, collection_path: str
         from ...impl.file_tree_snapshot import INDEX_PATH_SEPARATOR
         from ...utils.utils import path_needs_skip
 
-        if path_needs_skip(path.split(INDEX_PATH_SEPARATOR), skip_paths):
+        if path_needs_skip(path.split(INDEX_PATH_SEPARATOR), skip_paths, False):
             continue
 
         if hash_ not in table:

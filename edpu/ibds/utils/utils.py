@@ -4,6 +4,7 @@ from typing import Any, Optional
 
 
 SKIP_PATHS_SEPARATOR = '/'
+DESCRIPT_ION = 'descript.ion'
 
 
 def key_sorted_dict_items(dict_: dict) -> list[tuple[Any, Any]]:
@@ -42,7 +43,10 @@ def is_same_list(list_: list[str]) -> bool:
     return True
 
 
-def path_needs_skip(path: list[str], skip_paths: list[str]) -> bool:
+def path_needs_skip(path: list[str], skip_paths: list[str], use_descript_ion: bool) -> bool:
+    if use_descript_ion and len(path) > 0 and path[-1] == DESCRIPT_ION:
+        return True
+
     for skip_path in skip_paths:
         from re import match
 

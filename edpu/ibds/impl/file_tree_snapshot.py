@@ -50,14 +50,14 @@ def _hash(file_name: str, collector: time.Collector) -> str:
         return sha512_file(file_name)
 
 
-def _create_index(tree_path: str, skip_paths: list[str], collector: time.Collector) -> Index:
+def _create_index(tree_path: str, skip_paths: list[str], use_descript_ion: bool, collector: time.Collector) -> Index:
     from ..utils.file_tree_scanner import scan
     from ..utils.mtime import make_getmtime_progress_printer
 
     index = Index()
     getmtime_progress_printer = make_getmtime_progress_printer(tree_path)
 
-    for rel_path in scan(tree_path, skip_paths, collector):
+    for rel_path in scan(tree_path, skip_paths, use_descript_ion, collector):
         from ..utils.mtime import getmtime
         from os import sep
         from os.path import join
@@ -72,14 +72,14 @@ def _create_index(tree_path: str, skip_paths: list[str], collector: time.Collect
     return index
 
 
-def _update_index(old_index: Index, tree_path: str, skip_paths: list[str], skip_mtime: bool, collector: time.Collector) -> Index:
+def _update_index(old_index: Index, tree_path: str, skip_paths: list[str], use_descript_ion: bool, skip_mtime: bool, collector: time.Collector) -> Index:
     from ..utils.file_tree_scanner import scan
     from ..utils.mtime import make_getmtime_progress_printer
 
     index = Index()
     getmtime_progress_printer = make_getmtime_progress_printer(tree_path)
 
-    for rel_path in scan(tree_path, skip_paths, collector):
+    for rel_path in scan(tree_path, skip_paths, use_descript_ion, collector):
         from os import sep
         from os.path import join
 
@@ -145,13 +145,13 @@ def save_index(index: Index, file_path: str) -> None:
             output.write('\n')
 
 
-def update_index_file(tree_path: str, index_path: str, skip_paths: list[str], skip_mtime: bool, collector: time.Collector) -> None:
+def update_index_file(tree_path: str, index_path: str, skip_paths: list[str], use_descript_ion: bool, skip_mtime: bool, collector: time.Collector) -> None:
     from os.path import isfile
 
     if isfile(index_path):
         old_index = load_index(index_path)
-        new_index = _update_index(old_index, tree_path, skip_paths, skip_mtime, collector)
+        new_index = _update_index(old_index, tree_path, skip_paths, use_descript_ion, skip_mtime, collector)
     else:
-        new_index = _create_index(tree_path, skip_paths, collector)
+        new_index = _create_index(tree_path, skip_paths, use_descript_ion, collector)
 
     save_index(new_index, index_path)
