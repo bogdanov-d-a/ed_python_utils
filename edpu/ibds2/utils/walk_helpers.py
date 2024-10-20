@@ -2,7 +2,7 @@ from . import time
 from .walkers import WalkDefResult
 
 
-def walk_data(data_path: str) -> tuple[dict[str, set[str]], time.Collector]:
+def walk_data(data_path: str, skip_descript_ion: bool) -> tuple[dict[str, set[str]], time.Collector]:
     collector = time.Collector()
 
     with time.get_perf_counter_measure(collector, time.Key.WORKER2):
@@ -11,7 +11,7 @@ def walk_data(data_path: str) -> tuple[dict[str, set[str]], time.Collector]:
             with data_lock():
                 with time.get_perf_counter_measure(collector, time.Key.WORKER2_WALK_DATA):
                     from .walkers import walk_data as impl
-                    return (impl(data_path), collector)
+                    return (impl(data_path, skip_descript_ion), collector)
 
 
 def walk_def(def_path: str) -> tuple[WalkDefResult, time.Collector]:

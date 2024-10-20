@@ -10,11 +10,17 @@ def make_file_progress_printer(period: float, annotation: str, path_: str) -> Ca
     return TimeBasedAggregator.make_number_sum_printer(period, f'walkers.{annotation} {path_}', print_lock=print_lock())
 
 
-def walk_data(data_path: str) -> dict[str, set[str]]:
+def walk_data(data_path: str, skip_descript_ion: bool) -> dict[str, set[str]]:
     from ...file_tree_walker import walk, TYPE_DIR, TYPE_FILE
+    from ..utils.utils import DESCRIPT_ION
     from .mappers.path_key import path_to_key
 
-    data_walk = walk(data_path, file_progress=make_file_progress_printer(0.5, 'walk_data', data_path))
+    data_walk = walk(
+        data_path,
+        lambda type, path: skip_descript_ion and type == TYPE_FILE and len(path) > 0 and path[-1] == DESCRIPT_ION,
+        make_file_progress_printer(0.5, 'walk_data', data_path)
+    )
+
     result: dict[str, set[str]] = { TYPE_DIR: set(), TYPE_FILE: set() }
 
     for dir_path in data_walk[TYPE_DIR]:

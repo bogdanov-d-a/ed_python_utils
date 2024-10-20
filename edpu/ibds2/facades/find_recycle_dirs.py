@@ -22,7 +22,7 @@ def find_recycle_dirs(user_data: UserData) -> None:
 
                 print(recycle_path + ' exists')
 
-                for recycle_file in sorted(walk_data(recycle_path)[TYPE_FILE]):
+                for recycle_file in sorted(walk_data(recycle_path, False)[TYPE_FILE]):
                     print(recycle_file)
 
                 if yes_no_prompt('Delete ' + recycle_path):

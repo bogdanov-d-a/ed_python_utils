@@ -7,6 +7,7 @@ IS_SCAN_AVAILABLE = 'is_scan_available'
 STORAGE_DEVICES = 'storage_devices'
 BUNDLE_ALIASES = 'bundle_aliases'
 BUNDLE_SLICES = 'bundle_slices'
+SKIP_DESCRIPT_ION = 'skip_descript_ion'
 COLLECTION_DICT = 'collection_dict'
 DATA_PATH = 'data_path'
 BUNDLES_PATH = 'bundles_path'
@@ -63,6 +64,7 @@ class Collection:
         self.storage_devices: dict[str, str] = data[STORAGE_DEVICES]
         self.bundle_slices: dict[str, str] = data[BUNDLE_SLICES]
         self.bundle_aliases: dict[str, list[str]] = data[BUNDLE_ALIASES]
+        self.skip_descript_ion: bool = data[SKIP_DESCRIPT_ION]
 
 
 CollectionDict = dict[str, Collection]

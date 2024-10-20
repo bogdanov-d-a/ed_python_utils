@@ -2,12 +2,12 @@ from ...utils import time
 from ...utils.user_data import UserData
 
 
-def update_data_helper(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]]) -> time.Collector:
+def update_data_helper(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]], skip_descript_ion: bool) -> time.Collector:
     collector = time.Collector()
 
     with time.get_perf_counter_measure(collector, time.Key.WORKER1):
         from ...impl.update.data import update_data as impl
-        impl(root_def_path, root_data_path, root_data_path_recycle, data_sources, collector)
+        impl(root_def_path, root_data_path, root_data_path_recycle, data_sources, skip_descript_ion, collector)
         return collector
 
 
@@ -47,7 +47,8 @@ def update_data(user_data: UserData) -> None:
                     alias[1].def_,
                     alias[1].get_data(),
                     alias[1].get_data() + RECYCLE_SUFFIX,
-                    data_sources_provider(alias[0])
+                    data_sources_provider(alias[0]),
+                    user_data.collection_dict[alias[0]].skip_descript_ion
                 ),
                 aliases
             ))

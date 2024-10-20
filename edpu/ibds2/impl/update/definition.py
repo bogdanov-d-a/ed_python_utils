@@ -1,7 +1,7 @@
 from ...utils import time
 
 
-def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool, debug: bool, collector: time.Collector) -> None:
+def update_definition(root_data_path: str, root_def_path: str, skip_descript_ion: bool, skip_mtime: bool, debug: bool, collector: time.Collector) -> None:
     from ....file_tree_walker import TYPE_DIR, TYPE_FILE
     from ...utils.utils import IntersectionType
     from ...utils.walkers import WalkDefResult
@@ -13,7 +13,7 @@ def update_definition(root_data_path: str, root_def_path: str, skip_mtime: bool,
         with make_process_pool_executor(2) as executor:
             from ...utils.walk_helpers import walk_def, walk_data
 
-            data_walk_future = executor.submit(walk_data, root_data_path)
+            data_walk_future = executor.submit(walk_data, root_data_path, skip_descript_ion)
             def_walk_future = executor.submit(walk_def, root_def_path)
 
             data_walk, data_collector = data_walk_future.result()

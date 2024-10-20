@@ -4,6 +4,9 @@ from enum import Enum
 from typing import Iterator
 
 
+DESCRIPT_ION = 'descript.ion'
+
+
 class IntersectionType(Enum):
     MATCHING = 0
     DIFFERENT = 1

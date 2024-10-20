@@ -2,7 +2,7 @@ from __future__ import annotations
 from ...utils import time
 
 
-def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]], collector: time.Collector) -> None:
+def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle: str, data_sources: list[tuple[str, str]], skip_descript_ion: bool, collector: time.Collector) -> None:
     from ....file_tree_walker import TYPE_DIR, TYPE_FILE
     from ...utils.walkers import WalkDefResult
     from concurrent.futures import ProcessPoolExecutor
@@ -46,7 +46,7 @@ def update_data(root_def_path: str, root_data_path: str, root_data_path_recycle:
             from ...utils.walk_helpers import walk_def, walk_data
 
             def_walk_future = executor.submit(walk_def, root_def_path)
-            data_walk_future = executor.submit(walk_data, root_data_path)
+            data_walk_future = executor.submit(walk_data, root_data_path, skip_descript_ion)
 
             data_source_hash_to_location = get_data_source_hash_to_location(executor)
 
