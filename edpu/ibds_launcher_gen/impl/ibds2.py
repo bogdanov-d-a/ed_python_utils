@@ -70,6 +70,7 @@ def ibds2(file_path: str, devices: list[Device], collections: CollectionList, bu
                             collection_data.cd2.bundle_aliases
                     )) + [
                         tab_string('},', 1),
+                        tab_string(f'UD.SKIP_DESCRIPT_ION: {collection_data.use_descript_ion},', 1),
                         '},',
                     ]
 

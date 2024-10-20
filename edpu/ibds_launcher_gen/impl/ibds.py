@@ -89,6 +89,7 @@ def ibds(file_path: str, devices: list[Device], collections: CollectionList) -> 
                         ))),
                         get_list_lines_of_raw_strings(collection_data.scan_skip_paths),
                         get_list_lines_of_raw_strings(collection_data.duplicate_skip_paths),
+                        [str(collection_data.use_descript_ion)],
                     ]
 
                     result += [f'    \'{collection_name}\': (',] + tab_string_list(aggregate_string_list_list(append_comma_at_last_except_last(nested)), 2) + ['    ),',]

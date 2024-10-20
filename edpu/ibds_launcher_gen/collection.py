@@ -10,10 +10,11 @@ class CollectionData2:
 
 
 class Collection:
-    def __init__(self: Collection, locations: list[Location], scan_skip_paths: list[str], duplicate_skip_paths: list[str], cd2: Optional[CollectionData2]) -> None:
+    def __init__(self: Collection, locations: list[Location], scan_skip_paths: list[str], duplicate_skip_paths: list[str], use_descript_ion: bool, cd2: Optional[CollectionData2]) -> None:
         self.locations = locations
         self.scan_skip_paths = scan_skip_paths
         self.duplicate_skip_paths = duplicate_skip_paths
+        self.use_descript_ion = use_descript_ion
         self.cd2 = cd2
 
 
