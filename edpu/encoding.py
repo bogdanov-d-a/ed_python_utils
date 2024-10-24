@@ -56,3 +56,13 @@ def line_break_type(filename: str) -> Optional[bytes]:
         return LINE_BREAK_MAC
 
     return None
+
+
+def line_break_type_to_string(type: Optional[bytes]) -> str:
+    return {
+        b'': 'UNDEF',
+        LINE_BREAK_WINDOWS: 'WIN',
+        LINE_BREAK_UNIX: 'UNIX',
+        LINE_BREAK_MAC: 'MAC',
+        None: 'MIX',
+    }[type]
