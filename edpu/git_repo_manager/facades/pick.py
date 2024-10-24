@@ -7,7 +7,7 @@ def pick(get_stop: Callable[[], bool], get_bootstrap_mode: Callable[[], bool], f
         from ..utils import actions
 
         actions_dict = user_interaction.list_to_dict(list(map(lambda action: (action.cmd, action.name), actions.all())))
-        action_cmd = user_interaction.pick_str_option('Pick action', actions_dict)
+        action_cmd = user_interaction.pick_str_option(f'{filename} action', actions_dict)
         action = actions.find_by_cmd(action_cmd)
 
         if action.in_place:

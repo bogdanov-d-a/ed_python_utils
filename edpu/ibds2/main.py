@@ -26,6 +26,7 @@ def run(user_data: dict[str, Any]) -> None:
             ('u', 'Update data', update_data),
         ]
 
-        pick_str_option_ex('Choose an action', actions)(UserData(user_data))
+        user_data_ = UserData(user_data)
+        pick_str_option_ex(f'{user_data_.data_path} action', actions)(user_data_)
 
     pause_at_end.run(main, pause_at_end.DEFAULT_MESSAGE)

@@ -39,7 +39,7 @@ def run(user_data: UserData) -> None:
             storage_device_ = pick_storage_device(user_data.getDeviceList())
             impl(user_data.getDataPath(), user_data.getCollectionDict(), storage_device_)
 
-        pick_str_option_ex('Choose an action', [
+        pick_str_option_ex(f'{user_data.getDataPath()} action', [
             ('s', 'Scan location', scan_storage_device),
             ('c', 'Compare all data', lambda: collections(user_data.getDataPath(), user_data.getCollectionDict(), user_data.getCompareOnlyAvailable())),
             ('g', 'Generate collection definitions', lambda: generate_collections_definition(user_data.getDataPath(), user_data.getCollectionDict())),
