@@ -3,6 +3,8 @@ def backup(input_path: str, blobs_path: str, map_path: str, block_size: int) -> 
 
     with open_file_rb(input_path) as input_file:
         with open(map_path, 'wb') as map_file:
+            from ..throttling import TimeBasedAggregator
+
             def calibrate() -> int:
                 from os import SEEK_END
 
@@ -14,7 +16,12 @@ def backup(input_path: str, blobs_path: str, map_path: str, block_size: int) -> 
 
                 return size // block_size
 
-            for input_file_block in range(calibrate()):
+            calibrated = calibrate()
+            count_printer = TimeBasedAggregator.make_count_printer(0.5, f'backup block count (of {calibrated})')
+
+            for input_file_block in range(calibrated):
+                count_printer()
+
                 def input_file_block_handler() -> None:
                     from ..disk_utils.utils.io import read_block_helper
                     from .utils import hash, get_hash_path

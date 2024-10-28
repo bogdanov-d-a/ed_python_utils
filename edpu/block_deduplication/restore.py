@@ -3,6 +3,7 @@ def restore(blobs_path: str, map_path: str, block_size: int, output_path: str) -
 
     with open_file_rb(map_path) as map_file:
         with open(output_path, 'wb') as output_file:
+            from ..throttling import TimeBasedAggregator
             from .utils import HASH_SIZE
 
             def calibrate() -> int:
@@ -16,7 +17,12 @@ def restore(blobs_path: str, map_path: str, block_size: int, output_path: str) -
 
                 return size // HASH_SIZE
 
-            for map_file_block in range(calibrate()):
+            calibrated = calibrate()
+            count_printer = TimeBasedAggregator.make_count_printer(0.5, f'restore block count (of {calibrated})')
+
+            for map_file_block in range(calibrated):
+                count_printer()
+
                 def map_file_block_handler() -> None:
                     from ..disk_utils.utils.io import read_block_helper
                     from .utils import get_hash_path, read_blob_file, hash
