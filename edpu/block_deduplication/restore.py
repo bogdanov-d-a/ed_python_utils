@@ -1,8 +1,12 @@
-def restore(blobs_path: str, map_path: str, block_size: int, output_path: str) -> None:
+from typing import Optional
+
+
+def restore(blobs_path: str, map_path: str, block_size: int, output_path: Optional[str]) -> None:
+    from ..context_manager import DummyContextManager
     from ..disk_utils.utils.io import open_file_rb
 
     with open_file_rb(map_path) as map_file:
-        with open(output_path, 'wb') as output_file:
+        with (open(output_path, 'wb') if output_path is not None else DummyContextManager()) as output_file:
             from ..throttling import TimeBasedAggregator
             from .utils import HASH_SIZE
 
@@ -35,6 +39,10 @@ def restore(blobs_path: str, map_path: str, block_size: int, output_path: str) -
                     if hash_ != hash(data):
                         raise Exception('hash_ != hash(data)')
 
-                    output_file.write(data)
+                    if output_path is not None:
+                        if output_file is None:
+                            raise Exception('output_file is None')
+
+                        output_file.write(data)
 
                 map_file_block_handler()
