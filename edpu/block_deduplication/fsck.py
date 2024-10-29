@@ -32,7 +32,9 @@ def fsck(blobs_path: str, map_paths: list[str], block_size: int, move_blobs_path
         def find_reachable_blocks() -> set[bytes]:
             result: set[bytes] = set()
 
-            for map_file, calibrated in zip(map_files, calibrated_list):
+            for map_path, map_file, calibrated in zip(map_paths, map_files, calibrated_list):
+                print(f'find_reachable_blocks map_path - {map_path}')
+
                 for map_file_block in range(calibrated):
                     from ..disk_utils.utils.io import read_block_helper
                     from .utils import HASH_SIZE
