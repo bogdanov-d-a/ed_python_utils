@@ -79,12 +79,17 @@ def ibds(file_path: str, devices: list[Device], collections: CollectionList) -> 
             def lines() -> list[str]:
                 result = []
 
+                disabled_devices = {
+                    device.name for device
+                    in filter(lambda device: device.disable_in_1, devices)
+                }
+
                 for collection_name, collection_data in collections:
                     from ..string_utils import get_list_lines, get_list_lines_of_raw_strings, aggregate_string_list_list, append_comma_at_last_except_last
 
                     nested = [
                         get_list_lines(list(map(
-                            lambda location: f'Location(create_device(\'{location.storage_device}\'), r\'{location.path}\', {location.is_complete})',
+                            lambda location: ('#' if location.storage_device in disabled_devices else '') + f'Location(create_device(\'{location.storage_device}\'), r\'{location.path}\', {location.is_complete})',
                             collection_data.locations
                         ))),
                         get_list_lines_of_raw_strings(collection_data.scan_skip_paths),
