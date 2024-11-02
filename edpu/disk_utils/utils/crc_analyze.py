@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Callable
+from ...linux.dd_gen import DD_GEN_URANDOM
+from typing import Callable, Optional
 
 
 def get_block_aliases(crc_path: str, get_block_alias: Callable[[bytes, int], str]) -> list[str]:
@@ -65,7 +66,19 @@ def print_block_alias_ranges(ranges: list[BlockAliasRange]) -> None:
         print(tuple_)
 
 
-def print_dd_wipe(ranges: list[BlockAliasRange], dev: str, bs: str) -> None:
+def print_dd_wipe(ranges: list[BlockAliasRange], bs: str, of_: Optional[str], if_: Optional[str]=DD_GEN_URANDOM) -> None:
     for range in ranges:
         from ...linux.dd_gen import dd_gen_wipe_dev
-        print(dd_gen_wipe_dev(dev, bs, str(range.start), str(range.count)))
+        print(dd_gen_wipe_dev(bs, str(range.start), str(range.count), of_, if_))
+
+
+def print_dd_wipe_pipe(ranges: list[BlockAliasRange], bs: str, of_: Optional[str], src: str) -> None:
+    for range in ranges:
+        from ...linux.dd_gen import dd_gen_wipe_dev
+        from ...string_utils import merge_with_space
+
+        print(merge_with_space([
+            src,
+            '|',
+            dd_gen_wipe_dev(bs, str(range.start), str(range.count), of_, None),
+        ]))

@@ -1,4 +1,5 @@
 from io import BufferedRandom, BufferedReader
+from typing import BinaryIO
 
 
 def open_file_rb(path: str) -> BufferedReader:
@@ -13,7 +14,7 @@ def open_drive_rw(drive_path: str) -> BufferedRandom:
     return open(drive_path, 'r+b')
 
 
-def read_helper(file: BufferedReader, offset: int, count: int) -> bytes:
+def read_helper(file: BinaryIO, offset: int, count: int) -> bytes:
     file.seek(offset)
     data = file.read(count)
 
@@ -23,13 +24,14 @@ def read_helper(file: BufferedReader, offset: int, count: int) -> bytes:
     return data
 
 
-def read_block_helper(file: BufferedReader, block_size: int, block_number: int) -> bytes:
+def read_block_helper(file: BinaryIO, block_size: int, block_number: int) -> bytes:
     return read_helper(file, block_number * block_size, block_size)
 
 
 def write_helper(file: BufferedRandom, offset: int, data: bytes) -> None:
     file.seek(offset)
     file.write(data)
+    file.flush()
 
 
 def write_block_helper(file: BufferedRandom, block_size: int, block_number: int, data: bytes) -> None:
