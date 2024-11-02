@@ -18,7 +18,7 @@ def run(name: str, dirs: list[tuple[str, str, str]]) -> None:
     path = pick_str_option_ex(f'favorite_dirs_manager {name} path', dirs)
 
     pick_str_option_ex(f'favorite_dirs_manager {name} action', [
-        ('l', 'clipboard', _clipboard),
-        ('c', 'cmd', lambda path: _start_d(path, f'cmd')),
+        ('w', 'clipboard', _clipboard),
+        ('r', 'cmd', lambda path: _start_d(path, f'cmd')),
         ('e', 'explorer', open_dir_in_explorer),
     ])(path)
