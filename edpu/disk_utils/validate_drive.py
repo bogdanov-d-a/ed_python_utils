@@ -1,7 +1,8 @@
 from .utils.drive_block_data import DriveBlockData
+from typing import Optional
 
 
-def validate_drive_random(drive_block: DriveBlockData, max_cached_blocks: int, crc_path: str, echo_rate: int) -> None:
+def validate_drive_random(drive_block: DriveBlockData, max_cached_blocks: int, crc_path: Optional[str], echo_rate: int) -> None:
     from .utils.io import open_drive
 
     with open_drive(drive_block.drive.path) as drive_file:
@@ -12,7 +13,7 @@ def validate_drive_random(drive_block: DriveBlockData, max_cached_blocks: int, c
         from time import perf_counter
 
         block_count = get_block_count(drive_block.drive.size, drive_block.size)
-        crc_data = load_crc_file(crc_path)
+        crc_data = load_crc_file(crc_path) if crc_path is not None else None
         blocks_read = 0
 
         validate_crc_tasks: Queue[tuple[bytes, int]] = Queue(max_cached_blocks)
@@ -22,7 +23,10 @@ def validate_drive_random(drive_block: DriveBlockData, max_cached_blocks: int, c
                 from .utils.crc import validate_crc
 
                 validate_crc_task = validate_crc_tasks.get()
-                validate_crc(validate_crc_task[0], validate_crc_task[1], crc_data)
+
+                if crc_data is not None:
+                    validate_crc(validate_crc_task[0], validate_crc_task[1], crc_data)
+
                 validate_crc_tasks.task_done()
 
         Thread(target=validate_crc_worker, daemon=True).start()
@@ -53,7 +57,7 @@ def validate_drive_random(drive_block: DriveBlockData, max_cached_blocks: int, c
             print('total_duration - ' + str(total_duration))
 
 
-def validate_drive_butterfly(drive_block: DriveBlockData, max_cached_blocks: int, crc_path: str, echo_rate: int) -> None:
+def validate_drive_butterfly(drive_block: DriveBlockData, max_cached_blocks: int, crc_path: Optional[str], echo_rate: int) -> None:
     from .utils.io import open_drive
 
     with open_drive(drive_block.drive.path) as drive_file:
@@ -64,7 +68,7 @@ def validate_drive_butterfly(drive_block: DriveBlockData, max_cached_blocks: int
         from time import perf_counter
 
         block_count = get_block_count(drive_block.drive.size, drive_block.size)
-        crc_data = load_crc_file(crc_path)
+        crc_data = load_crc_file(crc_path) if crc_path is not None else None
         passes = 0
 
         validate_crc_tasks: Queue[tuple[bytes, int]] = Queue(max_cached_blocks)
@@ -74,7 +78,10 @@ def validate_drive_butterfly(drive_block: DriveBlockData, max_cached_blocks: int
                 from .utils.crc import validate_crc
 
                 validate_crc_task = validate_crc_tasks.get()
-                validate_crc(validate_crc_task[0], validate_crc_task[1], crc_data)
+
+                if crc_data is not None:
+                    validate_crc(validate_crc_task[0], validate_crc_task[1], crc_data)
+
                 validate_crc_tasks.task_done()
 
         Thread(target=validate_crc_worker, daemon=True).start()
