@@ -151,3 +151,13 @@ def host_repos_push_native(repos: dict[str, Data], filter_repos: Optional[set[st
             push_multi(repo.path, remote, repo.branches)
 
     host_repos_run(push_repo_native, repos, filter_repos)
+
+
+def host_repos_fix_storage_permissions(repos: dict[str, Data], storage_block_reasons: dict[str, str], filter_repos: Optional[set[str]]) -> None:
+    from ..utils.utils import Data_, host_repos_run
+
+    def fix_storage_permissions(_, repo: Data_) -> None:
+        from ..utils.utils import handle_all_storage, fix_storage_permissions
+        handle_all_storage(repo, storage_block_reasons, fix_storage_permissions)
+
+    host_repos_run(fix_storage_permissions, repos, filter_repos)

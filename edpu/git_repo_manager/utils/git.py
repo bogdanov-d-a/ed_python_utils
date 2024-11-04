@@ -60,6 +60,10 @@ def status(path: str) -> None:
     run_git_command(path, ['status'])
 
 
+def diff(path: str, cached: bool=False) -> None:
+    run_git_command(path, ['diff'] + (['--cached'] if cached else []))
+
+
 def remotes(path: str) -> None:
     run_git_command(path, ['remote', '-vv'])
 

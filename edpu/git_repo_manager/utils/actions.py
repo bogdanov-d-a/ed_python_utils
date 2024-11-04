@@ -212,6 +212,16 @@ def all() -> Actions:
             False
         ),
         Action(
+            'fsp',
+            'Fix storage permissions',
+            lambda: impl.host_repos_fix_storage_permissions(
+                get_state().data_provider.get_repos(),
+                get_state().data_provider.get_storage_block_reasons(),
+                bootstrap_mode_filter()
+            ),
+            False
+        ),
+        Action(
             'fbm',
             'Flip bootstrap_mode',
             lambda: get_state().get_flip_bootstrap_mode()(),
