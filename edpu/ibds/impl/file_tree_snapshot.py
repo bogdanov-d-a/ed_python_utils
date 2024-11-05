@@ -145,10 +145,10 @@ def save_index(index: Index, file_path: str) -> None:
             output.write('\n')
 
 
-def update_index_file(tree_path: str, index_path: str, skip_paths: list[str], use_descript_ion: bool, skip_mtime: bool, collector: time.Collector) -> None:
+def update_index_file(tree_path: str, index_path: str, skip_paths: list[str], force_rescan: bool, use_descript_ion: bool, skip_mtime: bool, collector: time.Collector) -> None:
     from os.path import isfile
 
-    if isfile(index_path):
+    if not force_rescan and isfile(index_path):
         old_index = load_index(index_path)
         new_index = _update_index(old_index, tree_path, skip_paths, use_descript_ion, skip_mtime, collector)
     else:

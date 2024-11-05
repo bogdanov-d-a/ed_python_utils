@@ -11,12 +11,12 @@ def run(user_data: UserData) -> None:
         from .collection.facades.generate_definition import generate_collections_definition
         from .utils.utils import DESCRIPT_ION
 
-        def scan_storage_device() -> None:
+        def scan_storage_device(force_rescan: bool) -> None:
             from .collection.facades.scan import scan_storage_device as impl
             from .utils.utils import pick_storage_device
 
             storage_device_ = pick_storage_device(user_data.getDeviceList())
-            impl(user_data.getDataPath(), user_data.getCollectionDict(), storage_device_, user_data.getSkipMtime())
+            impl(user_data.getDataPath(), user_data.getCollectionDict(), storage_device_, force_rescan, user_data.getSkipMtime())
 
         def find_file_duplicates() -> None:
             from .collection.facades.find_duplicates import collections_common
@@ -40,7 +40,8 @@ def run(user_data: UserData) -> None:
             impl(user_data.getDataPath(), user_data.getCollectionDict(), storage_device_)
 
         pick_str_option_ex(f'{user_data.getDataPath()} action', [
-            ('s', 'Scan location', scan_storage_device),
+            ('s', 'Scan location', lambda: scan_storage_device(False)),
+            ('sf', 'Force rescan location', lambda: scan_storage_device(True)),
             ('c', 'Compare all data', lambda: collections(user_data.getDataPath(), user_data.getCollectionDict(), user_data.getCompareOnlyAvailable())),
             ('g', 'Generate collection definitions', lambda: generate_collections_definition(user_data.getDataPath(), user_data.getCollectionDict())),
             ('d', 'Find file duplicates', find_file_duplicates),
