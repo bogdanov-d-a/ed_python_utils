@@ -10,7 +10,7 @@ def _header(file: TextIOWrapper, alias: str, device_path: str, device_blocks: st
 
 
 def get_drive_data() -> DriveData:
-    return DriveData('{alias}', '{device_path}', {device_blocks}*512)
+    return DriveData('{alias}', r'{device_path}', {device_blocks}*512)
 
 
 ''')
