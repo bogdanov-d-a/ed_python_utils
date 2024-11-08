@@ -1,5 +1,6 @@
 from __future__ import annotations
 from .utils.drive_block_data import DriveBlockData
+from typing import Optional
 
 
 class _Data:
@@ -13,13 +14,12 @@ class _Data:
         self.delay += delay
 
 
-def generate_drive_delays(drive_block: DriveBlockData, echo_rate: int, trace_thresold: float) -> None:
+def generate_drive_delays(drive_block: DriveBlockData, echo_rate: int, trace_thresold: float, repeat_count: Optional[int]=0) -> None:
     from .utils.io import open_drive
 
     with open_drive(drive_block.drive.path) as drive_file:
-        from typing import Optional
-
         stats: dict[int, _Data] = {}
+        repeats = 0
 
         def add_stat(delay: float) -> None:
             from math import ceil
@@ -50,6 +50,7 @@ def generate_drive_delays(drive_block: DriveBlockData, echo_rate: int, trace_thr
                     'read_block - ' + str(read_block),
                     'complete - ' + str(complete) + ' (' + str(complete / drive_block.count) + ')',
                     'remaining - ' + str(remaining) + ' (' + str(remaining / drive_block.count) + ')',
+                    'repeats - ' + str(repeats),
                     'now_duration - ' + str(now_duration),
                 ]))
 
@@ -63,11 +64,27 @@ def generate_drive_delays(drive_block: DriveBlockData, echo_rate: int, trace_thr
         def read_blocks(total_start: float) -> None:
             for read_block in range(drive_block.start, drive_block.end + 1):
                 def read_block_() -> float:
+                    from ..repeat import repeat_until_success
                     from .utils.io import read_block_helper
                     from time import perf_counter
 
+                    def on_exc(e: Exception) -> None:
+                        from sys import stdout
+
+                        print(f'read_block_ {read_block} repeat_until_success exc {e}')
+                        stdout.flush()
+
+                        nonlocal repeats
+                        repeats += 1
+
                     start = perf_counter()
-                    read_block_helper(drive_file, drive_block.size, read_block)
+
+                    repeat_until_success(
+                        lambda: read_block_helper(drive_file, drive_block.size, read_block),
+                        on_exc,
+                        repeat_count
+                    )
+
                     end = perf_counter()
 
                     return end - start
