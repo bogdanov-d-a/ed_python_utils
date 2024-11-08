@@ -36,23 +36,25 @@ def generate_drive_delays(drive_block: DriveBlockData, echo_rate: int, trace_thr
 
         def print_stats(total_start: float, read_block: Optional[int]) -> None:
             from sys import stdout
+            from time import perf_counter
+
+            now = perf_counter()
+            now_duration = now - total_start
 
             if read_block is not None:
-                from time import perf_counter
-
                 complete = read_block - drive_block.start + 1
                 remaining = drive_block.end - read_block
-
-                now = perf_counter()
-                now_duration = now - total_start
 
                 print(', '.join([
                     'read_block - ' + str(read_block),
                     'complete - ' + str(complete) + ' (' + str(complete / drive_block.count) + ')',
                     'remaining - ' + str(remaining) + ' (' + str(remaining / drive_block.count) + ')',
-                    'repeats - ' + str(repeats),
-                    'now_duration - ' + str(now_duration),
                 ]))
+
+            print(', '.join([
+                'repeats - ' + str(repeats),
+                'now_duration - ' + str(now_duration),
+            ]))
 
             print(', '.join(map(
                 lambda stats_item: str(stats_item[0]) + ': ' + str((stats_item[1].count, stats_item[1].delay)),
