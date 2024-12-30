@@ -85,3 +85,20 @@ def ffmpeg_merge(input: list[str], output: str) -> str:
         FFMPEG,
         ffmpeg_input(input) + ffmpeg_copy() + [quotation_mark_wrap(output)]
     )
+
+
+def ffmpeg_gif_conv(input: str, output: str) -> str:
+    from .string_utils import quotation_mark_wrap
+
+    return ffmpeg_gen(
+        FFMPEG,
+        ffmpeg_input([input]) + [
+            '-movflags',
+            'faststart',
+            '-pix_fmt',
+            'yuv420p',
+            '-vf',
+            quotation_mark_wrap('scale=trunc(iw/2)*2:trunc(ih/2)*2'),
+            quotation_mark_wrap(output),
+        ]
+    )
