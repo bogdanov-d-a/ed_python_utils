@@ -10,25 +10,36 @@ FFPLAY = 'ffplay'
 FFPROBE = 'ffprobe'
 
 
-FFPROBE_KEYS = [
-    'unit',
-    'prefix',
-    'sexagesimal',
-    'show_data',
-    'show_data_hash CRC32',
-    'show_error',
-    'show_format',
-    #'show_frames',
-    #'show_packets',
-    'show_programs',
-    'show_streams',
-    'show_chapters',
-    'count_frames',  # slow
-    'count_packets',
-    #'show_pixel_formats',
-    'show_private_data',
-    #'bitexact',  # uninformative
-]
+def ffprobe_keys_fast() -> list[str]:
+    return [
+        'unit',
+        'prefix',
+        'sexagesimal',
+        'show_data',
+        'show_data_hash CRC32',
+        'show_error',
+        'show_format',
+        'show_programs',
+        'show_streams',
+        'show_chapters',
+        'count_packets',
+        'show_private_data',
+    ]
+
+
+def ffprobe_keys_slow() -> list[str]:
+    return ffprobe_keys_fast() + [
+        'count_frames',
+    ]
+
+
+def ffprobe_keys_all() -> list[str]:
+    return ffprobe_keys_slow() + [
+        'show_frames',
+        'show_packets',
+        'show_pixel_formats',
+        'bitexact',  # uninformative
+    ]
 
 
 def ffmpeg_key(key: str) -> str:
