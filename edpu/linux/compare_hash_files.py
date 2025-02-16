@@ -4,7 +4,7 @@ def compare_hash_files(a: str, b: str) -> str:
 
     return merge_with_space([
         python(),
-        apostrophe_wrap(python_lib() + '/edpu/launchers/compare_hash_files.py'),
+        apostrophe_wrap(python_lib() + '/edpu/runnable/compare_hash_files.py'),
         apostrophe_wrap(a),
         apostrophe_wrap(b),
     ])
