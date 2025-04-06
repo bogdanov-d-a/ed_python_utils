@@ -1,7 +1,10 @@
-def _start_d(cwd: str, cmd: str) -> None:
-    from .start_d import start_d
+from typing import Optional
+
+
+def _start(args: list[str], path: Optional[str]=None) -> None:
+    from .win_start import start
     from os import system
-    system(start_d(cwd, cmd))
+    system(start(args, path))
 
 
 def _clipboard(path: str) -> None:
@@ -19,6 +22,6 @@ def run(name: str, dirs: list[tuple[str, str, str]]) -> None:
 
     pick_str_option_ex(f'favorite_dirs_manager {name} action', [
         ('w', 'clipboard', _clipboard),
-        ('r', 'cmd', lambda path: _start_d(path, f'cmd')),
+        ('r', 'cmd', lambda path: _start(['cmd'], path)),
         ('e', 'explorer', open_dir_in_explorer),
     ])(path)

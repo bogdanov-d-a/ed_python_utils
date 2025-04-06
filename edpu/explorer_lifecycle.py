@@ -10,13 +10,9 @@ def explorer_kill() -> None:
 
 
 def explorer_start() -> None:
-    from .string_utils import merge_with_space
+    from .win_start import start
     from os import system
-
-    system(merge_with_space([
-        'start',
-        EXPLORER_EXE
-    ]))
+    system(start([EXPLORER_EXE]))
 
 
 class ExplorerDown:

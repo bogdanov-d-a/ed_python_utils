@@ -23,4 +23,4 @@ def pick(get_stop: Callable[[], bool], get_bootstrap_mode: Callable[[], bool], f
 
             else:
                 from edpu_user.python_launcher import start_with_python3
-                start_with_python3(cmd, '.')
+                start_with_python3([cmd])
