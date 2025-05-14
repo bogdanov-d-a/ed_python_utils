@@ -51,3 +51,30 @@ def round_brackets_wrap(str_: str) -> str:
 
 def comma_separate(list_: list[str]) -> str:
     return ','.join(list_)
+
+
+def accent_str(lines: list[str], char: str='@') -> list[str]:
+    if len(char) != 1:
+        raise Exception('len(char) != 1')
+
+    if len(lines) == 0:
+        raise Exception('len(lines) == 0')
+
+    result: list[str] = []
+
+    max_len = max(map(
+        len,
+        lines
+    ))
+
+    def edge() -> None:
+        result.append(char * (max_len + 4))
+
+    edge()
+
+    for line in lines:
+        result.append(f'{char} {line}{" " * (max_len - len(line))} {char}')
+
+    edge()
+
+    return result

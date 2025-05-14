@@ -162,23 +162,7 @@ def user_wait(prompt: str) -> None:
 
 
 def accent_print(lines: list[str], char: str='@') -> None:
-    if len(char) != 1:
-        raise Exception('len(char) != 1')
+    from .string_utils import accent_str
 
-    if len(lines) == 0:
-        raise Exception('len(lines) == 0')
-
-    max_len = max(map(
-        len,
-        lines
-    ))
-
-    def edge() -> None:
-        print(char * (max_len + 4))
-
-    edge()
-
-    for line in lines:
-        print(f'{char} {line}{" " * (max_len - len(line))} {char}')
-
-    edge()
+    for elem in accent_str(lines, char):
+        print(elem)
