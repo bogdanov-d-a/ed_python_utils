@@ -19,6 +19,12 @@ class ControllerEx(Controller):
         self.release(key)
 
 
+    def type_delay(self: ControllerEx, string: str) -> None:
+        for char in string:
+            sleep()
+            self.press_delay(char)
+
+
     def key_wrap(self: ControllerEx, key: KeyT, fn: Fn) -> None:
         self.press(key)
         sleep()
