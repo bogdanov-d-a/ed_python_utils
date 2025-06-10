@@ -1,13 +1,11 @@
 DataElem = tuple[str, str, str, str]
 DataList = list[DataElem]
 
-CmdArgs = tuple[str, str, str]
-
 
 def run(data: DataList) -> None:
     from . import pause_at_end
 
-    def get_pick_data() -> list[tuple[str, str, CmdArgs]]:
+    def get_pick_data() -> list[tuple[str, str, tuple[str, str, str]]]:
         def get_description(e: DataElem) -> str:
             from .string_utils import merge_with_space, quotation_mark_wrap
             return merge_with_space(list(map(quotation_mark_wrap, e[1:])))
@@ -22,7 +20,7 @@ def run(data: DataList) -> None:
         from .tar_zst_utils import print_and_check_path, TAR_ZST_EXT, pack_tar_zst, unpack_tar_zst, run_with_prompt
         from .user_interaction import pick_str_option_ex
 
-        picked_data: CmdArgs = pick_str_option_ex('Pick data', get_pick_data())
+        picked_data = pick_str_option_ex('Pick data', get_pick_data())
 
         data_path_root = picked_data[0]
         data_path = data_path_root + '\\' + picked_data[1]
