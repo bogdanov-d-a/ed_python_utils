@@ -6,9 +6,9 @@ def popen_communicate(popen: Popen) -> None:
         process.communicate()
 
 
-def popen_communicate_command(command: str) -> None:
-    popen_communicate(Popen(command))
+def popen_communicate_args(args) -> None:
+    popen_communicate(Popen(args))
 
 
-def popen_communicate_command_cwd(command: str, cwd: str) -> None:
-    popen_communicate(Popen(command, cwd=cwd))
+def popen_communicate_args_cwd(args, cwd: str) -> None:
+    popen_communicate(Popen(args, cwd=cwd))

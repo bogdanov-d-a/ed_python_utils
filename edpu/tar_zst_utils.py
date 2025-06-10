@@ -41,13 +41,13 @@ def unpack_tar_zst(src_file: str, dst_dir: str) -> str:
 
 def run_with_prompt(cmd: str) -> None:
     from .user_interaction import yes_no_prompt
-    from subprocess import Popen
 
     print(cmd)
 
     if yes_no_prompt('Run command'):
-        with Popen(cmd, shell=True) as process:
-            process.communicate()
+        from .popen_helper import popen_communicate
+        from subprocess import Popen
+        popen_communicate(Popen(cmd, shell=True))
 
 
 def print_and_check_path(path: str) -> None:

@@ -33,12 +33,12 @@ def mpv_play(va: tuple[str, str], path: Optional[str]) -> None:
     ])
 
     if path is not None:
-        from .popen_helper import popen_communicate_command_cwd
-        popen_communicate_command_cwd(cmd, path)
+        from .popen_helper import popen_communicate_args_cwd
+        popen_communicate_args_cwd(cmd, path)
 
     else:
-        from .popen_helper import popen_communicate_command
-        popen_communicate_command(cmd)
+        from .popen_helper import popen_communicate_args
+        popen_communicate_args(cmd)
 
 
 def mpv_va_detect_play(path: str, rev: Optional[bool]=None) -> None:

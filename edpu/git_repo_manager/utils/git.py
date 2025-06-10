@@ -9,10 +9,8 @@ def run_command(path: str, command: list[str]) -> None:
         print('run_command ' + path + ' ' + str(command))
         return
 
-    from subprocess import Popen
-
-    with Popen(command, cwd=path) as process:
-        process.communicate()
+    from ...popen_helper import popen_communicate_args_cwd
+    popen_communicate_args_cwd(command, path)
 
 
 def run_command_for_result(path: str, command: list[str]) -> bytes:
