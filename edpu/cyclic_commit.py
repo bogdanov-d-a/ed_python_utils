@@ -7,7 +7,7 @@ def cyclic_commit(path: str) -> None:
         while not stop:
             from .citool_launcher import open_citool
             from .explorer_launcher import open_dir_in_explorer
-            from .git_repo_manager.utils.git import run_command, run_git_command, status, diff
+            from .git_repo_manager.utils.git import run_command, run_git_command, status, diff, reset_hard
             from .user_interaction import pick_str_option_ex
             from typing import Callable
 
@@ -29,6 +29,7 @@ def cyclic_commit(path: str) -> None:
                 ('a', 'add', lambda: run_git_command(path, ['add', '.'])),
                 ('c', 'commit', wrap_with_print_line(lambda: run_git_command(path, ['commit', '-m', '1']))),
                 ('l', 'gitk', lambda: run_command(path, ['gitk'])),
+                ('r', 'reset hard', lambda: reset_hard(path)),
                 ('n', 'clean', wrap_with_print_line(lambda: run_git_command(path, ['clean', '-idx']))),
             ])()
 
