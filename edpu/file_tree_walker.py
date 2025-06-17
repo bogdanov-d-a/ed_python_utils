@@ -38,3 +38,15 @@ def walk(root_path: str,
         handler(files, TYPE_FILE)
 
     return result
+
+
+def walk_type(root_path: str,
+              type: str,
+              ignore_callback: Callable[[list[str]], bool]=lambda *_: False,
+              file_progress: Callable[[int], None]=lambda _: None
+              ) -> list[list[str]]:
+    return walk(
+        root_path,
+        lambda type_, path: type_ != type or ignore_callback(path),
+        file_progress
+    )[type]
