@@ -52,9 +52,12 @@ class App:
 
 def run(source_dirs_raw: str, out_dir: str) -> None:
     from . import pause_at_end
-    from .pack_unpack_action_picker import pick_action
 
-    pause_at_end.run(
-        lambda: App(source_dirs_raw, out_dir, pick_action()).run(),
-        pause_at_end.DEFAULT_MESSAGE
-    )
+    def main() -> None:
+        print('Ensure that file permissions are sufficient')
+        input()
+
+        from .pack_unpack_action_picker import pick_action
+        App(source_dirs_raw, out_dir, pick_action()).run()
+
+    pause_at_end.run(main, pause_at_end.DEFAULT_MESSAGE)
