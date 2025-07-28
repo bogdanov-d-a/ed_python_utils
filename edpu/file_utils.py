@@ -41,3 +41,19 @@ def eval_file(filename: str, eval_fn: Callable[[str], Any]=eval) -> Any:
 
     with open(filename, 'r', 'utf-8') as file:
         return eval_fn(file.read())
+
+
+def remove_if_isfile(path: str) -> None:
+    from os.path import isfile
+
+    if isfile(path):
+        from os import remove
+        remove(path)
+
+
+def rmtree_if_isdir(path: str) -> None:
+    from os.path import isdir
+
+    if isdir(path):
+        from shutil import rmtree
+        rmtree(path)
