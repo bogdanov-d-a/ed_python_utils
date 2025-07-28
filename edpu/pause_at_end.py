@@ -1,10 +1,10 @@
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 
 DEFAULT_MESSAGE = 'Program completed successfully'
 
 
-def run(f: Callable[[], None], wait_on_success: Optional[str]=None) -> None:
+def run(f: Callable[[], Any], wait_on_success: Optional[str]=None) -> None:
     try:
         f()
 
