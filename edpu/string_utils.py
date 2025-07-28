@@ -41,12 +41,28 @@ def merge_with_space(list_: list[str]) -> str:
     return ' '.join(list_)
 
 
+def merge_with_semicolon(list_: list[str]) -> str:
+    return ';'.join(list_)
+
+
 def merge_with_newline(list_: list[str]) -> str:
     return '\n'.join(list_)
 
 
 def round_brackets_wrap(str_: str) -> str:
     return '(' + str_ + ')'
+
+
+def square_brackets_wrap(str_: str) -> str:
+    return '[' + str_ + ']'
+
+
+def curly_brackets_wrap(str_: str) -> str:
+    return '{' + str_ + '}'
+
+
+def angle_brackets_wrap(str_: str) -> str:
+    return '<' + str_ + '>'
 
 
 def comma_separate(list_: list[str]) -> str:
@@ -76,5 +92,14 @@ def accent_str(lines: list[str], char: str='@') -> list[str]:
         result.append(f'{char} {line}{" " * (max_len - len(line))} {char}')
 
     edge()
+
+    return result
+
+
+def gen_ascii_str() -> str:
+    result = ''
+
+    for byte in range(32, 127):
+        result += byte.to_bytes().decode('ascii')
 
     return result
