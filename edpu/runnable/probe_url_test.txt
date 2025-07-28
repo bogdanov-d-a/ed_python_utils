@@ -1,0 +1,63 @@
+url = <>
+EMPTY
+
+url = <4881a8336afd2e9ac3ee503dfed1e8d3cfb3e21e>
+Non-HTTPS address
+
+url = <https://1494a60b15afa03f06039e48f6ad13d661aef1e4>
+UNKNOWN
+
+url = <https://www.wikipedia.org/>
+wikipedia
+www
+
+url = <https://en.wikipedia.org/>
+wikipedia
+en
+
+url = <https://ru.wikipedia.org/>
+wikipedia
+ru
+
+url = <https://www1.wikipedia.org/>
+UNKNOWN
+
+url = <https://en.wikiipedia.org/>
+UNKNOWN
+
+url = <https://www.youtube.com/>
+youtube
+
+url = <https://www.youutube.com/>
+UNKNOWN
+
+url = <https://www.youtube.comm>
+UNKNOWN
+
+url = <https://github.com/>
+github
+
+url = <https://github.co>
+UNKNOWN
+
+url = <https://githb.com/>
+UNKNOWN
+
+url = <https://stackoverflow.com/>
+stackoverflow
+
+url = <https://stackoverflow.comm>
+UNKNOWN
+
+url = <https://stuckoverflow.com/>
+UNKNOWN
+
+url = <https://pypi.org/>
+pypi
+
+url = <https://pypi.or>
+UNKNOWN
+
+url = <https://pypii.org/>
+UNKNOWN
+
