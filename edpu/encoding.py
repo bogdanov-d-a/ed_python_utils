@@ -3,7 +3,7 @@ from typing import Optional
 
 def check_ascii_file(filename: str) -> None:
     with open(filename, 'rb') as file:
-        from edpu.read_in_chunks import read_in_chunks
+        from .read_in_chunks import read_in_chunks
 
         for data in read_in_chunks(file):
             data.decode('ascii')
