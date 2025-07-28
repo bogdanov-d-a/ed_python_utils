@@ -1,4 +1,5 @@
 def _remove_file() -> None:
+    from edpu.file_utils import remove_if_isfile
     from edpu_user.system_watchdog import system_watchdog_file_path, system_watchdog_file_path_bak
     from os import rename
     from os.path import isfile
@@ -6,10 +7,7 @@ def _remove_file() -> None:
     if not isfile(system_watchdog_file_path()):
         return
 
-    if isfile(system_watchdog_file_path_bak()):
-        from os import remove
-        remove(system_watchdog_file_path_bak())
-
+    remove_if_isfile(system_watchdog_file_path_bak())
     rename(system_watchdog_file_path(), system_watchdog_file_path_bak())
 
 
