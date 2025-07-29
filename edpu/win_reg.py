@@ -5,41 +5,37 @@ REG = 'reg'
 DEFAULT_ENCODING = 'utf_16_le'
 
 
-def reg_delete_gen(key: str) -> str:
-    from .string_utils import merge_with_space, quotation_mark_wrap
-
-    return merge_with_space([
+def reg_delete_gen(key: str) -> list[str]:
+    return [
         REG,
         'delete',
-        quotation_mark_wrap(key),
+        key,
         '/f',
-    ])
+    ]
 
 
 def reg_delete(key: str) -> None:
-    from os import system
-    system(reg_delete_gen(key))
+    from subprocess import run
+    run(reg_delete_gen(key))
 
 
-def reg_export_gen(key: str, file: str, overwrite: bool=False) -> str:
-    from .string_utils import merge_with_space, quotation_mark_wrap
-
+def reg_export_gen(key: str, file: str, overwrite: bool=False) -> list[str]:
     data = [
         REG,
         'export',
-        quotation_mark_wrap(key),
-        quotation_mark_wrap(file),
+        key,
+        file,
     ]
 
     if overwrite:
         data.append('/y')
 
-    return merge_with_space(data)
+    return data
 
 
 def reg_export(key: str, file: str, overwrite: bool=False) -> None:
-    from os import system
-    system(reg_export_gen(key, file, overwrite))
+    from subprocess import run
+    run(reg_export_gen(key, file, overwrite))
 
 
 def reg_export_and_convert(key: str, file: str, encoding: str='utf_8') -> None:
