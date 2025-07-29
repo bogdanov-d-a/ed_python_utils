@@ -1,12 +1,18 @@
 def main() -> None:
     while True:
-        from edpu.user_interaction import yes_no_prompt
-        from os import system
+        from subprocess import run
+        run([
+            'sync64',
+            '-r',
+        ], check=True)
 
-        system('sync64 -r')
+        print()
+        print()
 
-        if not yes_no_prompt('Run again'):
-            break
+        from edpu.user_interaction import accent_print
+        accent_print(['WAITING FOR INPUT...'])
+
+        input()
 
 
 if __name__ == '__main__':
