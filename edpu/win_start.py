@@ -18,3 +18,13 @@ def start(args: list[str], path: Optional[str]=None, title: str='') -> str:
     data += args
 
     return merge_with_space(data)
+
+
+def start_run(args: list[str], path: Optional[str]=None, title: str='') -> None:
+    from subprocess import run
+
+    run(
+        start(args, path, title),
+        shell=True,
+        check=True
+    )
