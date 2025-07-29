@@ -1,11 +1,18 @@
-def takeown_recursive(filename: str) -> str:
-    from .string_utils import merge_with_space, quotation_mark_wrap
-
-    return merge_with_space([
+def takeown_recursive_args(path: str) -> list[str]:
+    return [
         'takeown',
         '/f',
-        quotation_mark_wrap(filename),
+        path,
         '/r',
         '/d',
         'Y',
-    ])
+    ]
+
+
+def takeown_recursive_run(path: str) -> None:
+    from subprocess import run
+
+    run(
+        takeown_recursive_args(path),
+        check=True
+    )
