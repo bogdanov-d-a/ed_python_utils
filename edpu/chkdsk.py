@@ -8,7 +8,7 @@ def chkdsk_cmd(disk: str) -> str:
 def chkdsk_run_multi(disks: str) -> None:
     for disk in disks:
         from .user_interaction import accent_print
-        from os import system
+        from subprocess import run
 
         cmd = chkdsk_cmd(disk)
 
@@ -18,4 +18,4 @@ def chkdsk_run_multi(disks: str) -> None:
             f'cmd - {cmd}',
         ])
 
-        system(cmd)
+        run(cmd)

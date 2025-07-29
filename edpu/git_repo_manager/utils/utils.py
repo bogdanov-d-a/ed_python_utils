@@ -144,10 +144,3 @@ def init_bare_if_not_exists(path: str) -> None:
 
     from .git import init_bare
     init_bare(path)
-
-
-def fix_storage_permissions(path: str) -> None:
-    from ...takeown import takeown_recursive
-    from os import system
-
-    system(takeown_recursive(path))

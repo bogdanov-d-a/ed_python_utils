@@ -157,7 +157,8 @@ def host_repos_fix_storage_permissions(repos: dict[str, Data], storage_block_rea
     from ..utils.utils import Data_, host_repos_run
 
     def fix_storage_permissions(_, repo: Data_) -> None:
-        from ..utils.utils import handle_all_storage, fix_storage_permissions
-        handle_all_storage(repo, storage_block_reasons, fix_storage_permissions)
+        from ...takeown import takeown_recursive_run
+        from ..utils.utils import handle_all_storage
+        handle_all_storage(repo, storage_block_reasons, takeown_recursive_run)
 
     host_repos_run(fix_storage_permissions, repos, filter_repos)

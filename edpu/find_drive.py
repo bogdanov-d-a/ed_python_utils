@@ -2,7 +2,7 @@ UNKNOWN = 'UNKNOWN'
 
 
 def find_drive(storage_hacks: dict[str, str]) -> None:
-    from .favorite_dirs_manager import run
+    from .favorite_dirs_manager import run as fdm
     from .storage_finder import get_drive_letters, find_all_storage
 
     drive_letters = sorted(set(get_drive_letters()))
@@ -27,12 +27,17 @@ def find_drive(storage_hacks: dict[str, str]) -> None:
     for drive_letter in drive_letters:
         print(drive_letter_description(drive_letter))
 
-        from os import system
-        system(f'vol {drive_letter[:-1]}')
+        from subprocess import run
+
+        run(
+            ['vol', drive_letter[:-1]],
+            shell=True,
+            check=True
+        )
 
         print()
 
-    run('find_drive', list(map(
+    fdm('find_drive', list(map(
         lambda drive_letter: (
             drive_letter[:1].lower(),
             drive_letter_description(drive_letter),

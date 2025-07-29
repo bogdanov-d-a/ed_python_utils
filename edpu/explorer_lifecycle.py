@@ -5,14 +5,13 @@ EXPLORER_EXE = 'explorer.exe'
 
 
 def explorer_kill() -> None:
-    from .taskkill import taskkill_f_im
-    taskkill_f_im(EXPLORER_EXE)
+    from .taskkill import taskkill_image
+    taskkill_image(EXPLORER_EXE, True)
 
 
 def explorer_start() -> None:
-    from .win_start import start
-    from os import system
-    system(start([EXPLORER_EXE]))
+    from .win_start import start_run
+    start_run([EXPLORER_EXE])
 
 
 class ExplorerDown:
