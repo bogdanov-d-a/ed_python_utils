@@ -1,24 +1,33 @@
 ICACLS = 'icacls'
 
 
-def icacls_view(path: str) -> str:
-    from .string_utils import merge_with_space, quotation_mark_wrap
+def _run(args: list[str]) -> None:
+    from subprocess import run
+    run(args, check=True)
 
-    return merge_with_space([
+
+def icacls_view_args(path: str) -> list[str]:
+    return [
         ICACLS,
-        quotation_mark_wrap(path),
-    ])
+        path,
+    ]
 
 
-def icacls_reset(path: str) -> str:
-    from .string_utils import merge_with_space, quotation_mark_wrap
+def icacls_view_run(path: str) -> None:
+    _run(icacls_view_args(path))
 
-    return merge_with_space([
+
+def icacls_reset_args(path: str) -> list[str]:
+    return [
         ICACLS,
-        quotation_mark_wrap(path),
+        path,
         '/reset',
         '/t',
         '/c',
         '/l',
         '/q',
-    ])
+    ]
+
+
+def icacls_reset_run(path: str) -> None:
+    _run(icacls_reset_args(path))
