@@ -1,14 +1,24 @@
-def taskkill_f_im_gen(name: str) -> str:
-    from .string_utils import merge_with_space, quotation_mark_wrap
+TASKKILL = 'taskkill'
+TASKKILL_FORCE = '/f'
 
-    return merge_with_space([
-        'taskkill',
-        '/f',
-        '/im',
-        quotation_mark_wrap(name),
-    ])
+TASKKILL_TYPE_PROCESS_ID = '/pid'
+TASKKILL_TYPE_IMAGE = '/im'
 
 
-def taskkill_f_im(name: str) -> None:
-    from os import system
-    system(taskkill_f_im_gen(name))
+def taskkill(type: str, value: str, force: bool=False) -> None:
+    data = [TASKKILL]
+
+    if force:
+        data.append(TASKKILL_FORCE)
+
+    data += [
+        type,
+        value,
+    ]
+
+    from subprocess import run
+    print(f'taskkill returncode: {run(data).returncode}')
+
+
+def taskkill_image(name: str, force: bool=False) -> None:
+    taskkill(TASKKILL_TYPE_IMAGE, name, force)
