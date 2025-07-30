@@ -35,6 +35,10 @@ def get_screen_size(window: Tk) -> Size:
     )
 
 
+def non_resizable(window: Tk) -> None:
+    window.resizable(False, False)
+
+
 def center_window(window: Tk, size: Optional[Size]=None) -> None:
     window.update_idletasks()
 
