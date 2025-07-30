@@ -9,23 +9,21 @@ def run_command(path: str, command: list[str]) -> None:
         print('run_command ' + path + ' ' + str(command))
         return
 
-    from ...popen_helper import popen_communicate_args_cwd
-    popen_communicate_args_cwd(command, path)
+    from subprocess import run
+    run(command, cwd=path)
 
 
-def run_command_for_result(path: str, command: list[str]) -> bytes:
-    from subprocess import Popen, PIPE
+def run_command_for_result(path: str, command: list[str]) -> str:
+    from subprocess import run, PIPE
 
-    result = b''
-
-    with Popen(command, cwd=path, stdout=PIPE) as process:
-        if process.stdout is None:
-            raise Exception()
-
-        for line in process.stdout.readlines():
-            result += line
-
-    return result
+    return run(
+        command,
+        stdout=PIPE,
+        cwd=path,
+        check=True,
+        encoding='ascii',
+        text=True
+    ).stdout
 
 
 def put_blank_line() -> None:
@@ -51,7 +49,7 @@ def run_git_command_for_result(path: str, args: list[str]) -> str:
     if not isdir(path):
         raise Exception(path + ' doesn\'t exist')
 
-    return run_command_for_result(path, ['git', '--no-pager'] + args).decode('utf-8').rstrip('\n')
+    return run_command_for_result(path, ['git', '--no-pager'] + args)
 
 
 def status(path: str) -> None:
@@ -121,7 +119,7 @@ def worktree_add_detach(path: str, worktree_path: str, revision: str) -> None:
 
 
 def rev_parse(path: str, ref: str) -> str:
-    return run_git_command_for_result(path, ['rev-parse', ref])
+    return run_git_command_for_result(path, ['rev-parse', ref]).rstrip('\n')
 
 
 def pull_with_checkout(path: str, remote_path: str, local_branch: str, remote_branch: Optional[str]=None, orphan: bool=False) -> None:
