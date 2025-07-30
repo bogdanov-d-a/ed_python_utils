@@ -1,18 +1,25 @@
 def run(items: list[str]) -> None:
-    from . import button_window
-    from typing import Callable
+    from .button_window import run, ButtonDefs
 
-    def get_command(index: int) -> Callable[[], bool]:
-        def impl() -> bool:
-            from pyperclip import copy
-            copy(items[index])
-            return True
 
-        return impl
+    def button_defs() -> ButtonDefs:
+        result: ButtonDefs = []
 
-    buttons: button_window.ButtonDefs = []
+        for item in items:
+            from .button_window import ButtonCommand
 
-    for item, index in zip(items, range(len(items))):
-        buttons.append(('[' + item + ']', get_command(index)))
+            def command() -> ButtonCommand:
+                item_copy = item
 
-    button_window.run(buttons)
+                def impl() -> None:
+                    from pyperclip import copy
+                    copy(item_copy)
+
+                return impl
+
+            result.append((item, command()))
+
+        return result
+
+
+    run(button_defs(), 'clipboard_copier')
