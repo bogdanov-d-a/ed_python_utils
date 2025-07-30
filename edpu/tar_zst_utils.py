@@ -45,9 +45,8 @@ def run_with_prompt(cmd: str) -> None:
     print(cmd)
 
     if yes_no_prompt('Run command'):
-        from .popen_helper import popen_communicate
-        from subprocess import Popen
-        popen_communicate(Popen(cmd, shell=True))
+        from subprocess import run
+        run(cmd, shell=True, check=True)
 
 
 def print_and_check_path(path: str) -> None:
