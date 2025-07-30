@@ -3,6 +3,7 @@ def show(text: str) -> None:
     from tkinter.ttk import Label
 
     root = Tk()
+    root.title('show_text')
 
     Label(
         root,
