@@ -23,6 +23,7 @@ def mpv_va_detect(path: str, rev: Optional[bool]=None) -> tuple[str, str]:
 def mpv_play(va: tuple[str, str], path: Optional[str]) -> None:
     from .string_utils import merge_with_space, quotation_mark_wrap
     from edpu_user.mpv import mpv_path
+    from subprocess import run
 
     v, a = va
 
@@ -32,13 +33,7 @@ def mpv_play(va: tuple[str, str], path: Optional[str]) -> None:
         quotation_mark_wrap(f'--audio-file={a}'),
     ])
 
-    if path is not None:
-        from .popen_helper import popen_communicate_args_cwd
-        popen_communicate_args_cwd(cmd, path)
-
-    else:
-        from .popen_helper import popen_communicate_args
-        popen_communicate_args(cmd)
+    run(cmd, cwd=path)
 
 
 def mpv_va_detect_play(path: str, rev: Optional[bool]=None) -> None:
