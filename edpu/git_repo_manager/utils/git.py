@@ -26,14 +26,6 @@ def run_command_for_result(path: str, command: list[str]) -> str:
     ).stdout
 
 
-def put_blank_line() -> None:
-    if mock:
-        print('put_blank_line')
-        return
-
-    print()
-
-
 def run_git_command(path: str, args: list[str]) -> None:
     from os.path import isdir
 
@@ -78,7 +70,7 @@ def gc(path: str) -> None:
 
 def all_refs(path: str) -> None:
     run_git_command(path, ['branch', '-av'])
-    put_blank_line()
+    print()
     run_git_command(path, ['tag', '--format=%(refname:strip=2) %(objectname:short)'])
 
 
@@ -131,7 +123,7 @@ def pull_with_checkout(path: str, remote_path: str, local_branch: str, remote_br
     if orphan:
         reset_hard(path)
 
-    put_blank_line()
+    print()
     run_git_command(path, ['pull', remote_path, remote_branch])
 
 
@@ -168,7 +160,7 @@ def merge_with_checkout(path: str, remote_path: str, local_branch: str, remote_b
         remote_branch = local_branch
 
     checkout(path, local_branch)
-    put_blank_line()
+    print()
     run_git_command(path, ['merge', remote_path + '/' + remote_branch])
 
 
