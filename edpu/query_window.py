@@ -1,49 +1,53 @@
-from typing import Callable
+from typing import Callable, Optional
 
 
-DEFAULT_TITLE = 'Default title'
+StrFn = Callable[[], str]
 
 
-def make_exception_wrapper(callback: Callable[[], str]) -> Callable[[], str]:
-    def wrapper():
+def make_exception_wrapper(fn: StrFn) -> StrFn:
+    def impl() -> str:
         try:
-            return callback()
+            return fn()
 
         except:
             from traceback import format_exc
             return format_exc()
 
-    return wrapper
+    return impl
 
 
-def run(data_provider: Callable[[], str], title: str=DEFAULT_TITLE) -> None:
-    from . import tkinter_utils
-    import tkinter
+def run(data_provider: StrFn, title: Optional[str]=None) -> None:
+    from .tkinter_utils import autosize_window
+    from tkinter import Tk, NSEW
+    from tkinter.ttk import Button
+    from tkinter.scrolledtext import ScrolledText
 
-    root = tkinter.Tk()
+    root = Tk()
     root.title(title)
+    root.columnconfigure(0, weight=1)
 
-    def calc() -> None:
-        out_text.delete(1.0, tkinter.END)
-        out_text.insert(tkinter.END, data_provider())
+    def update() -> None:
+        from .tkinter_utils import text_widget_set
+        text_widget_set(text, data_provider())
 
-    root.bind('<F5>', lambda _: calc())
+    root.bind('<F5>', lambda _: update())
 
-    calc_button = tkinter.Button(root, text='Refresh (F5)', command=calc)
-    out_text = tkinter.Text(root, height=40, width=120)
-    out_text_sb = tkinter.Scrollbar(root)
+    root.rowconfigure(0)
+    Button(
+        root,
+        text='Refresh (F5)',
+        command=update
+    ).grid(row=0, column=0, sticky=NSEW)
 
-    calc_button.pack(side=tkinter.TOP, fill=tkinter.X)
-    out_text.pack(side=tkinter.LEFT, fill=tkinter.Y)
-    out_text_sb.pack(side=tkinter.LEFT, fill=tkinter.Y)
+    root.rowconfigure(1, weight=1)
+    text = ScrolledText(root)
+    text.grid(row=1, column=0, sticky=NSEW)
 
-    out_text.config(yscrollcommand=out_text_sb.set)
-    out_text_sb.config(command=out_text.yview)
+    update()
 
-    calc()
-    tkinter_utils.center_window(root)
-    tkinter.mainloop()
+    autosize_window(root)
+    root.mainloop()
 
 
-def run_with_exception_wrapper(data_provider: Callable[[], str], title: str=DEFAULT_TITLE) -> None:
+def run_with_exception_wrapper(data_provider: StrFn, title: Optional[str]=None) -> None:
     run(make_exception_wrapper(data_provider), title)
