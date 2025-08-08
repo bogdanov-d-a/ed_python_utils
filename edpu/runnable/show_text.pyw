@@ -1,9 +1,11 @@
 def show(text: str) -> None:
+    from edpu.tkinter_utils import non_resizable
     from tkinter import Tk
     from tkinter.ttk import Label
 
     root = Tk()
     root.title('show_text')
+    non_resizable(root)
 
     Label(
         root,
