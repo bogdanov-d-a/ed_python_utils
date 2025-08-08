@@ -22,7 +22,7 @@ def _try_encode_list(char_list: list[str], encoding: str='utf-8') -> Optional[st
 
 
 def str_check(str_: str) -> str:
-    result = f'len(\'{str_}\') = {len(str_)}\n\n'
+    result = f'len = {len(str_)}\n\n'
 
     str_list = list(str_)
 
